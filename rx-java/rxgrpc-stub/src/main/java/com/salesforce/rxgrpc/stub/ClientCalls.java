@@ -9,6 +9,7 @@ package com.salesforce.rxgrpc.stub;
 
 import com.google.common.util.concurrent.Runnables;
 import com.salesforce.grpc.contrib.LambdaStreamObserver;
+import com.salesforce.reactivegrpccommon.CancellableStreamObserver;
 import io.grpc.stub.StreamObserver;
 import io.reactivex.Flowable;
 import io.reactivex.Single;

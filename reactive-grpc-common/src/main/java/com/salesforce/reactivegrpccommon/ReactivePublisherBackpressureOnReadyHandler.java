@@ -5,7 +5,7 @@
  *  For full license text, see LICENSE.txt file in the repo root  or https://opensource.org/licenses/BSD-3-Clause
  */
 
-package com.salesforce.rxgrpc.stub;
+package com.salesforce.reactivegrpccommon;
 
 import com.google.common.base.Preconditions;
 import io.grpc.Status;
@@ -20,9 +20,9 @@ import org.reactivestreams.Subscription;
 import java.util.concurrent.CountDownLatch;
 
 /**
- * RxFlowableBackpressureOnReadyHandler bridges the manual flow control idioms of RxJava and gRPC. This class takes
+ * ReactivePublisherBackpressureOnReadyHandler bridges the manual flow control idioms of Reactive Streams and gRPC. This class takes
  * messages off of a {@link org.reactivestreams.Publisher} and feeds them into a {@link CallStreamObserver}
- * while respecting backpressure. This class is the inverse of {@link RxStreamObserverPublisher}.
+ * while respecting backpressure. This class is the inverse of {@link ReactiveStreamObserverPublisher}.
  * <p>
  * When a gRPC publisher's transport wants more data to transmit, the {@link CallStreamObserver}'s onReady handler is
  * signaled. This handler must keep transmitting messages until {@link CallStreamObserver#isReady()} ceases to be true.
@@ -41,18 +41,18 @@ import java.util.concurrent.CountDownLatch;
  *
  * @param <T>
  */
-public class RxFlowableBackpressureOnReadyHandler<T> implements Subscriber<T>, Runnable {
+public class ReactivePublisherBackpressureOnReadyHandler<T> implements Subscriber<T>, Runnable {
     private CallStreamObserver<T> requestStream;
     private Subscription subscription;
     private boolean canceled = false;
     private CountDownLatch subscribed = new CountDownLatch(1);
 
-    public RxFlowableBackpressureOnReadyHandler(ClientCallStreamObserver<T> requestStream) {
+    public ReactivePublisherBackpressureOnReadyHandler(ClientCallStreamObserver<T> requestStream) {
         this.requestStream = Preconditions.checkNotNull(requestStream);
         requestStream.setOnReadyHandler(this);
     }
 
-    public RxFlowableBackpressureOnReadyHandler(ServerCallStreamObserver<T> requestStream) {
+    public ReactivePublisherBackpressureOnReadyHandler(ServerCallStreamObserver<T> requestStream) {
         this.requestStream = Preconditions.checkNotNull(requestStream);
         requestStream.setOnReadyHandler(this);
         requestStream.setOnCancelHandler(() -> subscription.cancel());

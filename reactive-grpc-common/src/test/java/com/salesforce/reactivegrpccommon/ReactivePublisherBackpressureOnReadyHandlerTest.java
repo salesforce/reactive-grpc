@@ -5,9 +5,8 @@
  *  For full license text, see LICENSE.txt file in the repo root  or https://opensource.org/licenses/BSD-3-Clause
  */
 
-package com.salesforce.rxgrpc.stub;
+package com.salesforce.reactivegrpccommon;
 
-import io.grpc.stub.CallStreamObserver;
 import io.grpc.stub.ClientCallStreamObserver;
 import org.junit.Test;
 import org.reactivestreams.Subscription;
@@ -15,11 +14,11 @@ import org.reactivestreams.Subscription;
 import static org.mockito.Mockito.*;
 
 @SuppressWarnings("unchecked")
-public class RxFlowableBackpressureOnReadyHandlerTest {
+public class ReactivePublisherBackpressureOnReadyHandlerTest {
     @Test
     public void runPrimesThePump() {
         ClientCallStreamObserver<Object> obs = mock(ClientCallStreamObserver.class);
-        RxFlowableBackpressureOnReadyHandler<Object> handler = new RxFlowableBackpressureOnReadyHandler<>(obs);
+        ReactivePublisherBackpressureOnReadyHandler<Object> handler = new ReactivePublisherBackpressureOnReadyHandler<>(obs);
         Subscription sub = mock(Subscription.class);
 
         handler.onSubscribe(sub);
@@ -33,7 +32,7 @@ public class RxFlowableBackpressureOnReadyHandlerTest {
         ClientCallStreamObserver<Object> obs = mock(ClientCallStreamObserver.class);
         when(obs.isReady()).thenReturn(true);
 
-        RxFlowableBackpressureOnReadyHandler<Object> handler = new RxFlowableBackpressureOnReadyHandler<>(obs);
+        ReactivePublisherBackpressureOnReadyHandler<Object> handler = new ReactivePublisherBackpressureOnReadyHandler<>(obs);
         Subscription sub = mock(Subscription.class);
 
         handler.onSubscribe(sub);
@@ -50,7 +49,7 @@ public class RxFlowableBackpressureOnReadyHandlerTest {
         ClientCallStreamObserver<Object> obs = mock(ClientCallStreamObserver.class);
         when(obs.isReady()).thenReturn(false);
 
-        RxFlowableBackpressureOnReadyHandler<Object> handler = new RxFlowableBackpressureOnReadyHandler<>(obs);
+        ReactivePublisherBackpressureOnReadyHandler<Object> handler = new ReactivePublisherBackpressureOnReadyHandler<>(obs);
         Subscription sub = mock(Subscription.class);
 
         handler.onSubscribe(sub);

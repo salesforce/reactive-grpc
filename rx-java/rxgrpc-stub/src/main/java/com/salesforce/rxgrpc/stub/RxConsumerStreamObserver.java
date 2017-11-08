@@ -8,6 +8,8 @@
 package com.salesforce.rxgrpc.stub;
 
 import com.google.common.base.Preconditions;
+import com.salesforce.reactivegrpccommon.ReactiveExecutor;
+import com.salesforce.reactivegrpccommon.ReactiveStreamObserverPublisher;
 import io.grpc.Status;
 import io.grpc.stub.ClientCallStreamObserver;
 import io.grpc.stub.ClientResponseObserver;
@@ -23,7 +25,7 @@ import java.util.concurrent.CountDownLatch;
  * @param <TResponse>
  */
 public class RxConsumerStreamObserver<TRequest, TResponse> implements ClientResponseObserver<TRequest, TResponse> {
-    private RxStreamObserverPublisher<TResponse> publisher;
+    private ReactiveStreamObserverPublisher<TResponse> publisher;
     private Flowable<TResponse> rxConsumer;
     private CountDownLatch beforeStartCalled = new CountDownLatch(1);
 
@@ -39,10 +41,10 @@ public class RxConsumerStreamObserver<TRequest, TResponse> implements ClientResp
 
     @Override
     public void beforeStart(ClientCallStreamObserver<TRequest> requestStream) {
-        publisher = new RxStreamObserverPublisher<>(Preconditions.checkNotNull(requestStream));
+        publisher = new ReactiveStreamObserverPublisher<>(Preconditions.checkNotNull(requestStream));
 
         rxConsumer = Flowable.unsafeCreate(publisher)
-                .observeOn(Schedulers.from(RxExecutor.getSerializingExecutor()));
+                .observeOn(Schedulers.from(ReactiveExecutor.getSerializingExecutor()));
         beforeStartCalled.countDown();
     }
 

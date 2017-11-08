@@ -5,7 +5,7 @@
  *  For full license text, see LICENSE.txt file in the repo root  or https://opensource.org/licenses/BSD-3-Clause
  */
 
-package com.salesforce.rxgrpc.stub;
+package com.salesforce.reactivegrpccommon;
 
 import io.grpc.stub.CallStreamObserver;
 import org.junit.Test;
@@ -18,13 +18,13 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.*;
 
 @SuppressWarnings("unchecked")
-public class RxStreamObserverPublisherTest {
+public class ReactiveStreamObserverPublisherTest {
     @Test
     public void onNextDelegates() {
         CallStreamObserver<Object> obs = mock(CallStreamObserver.class);
         Subscriber<Object> sub = mock(Subscriber.class);
 
-        RxStreamObserverPublisher<Object> pub = new RxStreamObserverPublisher<>(obs);
+        ReactiveStreamObserverPublisher<Object> pub = new ReactiveStreamObserverPublisher<>(obs);
         pub.subscribe(sub);
 
         Object obj = new Object();
@@ -38,7 +38,7 @@ public class RxStreamObserverPublisherTest {
         CallStreamObserver<Object> obs = mock(CallStreamObserver.class);
         Subscriber<Object> sub = mock(Subscriber.class);
 
-        RxStreamObserverPublisher<Object> pub = new RxStreamObserverPublisher<>(obs);
+        ReactiveStreamObserverPublisher<Object> pub = new ReactiveStreamObserverPublisher<>(obs);
         pub.subscribe(sub);
 
         Throwable obj = new Exception();
@@ -52,7 +52,7 @@ public class RxStreamObserverPublisherTest {
         CallStreamObserver<Object> obs = mock(CallStreamObserver.class);
         Subscriber<Object> sub = mock(Subscriber.class);
 
-        RxStreamObserverPublisher<Object> pub = new RxStreamObserverPublisher<>(obs);
+        ReactiveStreamObserverPublisher<Object> pub = new ReactiveStreamObserverPublisher<>(obs);
         pub.subscribe(sub);
 
         pub.onCompleted();
@@ -70,7 +70,7 @@ public class RxStreamObserverPublisherTest {
             return null;
         }).when(sub).onSubscribe(any(Subscription.class));
 
-        RxStreamObserverPublisher<Object> pub = new RxStreamObserverPublisher<>(obs);
+        ReactiveStreamObserverPublisher<Object> pub = new ReactiveStreamObserverPublisher<>(obs);
         pub.subscribe(sub);
 
         assertThat(subscription.get()).isNotNull();

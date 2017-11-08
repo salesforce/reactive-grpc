@@ -9,6 +9,9 @@ package com.salesforce.rxgrpc.stub;
 
 import com.google.common.base.Preconditions;
 import com.salesforce.grpc.contrib.LambdaStreamObserver;
+import com.salesforce.reactivegrpccommon.ReactiveExecutor;
+import com.salesforce.reactivegrpccommon.ReactivePublisherBackpressureOnReadyHandler;
+import com.salesforce.reactivegrpccommon.ReactiveStreamObserverPublisher;
 import io.grpc.Status;
 import io.grpc.StatusException;
 import io.grpc.StatusRuntimeException;
@@ -68,7 +71,7 @@ public final class ServerCalls {
             Single<TRequest> rxRequest = Single.just(request);
 
             Flowable<TResponse> rxResponse = Preconditions.checkNotNull(delegate.apply(rxRequest));
-            rxResponse.subscribe(new RxFlowableBackpressureOnReadyHandler<>(
+            rxResponse.subscribe(new ReactivePublisherBackpressureOnReadyHandler<>(
                     (ServerCallStreamObserver<TResponse>) responseObserver));
         } catch (Throwable throwable) {
             responseObserver.onError(prepareError(throwable));
@@ -82,13 +85,13 @@ public final class ServerCalls {
     public static <TRequest, TResponse> StreamObserver<TRequest> manyToOne(
             StreamObserver<TResponse> responseObserver,
             Function<Flowable<TRequest>, Single<TResponse>> delegate) {
-        RxStreamObserverPublisher<TRequest> streamObserverPublisher =
-                new RxStreamObserverPublisher<>((CallStreamObserver<TResponse>) responseObserver);
+        ReactiveStreamObserverPublisher<TRequest> streamObserverPublisher =
+                new ReactiveStreamObserverPublisher<>((CallStreamObserver<TResponse>) responseObserver);
 
         try {
             Single<TResponse> rxResponse = Preconditions.checkNotNull(delegate.apply(
                     Flowable.unsafeCreate(streamObserverPublisher)
-                            .observeOn(Schedulers.from(RxExecutor.getSerializingExecutor()))));
+                            .observeOn(Schedulers.from(ReactiveExecutor.getSerializingExecutor()))));
             rxResponse.subscribe(
                 value -> {
                     // Don't try to respond if the server has already canceled the request
@@ -121,14 +124,14 @@ public final class ServerCalls {
     public static <TRequest, TResponse> StreamObserver<TRequest> manyToMany(
             StreamObserver<TResponse> responseObserver,
             Function<Flowable<TRequest>, Flowable<TResponse>> delegate) {
-        RxStreamObserverPublisher<TRequest> streamObserverPublisher =
-                new RxStreamObserverPublisher<>((CallStreamObserver<TResponse>) responseObserver);
+        ReactiveStreamObserverPublisher<TRequest> streamObserverPublisher =
+                new ReactiveStreamObserverPublisher<>((CallStreamObserver<TResponse>) responseObserver);
 
         try {
             Flowable<TResponse> rxResponse = Preconditions.checkNotNull(delegate.apply(
                     Flowable.unsafeCreate(streamObserverPublisher)
-                            .observeOn(Schedulers.from(RxExecutor.getSerializingExecutor()))));
-            Subscriber<TResponse> subscriber = new RxFlowableBackpressureOnReadyHandler<>(
+                            .observeOn(Schedulers.from(ReactiveExecutor.getSerializingExecutor()))));
+            Subscriber<TResponse> subscriber = new ReactivePublisherBackpressureOnReadyHandler<>(
                     (ServerCallStreamObserver<TResponse>) responseObserver);
             // Don't try to respond if the server has already canceled the request
             rxResponse.subscribe(
