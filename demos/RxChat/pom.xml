@@ -36,7 +36,7 @@
             <artifactId>grpc-netty</artifactId>
         </dependency>
         <dependency>
-            <groupId>com.salesforce.servicelibs</groupId>
+            <groupId>${project.groupId}</groupId>
             <artifactId>rxgrpc-stub</artifactId>
         </dependency>
         <dependency>

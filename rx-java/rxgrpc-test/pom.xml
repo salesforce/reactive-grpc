@@ -26,7 +26,7 @@
 
     <dependencies>
         <dependency>
-            <groupId>com.salesforce.servicelibs</groupId>
+            <groupId>${project.groupId}</groupId>
             <artifactId>rxgrpc-stub</artifactId>
             <version>${project.version}</version>
             <scope>test</scope>
@@ -116,7 +116,7 @@
                             <protocPlugins>
                                 <protocPlugin>
                                     <id>rxgrpc</id>
-                                    <groupId>com.salesforce.servicelibs</groupId>
+                                    <groupId>${project.groupId}</groupId>
                                     <artifactId>rxgrpc</artifactId>
                                     <version>${project.version}</version>
                                     <mainClass>com.salesforce.rxgrpc.RxGrpcGenerator</mainClass>

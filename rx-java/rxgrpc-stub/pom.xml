@@ -25,7 +25,7 @@
             <artifactId>grpc-contrib</artifactId>
         </dependency>
         <dependency>
-            <groupId>com.salesforce.servicelibs</groupId>
+            <groupId>${project.groupId}</groupId>
             <artifactId>reactive-grpc-common</artifactId>
             <version>${project.version}</version>
         </dependency>
