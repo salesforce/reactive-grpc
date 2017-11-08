@@ -35,6 +35,7 @@
         <module>rx-java/rxgrpc-stub</module>
         <module>rx-java/rxgrpc-tck</module>
         <module>rx-java/rxgrpc-test</module>
+        <module>demos/RxChat</module>
     </modules>
 
     <properties>
