@@ -1,0 +1,197 @@
+<?xml version="1.0"?>
+<!--
+  ~  Copyright (c) 2017, salesforce.com, inc.
+  ~  All rights reserved.
+  ~  Licensed under the BSD 3-Clause license.
+  ~  For full license text, see LICENSE.txt file in the repo root  or https://opensource.org/licenses/BSD-3-Clause
+  -->
+
+<!DOCTYPE module PUBLIC
+        "-//Puppy Crawl//DTD Check Configuration 1.3//EN"
+        "http://www.puppycrawl.com/dtds/configuration_1_3.dtd">
+<module name="Checker">
+    <!-- Checks that a package-info.java file exists for each package.     -->
+    <!-- See http://checkstyle.sf.net/config_javadoc.html#JavadocPackage -->
+
+    <!--<module name="JavadocPackage"/>-->
+
+    <!-- Checks whether files end with a new line.                        -->
+    <!-- See http://checkstyle.sf.net/config_misc.html#NewlineAtEndOfFile -->
+    <!--<module name="NewlineAtEndOfFile"/>-->
+
+    <!-- Checks that property files contain the same keys.         -->
+    <!-- See http://checkstyle.sf.net/config_misc.html#Translation -->
+    <module name="Translation"/>
+
+    <!-- Checks for Size Violations.                    -->
+    <!-- See http://checkstyle.sf.net/config_sizes.html -->
+    <module name="FileLength"/> <!-- by default set to 2000 lines-->
+
+    <!-- Checks for whitespace                               -->
+    <!-- See http://checkstyle.sf.net/config_whitespace.html -->
+    <module name="FileTabCharacter"/> <!-- spaces not tabs -->
+
+    <!-- Miscellaneous other checks.                   -->
+    <!-- See http://checkstyle.sf.net/config_misc.html -->
+    <module name="RegexpSingleline">
+        <property name="format" value="\s+$"/>
+        <property name="minimum" value="0"/>
+        <property name="maximum" value="0"/>
+        <property name="message" value="Line has trailing spaces."/>
+    </module>
+
+    <!-- Checks for Headers                                -->
+    <!-- See http://checkstyle.sf.net/config_header.html   -->
+    <module name="Header">
+        <property name="headerFile" value="checkstyle-header.txt"/>
+        <property name="fileExtensions" value="java"/>
+    </module>
+
+    <module name="SuppressionCommentFilter"/>
+
+    <module name="SuppressWithNearbyCommentFilter">
+        <property name="commentFormat" value="CHECKSTYLE DISABLE ([\w\|]+) FOR (-?\d+) LINES"/>
+        <property name="checkFormat" value="$1"/>
+        <property name="influenceFormat" value="$2"/>
+    </module>
+
+
+    <module name="TreeWalker">
+
+        <module name="FileContentsHolder"/>
+
+
+        <!-- Checks for Javadoc comments.                     -->
+        <!-- See http://checkstyle.sf.net/config_javadoc.html -->
+        <!--<module name="JavadocMethod"/>-->
+        <module name="JavadocType"/>
+        <!--<module name="JavadocVariable"/>-->
+        <module name="JavadocStyle"/>
+
+        <!-- Checks for Naming Conventions.                  -->
+        <!-- See http://checkstyle.sf.net/config_naming.html -->
+        <module name="ConstantName"/>
+        <module name="LocalFinalVariableName"/>
+        <module name="LocalVariableName"/>
+
+        <module name="MemberName">
+            <!-- camel case variables and all upper case constants (with underscores) -->
+            <property name="format" value="^[a-z][a-zA-Z0-9]*|[A-Z][A-Z0-9]*(_[A-Z0-9]+)*$"/>
+        </module>
+
+        <module name="MethodName"/>
+        <module name="PackageName"/>
+        <module name="ParameterName"/>
+        <module name="StaticVariableName"/>
+        <module name="TypeName"/>
+
+        <!-- Checks for imports                              -->
+        <!-- See http://checkstyle.sf.net/config_import.html -->
+        <!--<module name="AvoidStarImport"/>-->
+        <module name="IllegalImport"/> <!-- defaults to sun.* packages -->
+        <module name="RedundantImport"/>
+        <module name="UnusedImports">
+            <property name="processJavadoc" value="false"/>
+        </module>
+
+        <!-- Checks for Size Violations.                    -->
+        <!-- See http://checkstyle.sf.net/config_sizes.html -->
+        <!--
+                <module name="LineLength"/>
+        -->
+        <module name="MethodLength"/>
+        <module name="ParameterNumber"/>
+
+
+        <!-- Checks for whitespace                               -->
+        <!-- See http://checkstyle.sf.net/config_whitespace.html -->
+        <module name="EmptyForIteratorPad"/>
+        <module name="GenericWhitespace"/>
+        <module name="MethodParamPad"/>
+        <module name="NoWhitespaceAfter"/>
+        <module name="NoWhitespaceBefore"/>
+        <module name="OperatorWrap">
+            <property name="option" value="eol"/>
+        </module>
+        <module name="ParenPad"/>
+        <module name="TypecastParenPad"/>
+        <module name="WhitespaceAfter"/>
+        <module name="WhitespaceAround"/>
+
+
+        <!-- Modifier Checks                                    -->
+        <!-- See http://checkstyle.sf.net/config_modifiers.html -->
+        <module name="ModifierOrder"/>
+        <module name="RedundantModifier"/>
+
+        <!-- Checks for blocks. You know, those {}'s         -->
+        <!-- See http://checkstyle.sf.net/config_blocks.html -->
+        <module name="AvoidNestedBlocks"/>
+        <module name="EmptyBlock"/>
+        <module name="LeftCurly"/>
+        <module name="NeedBraces"/>
+        <module name="RightCurly"/>
+
+        <!-- Checks for common coding problems               -->
+        <!-- See http://checkstyle.sf.net/config_coding.html -->
+        <!--<module name="AvoidInlineConditionals"/>-->
+        <module name="EmptyStatement"/>
+        <module name="EqualsHashCode"/>
+        <!--<module name="HiddenField"/>-->
+        <module name="IllegalInstantiation"/>
+        <module name="InnerAssignment"/>
+        <module name="MagicNumber"/>
+        <module name="MissingSwitchDefault"/>
+        <module name="SimplifyBooleanExpression"/>
+        <module name="SimplifyBooleanReturn"/>
+
+        <!-- Checks for class design                         -->
+        <!-- See http://checkstyle.sf.net/config_design.html -->
+        <!--<module name="DesignForExtension"/>-->
+        <module name="FinalClass"/>
+        <module name="HideUtilityClassConstructor"/>
+        <module name="InterfaceIsType"/>
+        <module name="VisibilityModifier"/>
+
+
+
+        <!-- Miscellaneous other checks.                   -->
+        <!-- See http://checkstyle.sf.net/config_misc.html -->
+        <module name="ArrayTypeStyle"/>
+        <!--<module name="FinalParameters"/>-->
+        <!--<module name="TodoComment"/>-->
+        <module name="UpperEll"/>
+        <module name="Indentation"/>
+
+        <module name="DescendantToken">
+            <property name="tokens" value="EQUAL,NOT_EQUAL"/>
+            <property name="limitedTokens" value="STRING_LITERAL"/>
+            <property name="maximumNumber" value="0"/>
+            <property name="maximumDepth" value="1"/>
+            <property name="maximumMessage" value="Don't compare strings with ==, use .equals() instead"/>
+        </module>
+
+        <module name="DescendantToken">
+            <property name="tokens" value="EMPTY_STAT"/>
+            <property name="limitedTokens" value="EMPTY_STAT"/>
+            <property name="maximumNumber" value="0"/>
+            <property name="maximumDepth" value="0"/>
+            <property name="maximumMessage" value="Empty statement is not allowed."/>
+        </module>
+
+        <module name="DescendantToken">
+            <property name="tokens" value="LITERAL_SWITCH"/>
+            <property name="limitedTokens" value="LITERAL_SWITCH"/>
+            <property name="maximumNumber" value="0"/>
+            <property name="minimumDepth" value="1"/>
+            <property name="maximumMessage" value="Don't put switch statements inside other switch statements."/>
+        </module>
+
+        <module name="Regexp">
+            <property name="format" value="@Subscribe\s+private void"/>
+            <property name="illegalPattern" value="true"/>
+            <property name="ignoreComments" value="true"/>
+            <property name="message" value="Event handlers must be public"/>
+        </module>
+    </module>
+</module>

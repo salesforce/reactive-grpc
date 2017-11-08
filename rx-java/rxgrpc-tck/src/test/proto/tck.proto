@@ -1,0 +1,18 @@
+syntax = "proto3";
+
+package tck;
+
+option java_multiple_files = true;
+option java_package = "com.salesforce.rxgrpc.tck";
+option java_outer_classname = "TckProto";
+
+service Tck {
+    rpc OneToOne (Message) returns (Message) {}
+    rpc OneToMany (Message) returns (stream Message) {}
+    rpc ManyToOne (stream Message) returns (Message) {}
+    rpc ManyToMany (stream Message) returns (stream Message) {}
+}
+
+message Message {
+    int32 number = 1;
+}
