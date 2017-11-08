@@ -1,0 +1,18 @@
+syntax = "proto3";
+
+package com.salesforce.servicelibs;
+
+option java_package = "com.salesforce.servicelibs";
+option java_outer_classname = "NumberProto";
+
+import "google/protobuf/empty.proto";
+
+service Numbers {
+    rpc RequestPressure (stream Number) returns (Number) {}
+    rpc ResponsePressure (google.protobuf.Empty) returns (stream Number) {}
+    rpc TwoWayPressure (stream Number) returns (stream Number) {}
+}
+
+message Number {
+    repeated int32 number = 1;
+}
