@@ -7,7 +7,7 @@
 
 package com.salesforce.rxgrpc.tck;
 
-import com.salesforce.rxgrpc.stub.RxFlowableBackpressureOnReadyHandler;
+import com.salesforce.reactivegrpccommon.ReactivePublisherBackpressureOnReadyHandler;
 import io.grpc.stub.ClientCallStreamObserver;
 import org.reactivestreams.Subscriber;
 import org.reactivestreams.Subscription;
@@ -33,7 +33,7 @@ public class RxGrpcSubscriberWhiteboxVerificationTest extends SubscriberWhitebox
 
     @Override
     public Subscriber<Message> createSubscriber(WhiteboxSubscriberProbe<Message> probe) {
-        return new RxFlowableBackpressureOnReadyHandler<Message>(new StubServerCallStreamObserver()) {
+        return new ReactivePublisherBackpressureOnReadyHandler<Message>(new StubServerCallStreamObserver()) {
             @Override
             public void onSubscribe(final Subscription s) {
                 super.onSubscribe(s);

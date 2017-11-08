@@ -27,6 +27,11 @@
             <name>Ryan Michela</name>
             <email>rmichela@salesforce.com</email>
         </developer>
+        <developer>
+            <id>cbornet</id>
+            <name>Christophe Bornet</name>
+            <email>cbornet@hotmail.com</email>
+        </developer>
     </developers>
 
     <modules>

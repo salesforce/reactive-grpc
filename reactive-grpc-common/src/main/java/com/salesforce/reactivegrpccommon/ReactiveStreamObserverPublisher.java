@@ -5,7 +5,7 @@
  *  For full license text, see LICENSE.txt file in the repo root  or https://opensource.org/licenses/BSD-3-Clause
  */
 
-package com.salesforce.rxgrpc.stub;
+package com.salesforce.reactivegrpccommon;
 
 import com.google.common.base.Preconditions;
 import io.grpc.Status;
@@ -20,9 +20,9 @@ import org.reactivestreams.Subscription;
 import java.util.concurrent.CountDownLatch;
 
 /**
- * RxStreamObserverPublisher bridges the manual flow control idioms of gRPC and RxJava. This class takes
+ * ReactiveStreamObserverPublisher bridges the manual flow control idioms of gRPC and Reactive Streams. This class takes
  * messages off of a {@link StreamObserver} and feeds them into a {@link Publisher} while respecting backpressure. This
- * class is the inverse of {@link RxFlowableBackpressureOnReadyHandler}.
+ * class is the inverse of {@link ReactivePublisherBackpressureOnReadyHandler}.
  * <p>
  * When a {@link Publisher} is subscribed to by a {@link Subscriber}, the {@code Publisher} hands the {@code Subscriber}
  * a {@link Subscription}. When the {@code Subscriber} wants more messages from the {@code Publisher}, the
@@ -32,11 +32,11 @@ import java.util.concurrent.CountDownLatch;
  * <p>
  * To bridge the two idioms: this class implements a {@code Publisher} which delegates calls to {@code request()} to
  * a {@link CallStreamObserver} set in the constructor. When a message is generated as a response, the message is
- * delegated in the reverse so the {@code Publisher} can announce it to RxJava.
+ * delegated in the reverse so the {@code Publisher} can announce it to the Reactive Streams implementation.
  *
  * @param <T>
  */
-public class RxStreamObserverPublisher<T> implements Publisher<T>, StreamObserver<T> {
+public class ReactiveStreamObserverPublisher<T> implements Publisher<T>, StreamObserver<T> {
     private CallStreamObserver callStreamObserver;
     private Subscriber<? super T> subscriber;
     private volatile boolean isCanceled;
@@ -46,7 +46,7 @@ public class RxStreamObserverPublisher<T> implements Publisher<T>, StreamObserve
     // subscribe() has been called.
     private CountDownLatch subscribed = new CountDownLatch(1);
 
-    public RxStreamObserverPublisher(CallStreamObserver callStreamObserver) {
+    public ReactiveStreamObserverPublisher(CallStreamObserver callStreamObserver) {
         Preconditions.checkNotNull(callStreamObserver);
         this.callStreamObserver = callStreamObserver;
         callStreamObserver.disableAutoInboundFlowControl();
@@ -58,7 +58,7 @@ public class RxStreamObserverPublisher<T> implements Publisher<T>, StreamObserve
         subscriber.onSubscribe(new Subscription() {
             @Override
             public void request(long l) {
-                // RxJava uses Long.MAX_VALUE to indicate "all messages"; gRPC uses Integer.MAX_VALUE.
+                // Some Reactive Streams implementations use Long.MAX_VALUE to indicate "all messages"; gRPC uses Integer.MAX_VALUE.
                 int i = (int) Long.min(l, Integer.MAX_VALUE);
 
                 // Very rarely, request() gets called before the client has finished setting up its stream. If this

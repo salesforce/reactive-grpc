@@ -9,6 +9,7 @@ package com.salesforce.rxgrpc.stub;
 
 import com.google.common.base.Preconditions;
 import com.salesforce.grpc.contrib.LambdaStreamObserver;
+import com.salesforce.reactivegrpccommon.ReactivePublisherBackpressureOnReadyHandler;
 import io.grpc.stub.ClientCallStreamObserver;
 import io.grpc.stub.ClientResponseObserver;
 import io.reactivex.Flowable;
@@ -23,7 +24,7 @@ import java.util.function.Consumer;
  */
 public class RxProducerStreamObserver<TRequest, TResponse> extends LambdaStreamObserver<TResponse> implements ClientResponseObserver<TRequest, TResponse> {
     private Flowable<TRequest> rxProducer;
-    private RxFlowableBackpressureOnReadyHandler<TRequest> onReadyHandler;
+    private ReactivePublisherBackpressureOnReadyHandler<TRequest> onReadyHandler;
 
     public RxProducerStreamObserver(Flowable<TRequest> rxProducer, Consumer<TResponse> onNext, Consumer<Throwable> onError, Runnable onCompleted) {
         super(
@@ -39,7 +40,7 @@ public class RxProducerStreamObserver<TRequest, TResponse> extends LambdaStreamO
         Preconditions.checkNotNull(producerStream);
         // Subscribe to the rxProducer with an adapter to a gRPC StreamObserver that respects backpressure
         // signals from the underlying gRPC client transport.
-        onReadyHandler = new RxFlowableBackpressureOnReadyHandler<>(producerStream);
+        onReadyHandler = new ReactivePublisherBackpressureOnReadyHandler<>(producerStream);
     }
 
     public void rxSubscribe() {

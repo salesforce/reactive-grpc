@@ -5,7 +5,7 @@
  *  For full license text, see LICENSE.txt file in the repo root  or https://opensource.org/licenses/BSD-3-Clause
  */
 
-package com.salesforce.rxgrpc.stub;
+package com.salesforce.reactivegrpccommon;
 
 import io.grpc.internal.GrpcUtil;
 import io.grpc.internal.SerializingExecutor;
@@ -13,10 +13,10 @@ import io.grpc.internal.SerializingExecutor;
 import java.util.concurrent.Executor;
 
 /**
- * RxExecutor holds a shared executor used by RxGrpc to marshall messages between RxJava and gRPC streams.
+ * ReactiveExecutor holds a shared executor used by the Reactive Streams implementation to marshall messages between Reactive and gRPC streams.
  */
-public final class RxExecutor {
-    private RxExecutor() {
+public final class ReactiveExecutor {
+    private ReactiveExecutor() {
 
     }
 

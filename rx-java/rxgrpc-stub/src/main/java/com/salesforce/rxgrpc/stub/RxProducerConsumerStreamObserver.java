@@ -8,6 +8,7 @@
 package com.salesforce.rxgrpc.stub;
 
 import com.google.common.base.Preconditions;
+import com.salesforce.reactivegrpccommon.ReactivePublisherBackpressureOnReadyHandler;
 import io.grpc.stub.ClientCallStreamObserver;
 import io.reactivex.Flowable;
 
@@ -20,7 +21,7 @@ import io.reactivex.Flowable;
  */
 public class RxProducerConsumerStreamObserver<TRequest, TResponse> extends RxConsumerStreamObserver<TRequest, TResponse> {
     private Flowable<TRequest> rxProducer;
-    private RxFlowableBackpressureOnReadyHandler<TRequest> onReadyHandler;
+    private ReactivePublisherBackpressureOnReadyHandler<TRequest> onReadyHandler;
 
     public RxProducerConsumerStreamObserver(Flowable<TRequest> rxProducer) {
         this.rxProducer = rxProducer;
@@ -29,7 +30,7 @@ public class RxProducerConsumerStreamObserver<TRequest, TResponse> extends RxCon
     @Override
     public void beforeStart(ClientCallStreamObserver<TRequest> requestStream) {
         super.beforeStart(Preconditions.checkNotNull(requestStream));
-        onReadyHandler = new RxFlowableBackpressureOnReadyHandler<>(requestStream);
+        onReadyHandler = new ReactivePublisherBackpressureOnReadyHandler<>(requestStream);
     }
 
     public void rxSubscribe() {
