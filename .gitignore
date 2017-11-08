@@ -1,0 +1,10 @@
+.idea/
+target/
+generated-resources/
+*.iml
+dependency-reduced-pom.xml
+.DS_Store
+.settings/
+.checkstyle
+.classpath
+.project
