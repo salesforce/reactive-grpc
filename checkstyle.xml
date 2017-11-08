@@ -43,8 +43,7 @@
     <!-- Checks for Headers                                -->
     <!-- See http://checkstyle.sf.net/config_header.html   -->
     <module name="Header">
-        <property name="header"
-                  value="/*\n *  Copyright (c) 2017, salesforce.com, inc.\n *  All rights reserved.\n *  Licensed under the BSD 3-Clause license.\n *  For full license text, see LICENSE.txt file in the repo root  or https://opensource.org/licenses/BSD-3-Clause\n */"/>
+        <property name="headerFile" value="checkstyle-header.txt"/>
         <property name="fileExtensions" value="java"/>
     </module>
 
