@@ -10,6 +10,7 @@ package com.salesforce.rxgrpc.stub;
 import com.google.common.util.concurrent.Runnables;
 import com.salesforce.grpc.contrib.LambdaStreamObserver;
 import com.salesforce.reactivegrpccommon.CancellableStreamObserver;
+import com.salesforce.reactivegrpccommon.ReactiveProducerStreamObserver;
 import io.grpc.stub.StreamObserver;
 import io.reactivex.Flowable;
 import io.reactivex.Single;
@@ -76,7 +77,7 @@ public final class ClientCalls {
         try {
             return Single
                     .<TResponse>create(emitter -> {
-                        RxProducerStreamObserver<TRequest, TResponse> rxProducerStreamObserver = new RxProducerStreamObserver<>(
+                        ReactiveProducerStreamObserver<TRequest, TResponse> rxProducerStreamObserver = new ReactiveProducerStreamObserver<>(
                                 rxRequest,
                                 emitter::onSuccess,
                                 emitter::onError,

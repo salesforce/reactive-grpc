@@ -10,6 +10,7 @@ package com.salesforce.reactorgrpc.stub;
 import com.google.common.util.concurrent.Runnables;
 import com.salesforce.grpc.contrib.LambdaStreamObserver;
 import com.salesforce.reactivegrpccommon.CancellableStreamObserver;
+import com.salesforce.reactivegrpccommon.ReactiveProducerStreamObserver;
 import io.grpc.stub.StreamObserver;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
@@ -77,15 +78,15 @@ public final class ClientCalls {
         try {
             return Mono
                     .<TResponse>create(emitter -> {
-                        ReactorProducerStreamObserver<TRequest, TResponse> reactorProducerStreamObserver = new ReactorProducerStreamObserver<>(
+                        ReactiveProducerStreamObserver<TRequest, TResponse> reactiveProducerStreamObserver = new ReactiveProducerStreamObserver<>(
                                 rxRequest,
                                 emitter::success,
                                 emitter::error,
                                 Runnables.doNothing());
                         delegate.apply(
-                                new CancellableStreamObserver<>(reactorProducerStreamObserver,
-                                reactorProducerStreamObserver::cancel));
-                        reactorProducerStreamObserver.rxSubscribe();
+                                new CancellableStreamObserver<>(reactiveProducerStreamObserver,
+                                reactiveProducerStreamObserver::cancel));
+                        reactiveProducerStreamObserver.rxSubscribe();
                     })
                     .transform(Operators.lift(new SubscribeOnlyOnceLifter<TResponse>()));
         } catch (Throwable throwable) {
