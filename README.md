@@ -1,3 +1,6 @@
+[![Build Status](https://travis-ci.org/salesforce/reactive-grpc.svg?branch=master)](https://travis-ci.org/salesforce/reactive-grpc)
+[![codecov](https://codecov.io/gh/salesforce/reactive-grpc/branch/master/graph/badge.svg)](https://codecov.io/gh/salesforce/reactive-grpc)
+
 What is reactive-grpc?
 ======================
 Reactive gRPC is a suite of libraries for using gRPC with reactive programming libraries. Using a protocol buffers
