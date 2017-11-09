@@ -7,17 +7,16 @@
 
 package com.salesforce.rxgrpc.stub;
 
-import io.grpc.stub.CallStreamObserver;
 import io.grpc.stub.ClientCallStreamObserver;
+import io.reactivex.Flowable;
 import io.reactivex.subscribers.TestSubscriber;
 import org.junit.Test;
 import org.reactivestreams.Subscriber;
-import org.reactivestreams.Subscription;
 
 import java.util.concurrent.TimeUnit;
 
-import static org.mockito.Mockito.*;
-import static org.assertj.core.api.Assertions.*;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.Mockito.mock;
 
 @SuppressWarnings("unchecked")
 public class RxConsumerStreamObserverTest {
@@ -40,7 +39,7 @@ public class RxConsumerStreamObserverTest {
         rxObs.beforeStart(obs);
         rxObs.getRxConsumer().subscribe(sub);
 
-        TestSubscriber<Object> testSubscriber = rxObs.getRxConsumer().test();
+        TestSubscriber<Object> testSubscriber = ((Flowable<Object>)rxObs.getRxConsumer()).test();
 
         Object obj = new Object();
         rxObs.onNext(obj);
@@ -59,7 +58,7 @@ public class RxConsumerStreamObserverTest {
         rxObs.beforeStart(obs);
         rxObs.getRxConsumer().subscribe(sub);
 
-        TestSubscriber<Object> testSubscriber = rxObs.getRxConsumer().test();
+        TestSubscriber<Object> testSubscriber = ((Flowable<Object>)rxObs.getRxConsumer()).test();
 
         Throwable obj = new Exception();
         rxObs.onError(obj);

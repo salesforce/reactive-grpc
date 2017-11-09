@@ -60,8 +60,7 @@ public final class ClientCalls {
         try {
             ReactorConsumerStreamObserver<TRequest, TResponse> consumerStreamObserver = new ReactorConsumerStreamObserver<>();
             rxRequest.subscribe(request -> delegate.accept(request, consumerStreamObserver));
-            return consumerStreamObserver
-                    .getRxConsumer()
+            return ((Flux<TResponse>) consumerStreamObserver.getRxConsumer())
                     .transform(Operators.lift(new SubscribeOnlyOnceLifter<TResponse>()));
         } catch (Throwable throwable) {
             return Flux.error(throwable);
@@ -105,8 +104,7 @@ public final class ClientCalls {
             ReactorProducerConsumerStreamObserver<TRequest, TResponse> consumerStreamObserver = new ReactorProducerConsumerStreamObserver<>(rxRequest);
             delegate.apply(new CancellableStreamObserver<>(consumerStreamObserver, consumerStreamObserver::cancel));
             consumerStreamObserver.rxSubscribe();
-            return consumerStreamObserver
-                    .getRxConsumer()
+            return ((Flux<TResponse>) consumerStreamObserver.getRxConsumer())
                     .transform(Operators.lift(new SubscribeOnlyOnceLifter<TResponse>()));
         } catch (Throwable throwable) {
             return Flux.error(throwable);
