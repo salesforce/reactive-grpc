@@ -7,10 +7,12 @@
 
 package com.salesforce.reactorgrpc.stub;
 
-import com.google.common.base.Preconditions;
-import com.salesforce.reactivegrpccommon.ReactivePublisherBackpressureOnReadyHandler;
-import io.grpc.stub.ClientCallStreamObserver;
+import com.salesforce.reactivegrpccommon.ReactiveExecutor;
+import com.salesforce.reactivegrpccommon.ReactiveProducerConsumerStreamObserver;
+import com.salesforce.reactivegrpccommon.ReactiveStreamObserverPublisher;
+import org.reactivestreams.Publisher;
 import reactor.core.publisher.Flux;
+import reactor.core.scheduler.Schedulers;
 
 /**
  * ReactorProducerConsumerStreamObserver configures client-side manual flow control for when the client is both producing
@@ -19,25 +21,15 @@ import reactor.core.publisher.Flux;
  * @param <TRequest>
  * @param <TResponse>
  */
-public class ReactorProducerConsumerStreamObserver<TRequest, TResponse> extends ReactorConsumerStreamObserver<TRequest, TResponse> {
-    private Flux<TRequest> rxProducer;
-    private ReactivePublisherBackpressureOnReadyHandler<TRequest> onReadyHandler;
+public class ReactorProducerConsumerStreamObserver<TRequest, TResponse> extends ReactiveProducerConsumerStreamObserver<TRequest, TResponse> {
 
-    public ReactorProducerConsumerStreamObserver(Flux<TRequest> rxProducer) {
-        this.rxProducer = rxProducer;
+    public ReactorProducerConsumerStreamObserver(Publisher<TRequest> rxProducer) {
+        super(rxProducer);
     }
 
     @Override
-    public void beforeStart(ClientCallStreamObserver<TRequest> requestStream) {
-        super.beforeStart(Preconditions.checkNotNull(requestStream));
-        onReadyHandler = new ReactivePublisherBackpressureOnReadyHandler<>(requestStream);
+    public Publisher<TResponse> getReactiveConsumerFromPublisher(ReactiveStreamObserverPublisher<TResponse> publisher) {
+        return Flux.from(publisher).publishOn(Schedulers.fromExecutor(ReactiveExecutor.getSerializingExecutor()));
     }
 
-    public void rxSubscribe() {
-        rxProducer.subscribe(onReadyHandler);
-    }
-
-    public void cancel() {
-        onReadyHandler.cancel();
-    }
 }

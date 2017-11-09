@@ -7,10 +7,12 @@
 
 package com.salesforce.rxgrpc.stub;
 
-import com.google.common.base.Preconditions;
-import com.salesforce.reactivegrpccommon.ReactivePublisherBackpressureOnReadyHandler;
-import io.grpc.stub.ClientCallStreamObserver;
+import com.salesforce.reactivegrpccommon.ReactiveExecutor;
+import com.salesforce.reactivegrpccommon.ReactiveProducerConsumerStreamObserver;
+import com.salesforce.reactivegrpccommon.ReactiveStreamObserverPublisher;
 import io.reactivex.Flowable;
+import io.reactivex.schedulers.Schedulers;
+import org.reactivestreams.Publisher;
 
 /**
  * RxProducerConsumerStreamObserver configures client-side manual flow control for when the client is both producing
@@ -19,25 +21,14 @@ import io.reactivex.Flowable;
  * @param <TRequest>
  * @param <TResponse>
  */
-public class RxProducerConsumerStreamObserver<TRequest, TResponse> extends RxConsumerStreamObserver<TRequest, TResponse> {
-    private Flowable<TRequest> rxProducer;
-    private ReactivePublisherBackpressureOnReadyHandler<TRequest> onReadyHandler;
+public class RxProducerConsumerStreamObserver<TRequest, TResponse> extends ReactiveProducerConsumerStreamObserver<TRequest, TResponse> {
 
-    public RxProducerConsumerStreamObserver(Flowable<TRequest> rxProducer) {
-        this.rxProducer = rxProducer;
+    public RxProducerConsumerStreamObserver(Publisher<TRequest> rxProducer) {
+        super(rxProducer);
     }
 
     @Override
-    public void beforeStart(ClientCallStreamObserver<TRequest> requestStream) {
-        super.beforeStart(Preconditions.checkNotNull(requestStream));
-        onReadyHandler = new ReactivePublisherBackpressureOnReadyHandler<>(requestStream);
-    }
-
-    public void rxSubscribe() {
-        rxProducer.subscribe(onReadyHandler);
-    }
-
-    public void cancel() {
-        onReadyHandler.cancel();
+    public Publisher<TResponse> getReactiveConsumerFromPublisher(ReactiveStreamObserverPublisher<TResponse> publisher) {
+        return Flowable.unsafeCreate(publisher).observeOn(Schedulers.from(ReactiveExecutor.getSerializingExecutor()));
     }
 }
