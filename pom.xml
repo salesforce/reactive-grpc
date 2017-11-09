@@ -40,7 +40,9 @@
         <module>rx-java/rxgrpc-stub</module>
         <module>rx-java/rxgrpc-tck</module>
         <module>rx-java/rxgrpc-test</module>
+        <module>reactor/reactor-grpc</module>
         <module>reactor/reactor-grpc-stub</module>
+        <module>reactor/reactor-grpc-test</module>
         <module>demos/RxChat</module>
     </modules>
 

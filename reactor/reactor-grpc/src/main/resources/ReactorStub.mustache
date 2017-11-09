@@ -1,0 +1,101 @@
+{{#packageName}}
+package {{packageName}};
+{{/packageName}}
+
+import com.salesforce.reactorgrpc.stub.*;
+import com.google.common.util.concurrent.Runnables;
+import io.grpc.Channel;
+import io.grpc.Status;
+import io.grpc.StatusRuntimeException;
+import io.grpc.stub.StreamObserver;
+import reactor.core.publisher.*;
+
+import java.util.function.BiConsumer;
+import java.util.function.Consumer;
+import java.util.function.Function;
+
+import com.salesforce.reactorgrpc.stub.ClientCalls;
+import com.salesforce.reactorgrpc.stub.ServerCalls;
+
+{{#deprecated}}@Deprecated{{/deprecated}}
+@javax.annotation.Generated(
+value = "by ReactorGrpc generator",
+comments = "Source: {{protoName}}")
+public final class {{className}} {
+    private {{className}}() {}
+
+    public static Reactor{{serviceName}}Stub newReactorStub(Channel channel) {
+        return new Reactor{{serviceName}}Stub(channel);
+    }
+
+    public static final class Reactor{{serviceName}}Stub {
+        private {{serviceName}}Grpc.{{serviceName}}Stub delegateStub;
+
+        private Reactor{{serviceName}}Stub(Channel channel) {
+            delegateStub = {{serviceName}}Grpc.newStub(channel);
+        }
+        {{#oneToOne}}{{#deprecated}}@Deprecated{{/deprecated}}
+        public Mono<{{outputType}}> {{methodName}}(Mono<{{inputType}}> reactorRequest) {
+            return ClientCalls.oneToOne(reactorRequest, delegateStub::{{methodName}});
+        }
+        {{/oneToOne}}
+        {{#oneToMany}}{{#deprecated}}@Deprecated{{/deprecated}}
+        public Flux<{{outputType}}> {{methodName}}(Mono<{{inputType}}> reactorRequest) {
+            return ClientCalls.oneToMany(reactorRequest, delegateStub::{{methodName}});
+        }
+        {{/oneToMany}}
+        {{#manyToOne}}{{#deprecated}}@Deprecated{{/deprecated}}
+        public Mono<{{outputType}}> {{methodName}}(Flux<{{inputType}}> reactorRequest) {
+            return ClientCalls.manyToOne(reactorRequest, delegateStub::{{methodName}});
+        }
+        {{/manyToOne}}
+        {{#manyToMany}}{{#deprecated}}@Deprecated{{/deprecated}}
+        public Flux<{{outputType}}> {{methodName}}(Flux<{{inputType}}> reactorRequest) {
+            return ClientCalls.manyToMany(reactorRequest, delegateStub::{{methodName}});
+        }
+        {{/manyToMany}}
+    }
+
+    public static abstract class {{serviceName}}ImplBase extends {{serviceName}}Grpc.{{serviceName}}ImplBase {
+        {{#oneToOne}}{{#deprecated}}@Deprecated{{/deprecated}}
+        public Mono<{{outputType}}> {{methodName}}(Mono<{{inputType}}> request) {
+            throw new StatusRuntimeException(Status.UNIMPLEMENTED);
+        }
+
+        @Override
+        public void {{methodName}}({{inputType}} request, StreamObserver<{{outputType}}> responseObserver) {
+            ServerCalls.oneToOne(request, responseObserver, this::{{methodName}});
+        }
+        {{/oneToOne}}
+        {{#oneToMany}}{{#deprecated}}@Deprecated{{/deprecated}}
+        public Flux<{{outputType}}> {{methodName}}(Mono<{{inputType}}> request) {
+            throw new StatusRuntimeException(Status.UNIMPLEMENTED);
+        }
+
+        @Override
+        public void {{methodName}}({{inputType}} request, StreamObserver<{{outputType}}> responseObserver) {
+            ServerCalls.oneToMany(request, responseObserver, this::{{methodName}});
+        }
+        {{/oneToMany}}
+        {{#manyToOne}}{{#deprecated}}@Deprecated{{/deprecated}}
+        public Mono<{{outputType}}> {{methodName}}(Flux<{{inputType}}> request) {
+            throw new StatusRuntimeException(Status.UNIMPLEMENTED);
+        }
+
+        @Override
+        public StreamObserver<{{inputType}}> {{methodName}}(StreamObserver<{{outputType}}> responseObserver) {
+            return ServerCalls.manyToOne(responseObserver, this::{{methodName}});
+        }
+        {{/manyToOne}}
+        {{#manyToMany}}{{#deprecated}}@Deprecated{{/deprecated}}
+        public Flux<{{outputType}}> {{methodName}}(Flux<{{inputType}}> request) {
+            throw new StatusRuntimeException(Status.UNIMPLEMENTED);
+        }
+
+        @Override
+        public StreamObserver<{{inputType}}> {{methodName}}(StreamObserver<{{outputType}}> responseObserver) {
+            return ServerCalls.manyToMany(responseObserver, this::{{methodName}});
+        }
+        {{/manyToMany}}
+    }
+}
