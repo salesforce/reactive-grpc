@@ -5,7 +5,7 @@
  *  For full license text, see LICENSE.txt file in the repo root  or https://opensource.org/licenses/BSD-3-Clause
  */
 
-package com.salesforce.reactorgrpc;
+package com.salesforce.reactivegrpccommon;
 
 import javax.annotation.Nonnull;
 import java.util.Iterator;
