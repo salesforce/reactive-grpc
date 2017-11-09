@@ -21,13 +21,9 @@
 
     <dependencies>
         <dependency>
-            <groupId>io.grpc</groupId>
-            <artifactId>grpc-protobuf</artifactId>
-        </dependency>
-
-        <dependency>
-            <groupId>com.salesforce.servicelibs</groupId>
-            <artifactId>jprotoc</artifactId>
+            <groupId>${project.groupId}</groupId>
+            <artifactId>reactive-grpc-common</artifactId>
+            <version>${project.version}</version>
         </dependency>
     </dependencies>
 
