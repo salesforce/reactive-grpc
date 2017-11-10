@@ -8,8 +8,8 @@
 package com.salesforce.rxgrpc;
 
 import com.google.protobuf.Empty;
-import com.salesforce.reactivegrpccommon.BackpressureDetector;
-import com.salesforce.reactivegrpccommon.Sequence;
+import com.salesforce.reactivegrpccommon.testing.BackpressureDetector;
+import com.salesforce.reactivegrpccommon.testing.Sequence;
 import com.salesforce.servicelibs.NumberProto;
 import com.salesforce.servicelibs.RxNumbersGrpc;
 import io.grpc.ManagedChannel;

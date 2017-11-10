@@ -5,7 +5,7 @@
  *  For full license text, see LICENSE.txt file in the repo root  or https://opensource.org/licenses/BSD-3-Clause
  */
 
-package com.salesforce.reactivegrpccommon;
+package com.salesforce.reactivegrpccommon.testing;
 
 import java.util.Comparator;
 import java.util.LinkedList;
