@@ -5,11 +5,14 @@
  *  For full license text, see LICENSE.txt file in the repo root  or https://opensource.org/licenses/BSD-3-Clause
  */
 
-package com.salesforce.rxgrpc;
+package com.salesforce.reactivegrpccommon.testing;
 
 import javax.annotation.Nonnull;
 import java.util.Iterator;
 
+/**
+ * A sequence of Integers that ticks a {@link BackpressureDetector} each time it emits a new value.
+ */
 public class Sequence implements Iterable<Integer> {
     private final int max;
     private final BackpressureDetector backpressureDetector;
@@ -27,7 +30,8 @@ public class Sequence implements Iterable<Integer> {
     @Nonnull
     public Iterator<Integer> iterator() {
         return new Iterator<Integer>() {
-            int i = 1;
+            private static final int SEQUENCE_WAIT_TIME = 10;
+            private int i = 1;
 
             public void remove() {
                 throw new UnsupportedOperationException();
@@ -41,7 +45,11 @@ public class Sequence implements Iterable<Integer> {
                 if (backpressureDetector != null) {
                     backpressureDetector.tick();
                 }
-                try { Thread.sleep(10); } catch (InterruptedException e) {}
+                try {
+                    Thread.sleep(SEQUENCE_WAIT_TIME);
+                } catch (InterruptedException e) {
+
+                }
                 return i++;
             }
         };

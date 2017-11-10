@@ -56,6 +56,8 @@ public class ReactiveStreamObserverPublisher<T> implements Publisher<T>, StreamO
     public void subscribe(Subscriber<? super T> subscriber) {
         Preconditions.checkNotNull(subscriber);
         subscriber.onSubscribe(new Subscription() {
+            private static final int RETRY_WAIT_TIME = 5;
+
             @Override
             public void request(long l) {
                 // Some Reactive Streams implementations use Long.MAX_VALUE to indicate "all messages"; gRPC uses Integer.MAX_VALUE.
@@ -67,7 +69,7 @@ public class ReactiveStreamObserverPublisher<T> implements Publisher<T>, StreamO
                     callStreamObserver.request(i);
                 } catch (IllegalStateException ex) {
                     try {
-                        Thread.sleep(2);
+                        Thread.sleep(RETRY_WAIT_TIME);
                     } catch (InterruptedException e) {
                         // no-op
                     }

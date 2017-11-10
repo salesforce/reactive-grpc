@@ -5,14 +5,13 @@
  *  For full license text, see LICENSE.txt file in the repo root  or https://opensource.org/licenses/BSD-3-Clause
  */
 
-package com.salesforce.rxgrpc.stub;
+package com.salesforce.reactivegrpccommon;
 
 import com.google.common.base.Preconditions;
 import com.salesforce.grpc.contrib.LambdaStreamObserver;
-import com.salesforce.reactivegrpccommon.ReactivePublisherBackpressureOnReadyHandler;
 import io.grpc.stub.ClientCallStreamObserver;
 import io.grpc.stub.ClientResponseObserver;
-import io.reactivex.Flowable;
+import org.reactivestreams.Publisher;
 
 import java.util.function.Consumer;
 
@@ -22,11 +21,11 @@ import java.util.function.Consumer;
  * @param <TRequest>
  * @param <TResponse>
  */
-public class RxProducerStreamObserver<TRequest, TResponse> extends LambdaStreamObserver<TResponse> implements ClientResponseObserver<TRequest, TResponse> {
-    private Flowable<TRequest> rxProducer;
+public class ReactiveProducerStreamObserver<TRequest, TResponse> extends LambdaStreamObserver<TResponse> implements ClientResponseObserver<TRequest, TResponse> {
+    private Publisher<TRequest> rxProducer;
     private ReactivePublisherBackpressureOnReadyHandler<TRequest> onReadyHandler;
 
-    public RxProducerStreamObserver(Flowable<TRequest> rxProducer, Consumer<TResponse> onNext, Consumer<Throwable> onError, Runnable onCompleted) {
+    public ReactiveProducerStreamObserver(Publisher<TRequest> rxProducer, Consumer<TResponse> onNext, Consumer<Throwable> onError, Runnable onCompleted) {
         super(
             Preconditions.checkNotNull(onNext),
             Preconditions.checkNotNull(onError),

@@ -5,22 +5,22 @@
  *  For full license text, see LICENSE.txt file in the repo root  or https://opensource.org/licenses/BSD-3-Clause
  */
 
-package com.salesforce.rxgrpc;
+package com.salesforce.reactorgrpc;
 
 import com.salesforce.jprotoc.ProtocPlugin;
 import com.salesforce.reactivegrpccommon.ReactiveGrpcGenerator;
 
 /**
- * A protoc generator for generating ReactiveX 2.0 bindings for gRPC.
+ * A protoc generator for generating Reactor bindings for gRPC.
  */
-public class RxGrpcGenerator extends ReactiveGrpcGenerator {
+public class ReactorGrpcGenerator extends ReactiveGrpcGenerator {
 
     @Override
     protected String getClassPrefix() {
-        return "Rx";
+        return "Reactor";
     }
 
     public static void main(String[] args) {
-        ProtocPlugin.generate(new RxGrpcGenerator());
+        ProtocPlugin.generate(new ReactorGrpcGenerator());
     }
 }

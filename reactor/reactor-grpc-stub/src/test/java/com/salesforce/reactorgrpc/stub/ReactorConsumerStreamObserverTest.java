@@ -5,25 +5,24 @@
  *  For full license text, see LICENSE.txt file in the repo root  or https://opensource.org/licenses/BSD-3-Clause
  */
 
-package com.salesforce.rxgrpc.stub;
+package com.salesforce.reactorgrpc.stub;
 
 import io.grpc.stub.ClientCallStreamObserver;
-import io.reactivex.Flowable;
-import io.reactivex.subscribers.TestSubscriber;
 import org.junit.Test;
 import org.reactivestreams.Subscriber;
+import reactor.test.StepVerifier;
 
-import java.util.concurrent.TimeUnit;
+import java.time.Duration;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.*;
+import static org.assertj.core.api.Assertions.*;
 
 @SuppressWarnings("unchecked")
-public class RxConsumerStreamObserverTest {
+public class ReactorConsumerStreamObserverTest {
     @Test
     public void rxConsumerIsSet() {
         ClientCallStreamObserver<Object> obs = mock(ClientCallStreamObserver.class);
-        RxConsumerStreamObserver rxObs = new RxConsumerStreamObserver();
+        ReactorConsumerStreamObserver rxObs = new ReactorConsumerStreamObserver();
 
         rxObs.beforeStart(obs);
 
@@ -33,37 +32,34 @@ public class RxConsumerStreamObserverTest {
     @Test
     public void onNextDelegates() {
         ClientCallStreamObserver<Object> obs = mock(ClientCallStreamObserver.class);
-        RxConsumerStreamObserver rxObs = new RxConsumerStreamObserver();
+        ReactorConsumerStreamObserver rxObs = new ReactorConsumerStreamObserver();
         Subscriber<Object> sub = mock(Subscriber.class);
 
         rxObs.beforeStart(obs);
         rxObs.getRxConsumer().subscribe(sub);
 
-        TestSubscriber<Object> testSubscriber = ((Flowable<Object>)rxObs.getRxConsumer()).test();
-
         Object obj = new Object();
-        rxObs.onNext(obj);
-        rxObs.onCompleted();
-
-        testSubscriber.awaitTerminalEvent(3, TimeUnit.SECONDS);
-        testSubscriber.assertValues(obj);
+        StepVerifier.create(rxObs.getRxConsumer())
+                .then(() -> rxObs.onNext(obj))
+                .expectNext(obj)
+                .then(rxObs::onCompleted)
+                .expectComplete()
+                .verify(Duration.ofSeconds(3));
     }
 
     @Test
     public void onErrorDelegates() {
         ClientCallStreamObserver<Object> obs = mock(ClientCallStreamObserver.class);
-        RxConsumerStreamObserver rxObs = new RxConsumerStreamObserver();
+        ReactorConsumerStreamObserver rxObs = new ReactorConsumerStreamObserver();
         Subscriber<Object> sub = mock(Subscriber.class);
 
         rxObs.beforeStart(obs);
         rxObs.getRxConsumer().subscribe(sub);
 
-        TestSubscriber<Object> testSubscriber = ((Flowable<Object>)rxObs.getRxConsumer()).test();
-
-        Throwable obj = new Exception();
-        rxObs.onError(obj);
-
-        testSubscriber.awaitTerminalEvent(3, TimeUnit.SECONDS);
-        testSubscriber.assertError(obj);
+        Throwable obj = new Exception("test error");
+        StepVerifier.create(rxObs.getRxConsumer())
+                .then(() -> rxObs.onError(obj))
+                .expectErrorMessage("test error")
+                .verify(Duration.ofSeconds(3));
     }
 }

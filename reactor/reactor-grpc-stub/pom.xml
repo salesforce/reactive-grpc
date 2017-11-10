@@ -13,29 +13,28 @@
         <groupId>com.salesforce.servicelibs</groupId>
         <artifactId>reactive-grpc</artifactId>
         <version>0.7.0-SNAPSHOT</version>
-        <relativePath>../pom.xml</relativePath>
+        <relativePath>../../pom.xml</relativePath>
     </parent>
     <modelVersion>4.0.0</modelVersion>
 
-    <artifactId>reactive-grpc-common</artifactId>
+    <artifactId>reactor-grpc-stub</artifactId>
 
     <dependencies>
         <dependency>
-            <groupId>com.salesforce.servicelibs</groupId>
-            <artifactId>grpc-contrib</artifactId>
+            <groupId>${project.groupId}</groupId>
+            <artifactId>reactive-grpc-common</artifactId>
+            <version>${project.version}</version>
         </dependency>
         <dependency>
-            <groupId>com.salesforce.servicelibs</groupId>
-            <artifactId>jprotoc</artifactId>
+            <groupId>io.projectreactor</groupId>
+            <artifactId>reactor-core</artifactId>
+            <version>3.1.1.RELEASE</version>
         </dependency>
         <dependency>
-            <groupId>org.reactivestreams</groupId>
-            <artifactId>reactive-streams</artifactId>
-            <version>1.0.1</version>
-        </dependency>
-        <dependency>
-            <groupId>io.grpc</groupId>
-            <artifactId>grpc-stub</artifactId>
+            <groupId>io.projectreactor</groupId>
+            <artifactId>reactor-test</artifactId>
+            <version>3.1.1.RELEASE</version>
+            <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>junit</groupId>
@@ -60,11 +59,10 @@
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-checkstyle-plugin</artifactId>
                 <configuration>
-                    <configLocation>../checkstyle.xml</configLocation>
-                    <suppressionsLocation>../checkstyle_ignore.xml</suppressionsLocation>
+                    <configLocation>../../checkstyle.xml</configLocation>
+                    <suppressionsLocation>../../checkstyle_ignore.xml</suppressionsLocation>
                 </configuration>
             </plugin>
         </plugins>
     </build>
-
 </project>

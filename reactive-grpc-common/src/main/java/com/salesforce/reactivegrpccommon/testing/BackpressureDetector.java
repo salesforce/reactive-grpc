@@ -5,7 +5,7 @@
  *  For full license text, see LICENSE.txt file in the repo root  or https://opensource.org/licenses/BSD-3-Clause
  */
 
-package com.salesforce.rxgrpc;
+package com.salesforce.reactivegrpccommon.testing;
 
 import java.util.Comparator;
 import java.util.LinkedList;
@@ -13,7 +13,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 /**
- * Neither gRPC nor rxJava provide a direct way to detect that backpressure occurred. However, we can detect
+ * Neither gRPC nor Reactive Streams implementations provide a direct way to detect that backpressure occurred. However, we can detect
  * it statistically. Backpressure is signalled by delaying calls to request(). If messages were flowing without
  * backpressure, the rate at which request() is called would be relatively constant. In the presence of backpressure,
  * calls to request() are delayed while the consumer deals with its backlog. We can measure these delays by looking

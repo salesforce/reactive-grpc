@@ -17,7 +17,7 @@
     </parent>
     <modelVersion>4.0.0</modelVersion>
 
-    <artifactId>rxgrpc</artifactId>
+    <artifactId>reactor-grpc</artifactId>
 
     <dependencies>
         <dependency>

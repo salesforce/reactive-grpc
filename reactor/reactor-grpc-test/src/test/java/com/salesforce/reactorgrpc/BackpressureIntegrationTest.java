@@ -5,23 +5,23 @@
  *  For full license text, see LICENSE.txt file in the repo root  or https://opensource.org/licenses/BSD-3-Clause
  */
 
-package com.salesforce.rxgrpc;
+package com.salesforce.reactorgrpc;
 
 import com.google.protobuf.Empty;
 import com.salesforce.reactivegrpccommon.testing.BackpressureDetector;
 import com.salesforce.reactivegrpccommon.testing.Sequence;
 import com.salesforce.servicelibs.NumberProto;
-import com.salesforce.servicelibs.RxNumbersGrpc;
+import com.salesforce.servicelibs.ReactorNumbersGrpc;
 import io.grpc.ManagedChannel;
 import io.grpc.Server;
 import io.grpc.inprocess.InProcessChannelBuilder;
 import io.grpc.inprocess.InProcessServerBuilder;
-import io.reactivex.Flowable;
-import io.reactivex.Single;
 import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
+import reactor.core.publisher.Flux;
+import reactor.core.publisher.Mono;
 
 import java.util.Arrays;
 import java.util.concurrent.TimeUnit;
@@ -39,9 +39,9 @@ public class BackpressureIntegrationTest {
 
     @BeforeClass
     public static void setupServer() throws Exception {
-        RxNumbersGrpc.NumbersImplBase svc = new RxNumbersGrpc.NumbersImplBase() {
+        ReactorNumbersGrpc.NumbersImplBase svc = new ReactorNumbersGrpc.NumbersImplBase() {
             @Override
-            public Single<NumberProto.Number> requestPressure(Flowable<NumberProto.Number> request) {
+            public Mono<NumberProto.Number> requestPressure(Flux<NumberProto.Number> request) {
                 return request
                         .map(proto -> proto.getNumber(0))
                         .doOnNext(i -> {
@@ -54,15 +54,15 @@ public class BackpressureIntegrationTest {
             }
 
             @Override
-            public Flowable<NumberProto.Number> responsePressure(Single<Empty> request) {
-                return Flowable
+            public Flux<NumberProto.Number> responsePressure(Mono<Empty> request) {
+                return Flux
                         .fromIterable(new Sequence(200, serverRespBPDetector))
                         .doOnNext(i -> System.out.println("   <-- " + i))
                         .map(BackpressureIntegrationTest::protoNum);
             }
 
             @Override
-            public Flowable<NumberProto.Number> twoWayPressure(Flowable<NumberProto.Number> request) {
+            public Flux<NumberProto.Number> twoWayPressure(Flux<NumberProto.Number> request) {
                 request
                     .map(proto -> proto.getNumber(0))
                     .subscribe(
@@ -75,7 +75,7 @@ public class BackpressureIntegrationTest {
                         () -> System.out.println("Server done.")
                     );
 
-                return Flowable
+                return Flux
                         .fromIterable(new Sequence(200, serverRespBPDetector))
                         .doOnNext(i -> System.out.println("                  <-- " + i))
                         .map(BackpressureIntegrationTest::protoNum);
@@ -106,19 +106,19 @@ public class BackpressureIntegrationTest {
     public void clientToServerBackpressure() throws InterruptedException {
         Object lock = new Object();
 
-        RxNumbersGrpc.RxNumbersStub stub = RxNumbersGrpc.newRxStub(channel);
+        ReactorNumbersGrpc.ReactorNumbersStub stub = ReactorNumbersGrpc.newReactorStub(channel);
         BackpressureDetector clientBackpressureDetector = new BackpressureDetector(madMultipleCutoff);
         Sequence seq = new Sequence(200, clientBackpressureDetector);
 
-        Flowable<NumberProto.Number> rxRequest = Flowable
+        Flux<NumberProto.Number> reactorRequest = Flux
                 .fromIterable(seq)
                 .doOnNext(i -> System.out.println(i + " -->"))
                 .map(BackpressureIntegrationTest::protoNum);
 
 
-        Single<NumberProto.Number> rxResponse = stub.requestPressure(rxRequest);
+        Mono<NumberProto.Number> reactorResponse = stub.requestPressure(reactorRequest);
 
-        rxResponse.subscribe(
+        reactorResponse.subscribe(
                 n -> {
                     System.out.println("Client done. " + n.getNumber(0));
                     synchronized (lock) {
@@ -144,12 +144,12 @@ public class BackpressureIntegrationTest {
         Object lock = new Object();
         BackpressureDetector clientBackpressureDetector = new BackpressureDetector(madMultipleCutoff);
 
-        RxNumbersGrpc.RxNumbersStub stub = RxNumbersGrpc.newRxStub(channel);
+        ReactorNumbersGrpc.ReactorNumbersStub stub = ReactorNumbersGrpc.newReactorStub(channel);
 
-        Single<Empty> rxRequest = Single.just(Empty.getDefaultInstance());
+        Mono<Empty> reactorRequest = Mono.just(Empty.getDefaultInstance());
 
-        Flowable<NumberProto.Number> rxResponse = stub.responsePressure(rxRequest);
-        rxResponse.subscribe(
+        Flux<NumberProto.Number> reactorResponse = stub.responsePressure(reactorRequest);
+        reactorResponse.subscribe(
                 n -> {
                     clientBackpressureDetector.tick();
                     System.out.println(n.getNumber(0) + "  <--");
@@ -181,16 +181,16 @@ public class BackpressureIntegrationTest {
         BackpressureDetector clientReqBPDetector = new BackpressureDetector(madMultipleCutoff);
         BackpressureDetector clientRespBPDetector = new BackpressureDetector(madMultipleCutoff);
 
-        RxNumbersGrpc.RxNumbersStub stub = RxNumbersGrpc.newRxStub(channel);
+        ReactorNumbersGrpc.ReactorNumbersStub stub = ReactorNumbersGrpc.newReactorStub(channel);
 
-        Flowable<NumberProto.Number> rxRequest = Flowable
+        Flux<NumberProto.Number> reactorRequest = Flux
                 .fromIterable(new Sequence(180, clientReqBPDetector))
                 .doOnNext(i -> System.out.println(i + " -->"))
                 .map(BackpressureIntegrationTest::protoNum);
 
-        Flowable<NumberProto.Number> rxResponse = stub.twoWayPressure(rxRequest);
+        Flux<NumberProto.Number> reactorResponse = stub.twoWayPressure(reactorRequest);
 
-        rxResponse.subscribe(
+        reactorResponse.subscribe(
                 n -> {
                     clientRespBPDetector.tick();
                     System.out.println("               " + n.getNumber(0) + "  <--");
