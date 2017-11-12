@@ -16,14 +16,14 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.annotation.Bean;
 
 /**
- * Demonstrates building a gRPC streaming server using RxJava, Reactive-Grpc, grpc-spring, and Spring Boot.
+ * Demonstrates building a gRPC streaming server using Reactor, Reactive-Grpc, grpc-spring, and Spring Boot.
  */
 @SpringBootApplication
-public class ChatServer {
-    private final Logger logger = LoggerFactory.getLogger(ChatServer.class);
+public class ReactorChatServer {
+    private final Logger logger = LoggerFactory.getLogger(ReactorChatServer.class);
 
     public static void main(String[] args) throws Exception {
-        SpringApplication.run(ChatServer.class, args);
+        SpringApplication.run(ReactorChatServer.class, args);
         Thread.currentThread().join();
     }
 
@@ -35,7 +35,7 @@ public class ChatServer {
     }
 
     @Bean
-    public ChatGrpc.ChatImplBase chatImpl() {
+    public ReactorChatGrpc.ChatImplBase chatImpl() {
         return new ChatImpl();
     }
 }

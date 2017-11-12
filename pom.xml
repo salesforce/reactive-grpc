@@ -45,6 +45,7 @@
         <module>reactor/reactor-grpc-tck</module>
         <module>reactor/reactor-grpc-test</module>
         <module>demos/RxChat</module>
+        <module>demos/ReactorChat</module>
     </modules>
 
     <properties>
@@ -93,8 +94,13 @@
             -->
 
             <dependency>
-                <groupId>com.salesforce.servicelibs</groupId>
+                <groupId>${project.groupId}</groupId>
                 <artifactId>rxgrpc-stub</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>${project.groupId}</groupId>
+                <artifactId>reactor-grpc-stub</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>

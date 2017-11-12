@@ -17,7 +17,7 @@
     </parent>
     <modelVersion>4.0.0</modelVersion>
 
-    <artifactId>RxChat</artifactId>
+    <artifactId>ReactorChat</artifactId>
     <packaging>pom</packaging>
 
     <properties>
@@ -26,8 +26,8 @@
     </properties>
 
     <modules>
-        <module>RxChat-Client</module>
-        <module>RxChat-Server</module>
+        <module>ReactorChat-Client</module>
+        <module>ReactorChat-Server</module>
     </modules>
 
     <dependencies>
@@ -37,7 +37,7 @@
         </dependency>
         <dependency>
             <groupId>${project.groupId}</groupId>
-            <artifactId>rxgrpc-stub</artifactId>
+            <artifactId>reactor-grpc-stub</artifactId>
         </dependency>
     </dependencies>
 
@@ -77,11 +77,11 @@
                         <configuration>
                             <protocPlugins>
                                 <protocPlugin>
-                                    <id>rxgrpc</id>
+                                    <id>reactor-grpc</id>
                                     <groupId>com.salesforce.servicelibs</groupId>
-                                    <artifactId>rxgrpc</artifactId>
+                                    <artifactId>reactor-grpc</artifactId>
                                     <version>${project.version}</version>
-                                    <mainClass>com.salesforce.rxgrpc.RxGrpcGenerator</mainClass>
+                                    <mainClass>com.salesforce.reactorgrpc.ReactorGrpcGenerator</mainClass>
                                 </protocPlugin>
                             </protocPlugins>
                         </configuration>

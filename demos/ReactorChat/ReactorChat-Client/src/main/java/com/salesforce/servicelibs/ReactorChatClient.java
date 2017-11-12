@@ -10,10 +10,10 @@ package com.salesforce.servicelibs;
 import com.google.protobuf.Empty;
 import io.grpc.ManagedChannel;
 import io.grpc.ManagedChannelBuilder;
-import io.reactivex.Observable;
-import io.reactivex.Single;
-import io.reactivex.disposables.Disposable;
 import jline.console.ConsoleReader;
+import reactor.core.Disposable;
+import reactor.core.publisher.Flux;
+import reactor.core.publisher.Mono;
 
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
@@ -21,17 +21,17 @@ import java.util.concurrent.TimeUnit;
 import static com.salesforce.servicelibs.ConsoleUtil.*;
 
 /**
- * Demonstrates building a gRPC streaming client using RxJava and Reactive-Grpc.
+ * Demonstrates building a gRPC streaming client using Reactor and Reactive-Grpc.
  */
-public final class ChatClient {
+public final class ReactorChatClient {
     private static final int PORT = 9999;
 
-    private ChatClient() { }
+    private ReactorChatClient() { }
 
     public static void main(String[] args) throws Exception {
         // Connect to the sever
         ManagedChannel channel = ManagedChannelBuilder.forAddress("localhost", PORT).usePlaintext(true).build();
-        RxChatGrpc.RxChatStub stub = RxChatGrpc.newRxStub(channel);
+        ReactorChatGrpc.ReactorChatStub stub = ReactorChatGrpc.newReactorStub(channel);
 
         CountDownLatch done = new CountDownLatch(1);
         ConsoleReader console = new ConsoleReader();
@@ -42,7 +42,7 @@ public final class ChatClient {
         stub.postMessage(toMessage(author, author + " joined.")).subscribe();
 
         // Subscribe to incoming messages
-        Disposable chatSubscription = stub.getMessages(Single.just(Empty.getDefaultInstance())).subscribe(
+        Disposable chatSubscription = stub.getMessages(Mono.just(Empty.getDefaultInstance())).subscribe(
             message -> {
                 // Don't re-print our own messages
                 if (!message.getAuthor().equals(author)) {
@@ -57,9 +57,9 @@ public final class ChatClient {
         );
 
         // Publish outgoing messages
-        Observable.fromIterable(new ConsoleIterator(console, author + " > "))
+        Flux.fromIterable(new ConsoleIterator(console, author + " > "))
             .map(msg -> toMessage(author, msg))
-            .flatMapSingle(stub::postMessage)
+            .flatMap(stub::postMessage)
             .subscribe(
                 empty -> { },
                 throwable -> {
@@ -78,8 +78,8 @@ public final class ChatClient {
         console.getTerminal().restore();
     }
 
-    private static Single<ChatProto.ChatMessage> toMessage(String author, String message) {
-        return Single.just(
+    private static Mono<ChatProto.ChatMessage> toMessage(String author, String message) {
+        return Mono.just(
             ChatProto.ChatMessage.newBuilder()
                 .setAuthor(author)
                 .setMessage(message)
