@@ -9,24 +9,22 @@ package com.salesforce.servicelibs;
 
 import com.google.protobuf.Empty;
 import com.salesforce.grpc.contrib.spring.GrpcService;
-import io.reactivex.BackpressureStrategy;
-import io.reactivex.Flowable;
-import io.reactivex.Single;
-import io.reactivex.subjects.PublishSubject;
-import io.reactivex.subjects.Subject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import reactor.core.publisher.EmitterProcessor;
+import reactor.core.publisher.Flux;
+import reactor.core.publisher.Mono;
 
 /**
- * Demonstrates building a gRPC streaming server using RxJava and Reactive-Grpc.
+ * Demonstrates building a gRPC streaming server using Reactor and Reactive-Grpc.
  */
 @GrpcService
-public class ChatImpl extends RxChatGrpc.ChatImplBase {
+public class ChatImpl extends ReactorChatGrpc.ChatImplBase {
     private final Logger logger = LoggerFactory.getLogger(ChatImpl.class);
-    private final Subject<ChatProto.ChatMessage> broadcast = PublishSubject.create();
+    private final EmitterProcessor<ChatProto.ChatMessage> broadcast = EmitterProcessor.create();
 
     @Override
-    public Single<Empty> postMessage(Single<ChatProto.ChatMessage> request) {
+    public Mono<Empty> postMessage(Mono<ChatProto.ChatMessage> request) {
         return request.map(this::broadcast);
     }
 
@@ -37,7 +35,7 @@ public class ChatImpl extends RxChatGrpc.ChatImplBase {
     }
 
     @Override
-    public Flowable<ChatProto.ChatMessage> getMessages(Single<Empty> request) {
-        return broadcast.toFlowable(BackpressureStrategy.BUFFER);
+    public Flux<ChatProto.ChatMessage> getMessages(Mono<Empty> request) {
+        return broadcast;
     }
 }

@@ -1,1 +1,1 @@
-This module contains integration tests for ReactorGrpc.
+This module contains integration tests for Reactor-Grpc.
