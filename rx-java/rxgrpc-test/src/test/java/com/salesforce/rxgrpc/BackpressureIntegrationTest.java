@@ -32,12 +32,10 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 @SuppressWarnings("Duplicates")
 public class BackpressureIntegrationTest {
-    private static final int NUMBER_OF_STREAM_ELEMENTS = 200;
+    private static final int NUMBER_OF_STREAM_ELEMENTS = 140;
 
-    private static AtomicLong clientLastValueTime;
-    private static AtomicLong serverLastValueTime;
-    private static AtomicLong clientNbOfWaits;
-    private static AtomicLong serverNumberOfWaits;
+    private static AtomicLong lastValueTime;
+    private static AtomicLong numberOfWaits;
 
     private static Server server;
     private static ManagedChannel channel;
@@ -60,22 +58,19 @@ public class BackpressureIntegrationTest {
                 return Flowable
                         .fromIterable(IntStream.range(0, NUMBER_OF_STREAM_ELEMENTS)::iterator)
                         .doOnNext(i -> System.out.println("   <-- " + i))
-                        .doOnNext(i -> updateNumberOfWaits(serverLastValueTime, serverNumberOfWaits))
+                        .doOnNext(i -> updateNumberOfWaits(lastValueTime, numberOfWaits))
                         .map(BackpressureIntegrationTest::protoNum);
             }
 
             @Override
-            public Flowable<NumberProto.Number> twoWayPressure(Flowable<NumberProto.Number> request) {
-                request
-                    .map(proto -> proto.getNumber(0))
-                        .doOnNext(n -> System.out.println("   --> " + n))
-                        .doOnNext(n -> waitIfValuesAreEqual(n, 3))
-                        .subscribe();
-                return Flowable
-                        .fromIterable(IntStream.range(0, NUMBER_OF_STREAM_ELEMENTS)::iterator)
-                        .doOnNext(i -> System.out.println("                  <-- " + i))
-                        .doOnNext(i -> updateNumberOfWaits(serverLastValueTime, serverNumberOfWaits))
-                        .map(BackpressureIntegrationTest::protoNum);
+            public Flowable<NumberProto.Number> twoWayRequestPressure(Flowable<NumberProto.Number> request) {
+                return requestPressure(request).toFlowable();
+            }
+
+            @Override
+            public Flowable<NumberProto.Number> twoWayResponsePressure(Flowable<NumberProto.Number> request) {
+                request.subscribe();
+                return responsePressure(null);
             }
         };
 
@@ -85,10 +80,8 @@ public class BackpressureIntegrationTest {
 
     @Before
     public void resetServerStats() {
-        clientLastValueTime = new AtomicLong(0);
-        clientNbOfWaits = new AtomicLong(0);
-        serverLastValueTime = new AtomicLong(0);
-        serverNumberOfWaits = new AtomicLong(0);
+        lastValueTime = new AtomicLong(0);
+        numberOfWaits = new AtomicLong(0);
     }
 
     @AfterClass
@@ -108,7 +101,7 @@ public class BackpressureIntegrationTest {
         Flowable<NumberProto.Number> rxRequest = Flowable
                 .fromIterable(IntStream.range(0, NUMBER_OF_STREAM_ELEMENTS)::iterator)
                 .doOnNext(i -> System.out.println(i + " --> "))
-                .doOnNext(i -> updateNumberOfWaits(clientLastValueTime, clientNbOfWaits))
+                .doOnNext(i -> updateNumberOfWaits(lastValueTime, numberOfWaits))
                 .map(BackpressureIntegrationTest::protoNum);
 
         TestObserver<NumberProto.Number> rxResponse = stub.requestPressure(rxRequest).test();
@@ -117,7 +110,7 @@ public class BackpressureIntegrationTest {
         rxResponse.assertComplete()
                 .assertValue(v -> v.getNumber(0) == NUMBER_OF_STREAM_ELEMENTS - 1);
 
-        assertThat(clientNbOfWaits.get()).isEqualTo(1);
+        assertThat(numberOfWaits.get()).isEqualTo(1);
     }
 
     @Test
@@ -135,30 +128,44 @@ public class BackpressureIntegrationTest {
         rxResponse.assertComplete()
                 .assertValueCount(NUMBER_OF_STREAM_ELEMENTS);
 
-        assertThat(serverNumberOfWaits.get()).isEqualTo(1);
+        assertThat(numberOfWaits.get()).isEqualTo(1);
     }
 
     @Test
-    public void bidiBackpressure() throws InterruptedException {
+    public void bidiResponseBackpressure() throws InterruptedException {
         RxNumbersGrpc.RxNumbersStub stub = RxNumbersGrpc.newRxStub(channel);
 
-        Flowable<NumberProto.Number> rxRequest = Flowable
-                .fromIterable(IntStream.range(0, NUMBER_OF_STREAM_ELEMENTS)::iterator)
-                .doOnNext(i -> System.out.println(i + " --> "))
-                .doOnNext(i -> updateNumberOfWaits(clientLastValueTime, clientNbOfWaits))
-                .map(BackpressureIntegrationTest::protoNum);
-
-        TestSubscriber<NumberProto.Number> rxResponse = stub.twoWayPressure(rxRequest)
+        TestSubscriber<NumberProto.Number> rxResponse = stub.twoWayResponsePressure(Flowable.empty())
                 .doOnNext(n -> System.out.println(n.getNumber(0) + "  <--"))
                 .doOnNext(n -> waitIfValuesAreEqual(n.getNumber(0), 3))
                 .test();
 
         rxResponse.awaitTerminalEvent(5, TimeUnit.SECONDS);
-        rxResponse.assertComplete().assertValueCount(NUMBER_OF_STREAM_ELEMENTS);
+        rxResponse.assertComplete()
+                .assertValueCount(NUMBER_OF_STREAM_ELEMENTS);
 
-        assertThat(clientNbOfWaits.get()).isEqualTo(1);
-        assertThat(serverNumberOfWaits.get()).isEqualTo(1);
+        assertThat(numberOfWaits.get()).isEqualTo(1);
     }
+
+    @Test
+    public void bidiRequestBackpressure() throws InterruptedException {
+        RxNumbersGrpc.RxNumbersStub stub = RxNumbersGrpc.newRxStub(channel);
+
+        Flowable<NumberProto.Number> rxRequest = Flowable
+                .fromIterable(IntStream.range(0, NUMBER_OF_STREAM_ELEMENTS)::iterator)
+                .doOnNext(i -> System.out.println(i + " --> "))
+                .doOnNext(i -> updateNumberOfWaits(lastValueTime, numberOfWaits))
+                .map(BackpressureIntegrationTest::protoNum);
+
+        TestSubscriber<NumberProto.Number> rxResponse = stub.twoWayRequestPressure(rxRequest).test();
+
+        rxResponse.awaitTerminalEvent(5, TimeUnit.SECONDS);
+        rxResponse.assertComplete()
+                .assertValue(v -> v.getNumber(0) == NUMBER_OF_STREAM_ELEMENTS - 1);
+
+        assertThat(numberOfWaits.get()).isEqualTo(1);
+    }
+
 
     private static void updateNumberOfWaits(AtomicLong start, AtomicLong maxTime) {
         Long now = System.currentTimeMillis();
@@ -173,7 +180,7 @@ public class BackpressureIntegrationTest {
         if (value == other) {
             try {
                 Thread.sleep(2000);
-            } catch (InterruptedException e) {
+                } catch (InterruptedException e) {
             }
         }
     }
