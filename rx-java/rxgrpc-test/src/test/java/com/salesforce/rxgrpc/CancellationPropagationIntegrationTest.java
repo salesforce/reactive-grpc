@@ -8,7 +8,6 @@
 package com.salesforce.rxgrpc;
 
 import com.google.protobuf.Empty;
-import com.salesforce.reactivegrpccommon.testing.Sequence;
 import com.salesforce.servicelibs.NumberProto;
 import com.salesforce.servicelibs.RxNumbersGrpc;
 import io.grpc.*;
@@ -26,11 +25,14 @@ import java.util.Arrays;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.stream.IntStream;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
 @SuppressWarnings("ALL")
 public class CancellationPropagationIntegrationTest {
+    private static final int NUMBER_OF_STREAM_ELEMENTS = 10000;
+
     private static Server server;
     private static ManagedChannel channel;
     private static TestService svc = new TestService();
@@ -61,7 +63,9 @@ public class CancellationPropagationIntegrationTest {
         @Override
         public Flowable<NumberProto.Number> responsePressure(Single<Empty> request) {
             // Produce a very long sequence
-            return Flowable.fromIterable(new Sequence(10000))
+            return Flowable
+                    .fromIterable(IntStream.range(0, NUMBER_OF_STREAM_ELEMENTS)::iterator)
+                    .delay(10, TimeUnit.MILLISECONDS)
                     .doOnNext(i -> lastNumberProduced.set(i))
                     .map(CancellationPropagationIntegrationTest::protoNum)
                     .doOnCancel(() -> {
@@ -169,7 +173,9 @@ public class CancellationPropagationIntegrationTest {
         AtomicBoolean requestWasCanceled = new AtomicBoolean(false);
         AtomicBoolean requestDidProduce = new AtomicBoolean(false);
 
-        Flowable<NumberProto.Number> request = Flowable.fromIterable(new Sequence(10000))
+        Flowable<NumberProto.Number> request = Flowable
+                .fromIterable(IntStream.range(0, NUMBER_OF_STREAM_ELEMENTS)::iterator)
+                .delay(10, TimeUnit.MILLISECONDS)
                 .map(CancellationPropagationIntegrationTest::protoNum)
                 .doOnNext(x -> {
                     requestDidProduce.set(true);
@@ -203,7 +209,9 @@ public class CancellationPropagationIntegrationTest {
         AtomicBoolean requestWasCanceled = new AtomicBoolean(false);
         AtomicBoolean requestDidProduce = new AtomicBoolean(false);
 
-        Flowable<NumberProto.Number> request = Flowable.fromIterable(new Sequence(10000))
+        Flowable<NumberProto.Number> request = Flowable
+                .fromIterable(IntStream.range(0, NUMBER_OF_STREAM_ELEMENTS)::iterator)
+                .delay(10, TimeUnit.MILLISECONDS)
                 .map(CancellationPropagationIntegrationTest::protoNum)
                 .doOnNext(n -> {
                     requestDidProduce.set(true);
@@ -236,7 +244,9 @@ public class CancellationPropagationIntegrationTest {
         AtomicBoolean requestWasCanceled = new AtomicBoolean(false);
         AtomicBoolean requestDidProduce = new AtomicBoolean(false);
 
-        Flowable<NumberProto.Number> request = Flowable.fromIterable(new Sequence(10000))
+        Flowable<NumberProto.Number> request = Flowable
+                .fromIterable(IntStream.range(0, NUMBER_OF_STREAM_ELEMENTS)::iterator)
+                .delay(10, TimeUnit.MILLISECONDS)
                 .map(CancellationPropagationIntegrationTest::protoNum)
                 .doOnNext(x -> {
                     requestDidProduce.set(true);
@@ -268,7 +278,9 @@ public class CancellationPropagationIntegrationTest {
         AtomicBoolean requestWasCanceled = new AtomicBoolean(false);
         AtomicBoolean requestDidProduce = new AtomicBoolean(false);
 
-        Flowable<NumberProto.Number> request = Flowable.fromIterable(new Sequence(10000))
+        Flowable<NumberProto.Number> request = Flowable
+                .fromIterable(IntStream.range(0, NUMBER_OF_STREAM_ELEMENTS)::iterator)
+                .delay(10, TimeUnit.MILLISECONDS)
                 .map(CancellationPropagationIntegrationTest::protoNum)
                 .doOnNext(n -> {
                     requestDidProduce.set(true);
