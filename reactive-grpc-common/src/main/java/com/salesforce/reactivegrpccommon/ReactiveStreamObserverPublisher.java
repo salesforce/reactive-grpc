@@ -65,7 +65,7 @@ public class ReactiveStreamObserverPublisher<T> implements Publisher<T>, StreamO
 
                 // Very rarely, request() gets called before the client has finished setting up its stream. If this
                 // happens, wait momentarily and try again.
-                for (int j=0 ; j< MAX_REQUEST_RETRIES; j++) {
+                for (int j = 0; j < MAX_REQUEST_RETRIES; j++) {
                     try {
                         callStreamObserver.request(i);
                         break;
