@@ -56,7 +56,7 @@ public class ReactiveStreamObserverPublisher<T> implements Publisher<T>, StreamO
     public void subscribe(Subscriber<? super T> subscriber) {
         Preconditions.checkNotNull(subscriber);
         subscriber.onSubscribe(new Subscription() {
-            private static final int RETRY_WAIT_TIME = 5;
+            private static final int MAX_REQUEST_RETRIES = 20;
 
             @Override
             public void request(long l) {
@@ -65,15 +65,20 @@ public class ReactiveStreamObserverPublisher<T> implements Publisher<T>, StreamO
 
                 // Very rarely, request() gets called before the client has finished setting up its stream. If this
                 // happens, wait momentarily and try again.
-                try {
-                    callStreamObserver.request(i);
-                } catch (IllegalStateException ex) {
+                for (int j=0 ; j< MAX_REQUEST_RETRIES; j++) {
                     try {
-                        Thread.sleep(RETRY_WAIT_TIME);
-                    } catch (InterruptedException e) {
-                        // no-op
+                        callStreamObserver.request(i);
+                        break;
+                    } catch (IllegalStateException ex) {
+                        if (j == MAX_REQUEST_RETRIES - 1) {
+                            throw ex;
+                        }
+                        try {
+                            Thread.sleep(1);
+                        } catch (InterruptedException e) {
+                            // no-op
+                        }
                     }
-                    callStreamObserver.request(i);
                 }
             }
 
