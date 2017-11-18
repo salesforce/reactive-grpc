@@ -8,7 +8,6 @@
 package com.salesforce.reactorgrpc;
 
 import com.google.protobuf.Empty;
-import com.salesforce.reactivegrpccommon.testing.Sequence;
 import com.salesforce.servicelibs.NumberProto;
 import com.salesforce.servicelibs.ReactorNumbersGrpc;
 import io.grpc.*;
@@ -25,11 +24,15 @@ import java.time.Duration;
 import java.util.Arrays;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.stream.IntStream;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
 @SuppressWarnings("ALL")
 public class CancellationPropagationIntegrationTest {
+    private static final int NUMBER_OF_STREAM_ELEMENTS = 10000;
+    private static final int SEQUENCE_DELAY_MILLIS = 10;
+
     private static Server server;
     private static ManagedChannel channel;
     private static TestService svc = new TestService();
@@ -60,7 +63,9 @@ public class CancellationPropagationIntegrationTest {
         @Override
         public Flux<NumberProto.Number> responsePressure(Mono<Empty> request) {
             // Produce a very long sequence
-            return Flux.fromIterable(new Sequence(10000))
+            return Flux
+                    .fromIterable(IntStream.range(0, NUMBER_OF_STREAM_ELEMENTS)::iterator)
+                    .delayElements(Duration.ofMillis(SEQUENCE_DELAY_MILLIS))
                     .doOnNext(i -> lastNumberProduced.set(i))
                     .map(CancellationPropagationIntegrationTest::protoNum)
                     .doOnCancel(() -> {
@@ -166,7 +171,9 @@ public class CancellationPropagationIntegrationTest {
         AtomicBoolean requestWasCanceled = new AtomicBoolean(false);
         AtomicBoolean requestDidProduce = new AtomicBoolean(false);
 
-        Flux<NumberProto.Number> request = Flux.fromIterable(new Sequence(10000))
+        Flux<NumberProto.Number> request = Flux
+                .fromIterable(IntStream.range(0, NUMBER_OF_STREAM_ELEMENTS)::iterator)
+                .delayElements(Duration.ofMillis(SEQUENCE_DELAY_MILLIS))
                 .map(CancellationPropagationIntegrationTest::protoNum)
                 .doOnNext(x -> {
                     requestDidProduce.set(true);
@@ -198,7 +205,9 @@ public class CancellationPropagationIntegrationTest {
         AtomicBoolean requestWasCanceled = new AtomicBoolean(false);
         AtomicBoolean requestDidProduce = new AtomicBoolean(false);
 
-        Flux<NumberProto.Number> request = Flux.fromIterable(new Sequence(10000))
+        Flux<NumberProto.Number> request = Flux
+                .fromIterable(IntStream.range(0, NUMBER_OF_STREAM_ELEMENTS)::iterator)
+                .delayElements(Duration.ofMillis(SEQUENCE_DELAY_MILLIS))
                 .map(CancellationPropagationIntegrationTest::protoNum)
                 .doOnNext(n -> {
                     requestDidProduce.set(true);
@@ -229,7 +238,9 @@ public class CancellationPropagationIntegrationTest {
         AtomicBoolean requestWasCanceled = new AtomicBoolean(false);
         AtomicBoolean requestDidProduce = new AtomicBoolean(false);
 
-        Flux<NumberProto.Number> request = Flux.fromIterable(new Sequence(10000))
+        Flux<NumberProto.Number> request = Flux
+                .fromIterable(IntStream.range(0, NUMBER_OF_STREAM_ELEMENTS)::iterator)
+                .delayElements(Duration.ofMillis(SEQUENCE_DELAY_MILLIS))
                 .map(CancellationPropagationIntegrationTest::protoNum)
                 .doOnNext(x -> {
                     requestDidProduce.set(true);
@@ -260,7 +271,9 @@ public class CancellationPropagationIntegrationTest {
         AtomicBoolean requestWasCanceled = new AtomicBoolean(false);
         AtomicBoolean requestDidProduce = new AtomicBoolean(false);
 
-        Flux<NumberProto.Number> request = Flux.fromIterable(new Sequence(10000))
+        Flux<NumberProto.Number> request = Flux
+                .fromIterable(IntStream.range(0, NUMBER_OF_STREAM_ELEMENTS)::iterator)
+                .delayElements(Duration.ofMillis(SEQUENCE_DELAY_MILLIS))
                 .map(CancellationPropagationIntegrationTest::protoNum)
                 .doOnNext(n -> {
                     requestDidProduce.set(true);

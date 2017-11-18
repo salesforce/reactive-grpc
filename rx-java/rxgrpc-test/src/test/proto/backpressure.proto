@@ -11,6 +11,8 @@ service Numbers {
     rpc RequestPressure (stream Number) returns (Number) {}
     rpc ResponsePressure (google.protobuf.Empty) returns (stream Number) {}
     rpc TwoWayPressure (stream Number) returns (stream Number) {}
+    rpc TwoWayRequestPressure (stream Number) returns (stream Number) {}
+    rpc TwoWayResponsePressure (stream Number) returns (stream Number) {}
 }
 
 message Number {
