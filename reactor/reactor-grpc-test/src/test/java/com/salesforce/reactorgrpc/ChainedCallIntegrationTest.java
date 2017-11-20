@@ -27,7 +27,7 @@ public class ChainedCallIntegrationTest {
 
     @Before
     public void setupServer() throws Exception {
-        GreeterGrpc.GreeterImplBase svc = new ReactorGreeterGrpc.GreeterImplBase() {
+        ReactorGreeterGrpc.GreeterImplBase svc = new ReactorGreeterGrpc.GreeterImplBase() {
 
             @Override
             public Mono<HelloResponse> sayHello(Mono<HelloRequest> reactorRequest) {

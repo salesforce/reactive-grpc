@@ -7,6 +7,7 @@
 
 package com.salesforce.reactivegrpccommon;
 
+import com.google.common.base.CaseFormat;
 import com.google.common.base.Strings;
 import com.google.protobuf.DescriptorProtos.FileDescriptorProto;
 import com.google.protobuf.DescriptorProtos.FileOptions;
@@ -76,35 +77,40 @@ public abstract class ReactiveGrpcGenerator extends Generator {
         serviceContext.serviceName = serviceProto.getName();
         serviceContext.deprecated = serviceProto.getOptions() != null && serviceProto.getOptions().getDeprecated();
 
-        serviceContext.oneToOne = serviceProto.getMethodList().stream()
-                .filter(method -> !method.getClientStreaming() && !method.getServerStreaming())
-                .map(methodProto -> buildMethodContext(methodProto, typeMap))
-                .collect(Collectors.toList());
-
-        serviceContext.oneToMany = serviceProto.getMethodList().stream()
-                .filter(method -> !method.getClientStreaming() && method.getServerStreaming())
-                .map(methodProto -> buildMethodContext(methodProto, typeMap))
-                .collect(Collectors.toList());
-
-        serviceContext.manyToOne = serviceProto.getMethodList().stream()
-                .filter(method -> method.getClientStreaming() && !method.getServerStreaming())
-                .map(methodProto -> buildMethodContext(methodProto, typeMap))
-                .collect(Collectors.toList());
-
-        serviceContext.manyToMany = serviceProto.getMethodList().stream()
-                .filter(method -> method.getClientStreaming() && method.getServerStreaming())
-                .map(methodProto -> buildMethodContext(methodProto, typeMap))
-                .collect(Collectors.toList());
+        int i = 0;
+        for (MethodDescriptorProto methodProto : serviceProto.getMethodList()) {
+            MethodContext methodContext = buildMethodContext(methodProto, typeMap, i++);
+            serviceContext.methods.add(methodContext);
+        }
 
         return serviceContext;
     }
 
-    private MethodContext buildMethodContext(MethodDescriptorProto methodProto, ProtoTypeMap typeMap) {
+    private MethodContext buildMethodContext(MethodDescriptorProto methodProto, ProtoTypeMap typeMap, int methodNumber) {
         MethodContext methodContext = new MethodContext();
         methodContext.methodName = lowerCaseFirst(methodProto.getName());
+        methodContext.methodNumber = methodNumber;
         methodContext.inputType = typeMap.toJavaTypeName(methodProto.getInputType());
         methodContext.outputType = typeMap.toJavaTypeName(methodProto.getOutputType());
         methodContext.deprecated = methodProto.getOptions() != null && methodProto.getOptions().getDeprecated();
+        methodContext.isManyInput = methodProto.getClientStreaming();
+        methodContext.isManyOutput = methodProto.getServerStreaming();
+        if (!methodProto.getClientStreaming() && !methodProto.getServerStreaming()) {
+            methodContext.reactiveCallsMethodName = "oneToOne";
+            methodContext.grpcCallsMethodName = "asyncUnaryCall";
+        }
+        if (!methodProto.getClientStreaming() && methodProto.getServerStreaming()) {
+            methodContext.reactiveCallsMethodName = "oneToMany";
+            methodContext.grpcCallsMethodName = "asyncServerStreamingCall";
+        }
+        if (methodProto.getClientStreaming() && !methodProto.getServerStreaming()) {
+            methodContext.reactiveCallsMethodName = "manyToOne";
+            methodContext.grpcCallsMethodName = "asyncClientStreamingCall";
+        }
+        if (methodProto.getClientStreaming() && methodProto.getServerStreaming()) {
+            methodContext.reactiveCallsMethodName = "manyToMany";
+            methodContext.grpcCallsMethodName = "asyncBidiStreamingCall";
+        }
         return methodContext;
     }
 
@@ -140,44 +146,33 @@ public abstract class ReactiveGrpcGenerator extends Generator {
      * Template class for proto Service objects.
      */
     private class ServiceContext {
-        // CHECKSTYLE DISABLE VisibilityModifier FOR 11 LINES
+        // CHECKSTYLE DISABLE VisibilityModifier FOR 7 LINES
         public String fileName;
         public String protoName;
         public String packageName;
         public String className;
         public String serviceName;
         public boolean deprecated;
-
-        public List<MethodContext> oneToOne;
-        public List<MethodContext> oneToMany;
-        public List<MethodContext> manyToOne;
-        public List<MethodContext> manyToMany;
-
-        public boolean getHasOneToOne() {
-            return oneToOne != null && oneToOne.size() > 0;
-        }
-
-        public boolean getHasOneToMany() {
-            return oneToMany != null && oneToMany.size() > 0;
-        }
-
-        public boolean getHasManyToOne() {
-            return manyToOne != null && manyToOne.size() > 0;
-        }
-
-        public boolean getHasManyToMany() {
-            return manyToMany != null && manyToMany.size() > 0;
-        }
+        public List<MethodContext> methods = new ArrayList<>();
     }
 
     /**
      * Template class for proto RPC objects.
      */
     private class MethodContext {
-        // CHECKSTYLE DISABLE VisibilityModifier FOR 4 LINES
+        // CHECKSTYLE DISABLE VisibilityModifier FOR 9 LINES
         public String methodName;
         public String inputType;
         public String outputType;
         public boolean deprecated;
+        public boolean isManyInput;
+        public boolean isManyOutput;
+        public String reactiveCallsMethodName;
+        public String grpcCallsMethodName;
+        public int methodNumber;
+
+        public String methodNameUpperUnderscore() {
+            return CaseFormat.LOWER_CAMEL.to(CaseFormat.UPPER_UNDERSCORE, methodName);
+        }
     }
 }

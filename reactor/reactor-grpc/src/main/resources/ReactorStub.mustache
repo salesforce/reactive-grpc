@@ -2,100 +2,113 @@
 package {{packageName}};
 {{/packageName}}
 
-import com.salesforce.reactorgrpc.stub.*;
-import com.google.common.util.concurrent.Runnables;
-import io.grpc.Channel;
-import io.grpc.Status;
-import io.grpc.StatusRuntimeException;
-import io.grpc.stub.StreamObserver;
-import reactor.core.publisher.*;
+import static {{packageName}}.{{serviceName}}Grpc.getServiceDescriptor;
+import static io.grpc.stub.ServerCalls.asyncUnaryCall;
+import static io.grpc.stub.ServerCalls.asyncServerStreamingCall;
+import static io.grpc.stub.ServerCalls.asyncClientStreamingCall;
+import static io.grpc.stub.ServerCalls.asyncBidiStreamingCall;
 
-import java.util.function.BiConsumer;
-import java.util.function.Consumer;
-import java.util.function.Function;
 
-import com.salesforce.reactorgrpc.stub.ClientCalls;
-import com.salesforce.reactorgrpc.stub.ServerCalls;
-
-{{#deprecated}}@Deprecated{{/deprecated}}
+{{#deprecated}}@java.lang.Deprecated{{/deprecated}}
 @javax.annotation.Generated(
 value = "by ReactorGrpc generator",
 comments = "Source: {{protoName}}")
 public final class {{className}} {
     private {{className}}() {}
 
-    public static Reactor{{serviceName}}Stub newReactorStub(Channel channel) {
+    public static Reactor{{serviceName}}Stub newReactorStub(io.grpc.Channel channel) {
         return new Reactor{{serviceName}}Stub(channel);
     }
 
     public static final class Reactor{{serviceName}}Stub {
         private {{serviceName}}Grpc.{{serviceName}}Stub delegateStub;
 
-        private Reactor{{serviceName}}Stub(Channel channel) {
+        private Reactor{{serviceName}}Stub(io.grpc.Channel channel) {
             delegateStub = {{serviceName}}Grpc.newStub(channel);
         }
-        {{#oneToOne}}{{#deprecated}}@Deprecated{{/deprecated}}
-        public Mono<{{outputType}}> {{methodName}}(Mono<{{inputType}}> reactorRequest) {
-            return ClientCalls.oneToOne(reactorRequest, delegateStub::{{methodName}});
+        {{#methods}}
+        {{#deprecated}}@java.lang.Deprecated{{/deprecated}}
+        public {{#isManyOutput}}reactor.core.publisher.Flux{{/isManyOutput}}{{^isManyOutput}}reactor.core.publisher.Mono{{/isManyOutput}}<{{outputType}}> {{methodName}}({{#isManyInput}}reactor.core.publisher.Flux{{/isManyInput}}{{^isManyInput}}reactor.core.publisher.Mono{{/isManyInput}}<{{inputType}}> reactorRequest) {
+            return com.salesforce.reactorgrpc.stub.ClientCalls.{{reactiveCallsMethodName}}(reactorRequest, delegateStub::{{methodName}});
         }
-        {{/oneToOne}}
-        {{#oneToMany}}{{#deprecated}}@Deprecated{{/deprecated}}
-        public Flux<{{outputType}}> {{methodName}}(Mono<{{inputType}}> reactorRequest) {
-            return ClientCalls.oneToMany(reactorRequest, delegateStub::{{methodName}});
-        }
-        {{/oneToMany}}
-        {{#manyToOne}}{{#deprecated}}@Deprecated{{/deprecated}}
-        public Mono<{{outputType}}> {{methodName}}(Flux<{{inputType}}> reactorRequest) {
-            return ClientCalls.manyToOne(reactorRequest, delegateStub::{{methodName}});
-        }
-        {{/manyToOne}}
-        {{#manyToMany}}{{#deprecated}}@Deprecated{{/deprecated}}
-        public Flux<{{outputType}}> {{methodName}}(Flux<{{inputType}}> reactorRequest) {
-            return ClientCalls.manyToMany(reactorRequest, delegateStub::{{methodName}});
-        }
-        {{/manyToMany}}
+
+        {{/methods}}
     }
 
-    public static abstract class {{serviceName}}ImplBase extends {{serviceName}}Grpc.{{serviceName}}ImplBase {
-        {{#oneToOne}}{{#deprecated}}@Deprecated{{/deprecated}}
-        public Mono<{{outputType}}> {{methodName}}(Mono<{{inputType}}> request) {
-            throw new StatusRuntimeException(Status.UNIMPLEMENTED);
+    public static abstract class {{serviceName}}ImplBase implements io.grpc.BindableService {
+        {{#methods}}
+        {{#deprecated}}@java.lang.Deprecated{{/deprecated}}
+        public {{#isManyOutput}}reactor.core.publisher.Flux{{/isManyOutput}}{{^isManyOutput}}reactor.core.publisher.Mono{{/isManyOutput}}<{{outputType}}> {{methodName}}({{#isManyInput}}reactor.core.publisher.Flux{{/isManyInput}}{{^isManyInput}}reactor.core.publisher.Mono{{/isManyInput}}<{{inputType}}> request) {
+            throw new io.grpc.StatusRuntimeException(io.grpc.Status.UNIMPLEMENTED);
         }
 
-        @Override
-        public void {{methodName}}({{inputType}} request, StreamObserver<{{outputType}}> responseObserver) {
-            ServerCalls.oneToOne(request, responseObserver, this::{{methodName}});
+        {{/methods}}
+        @java.lang.Override public final io.grpc.ServerServiceDefinition bindService() {
+            return io.grpc.ServerServiceDefinition.builder(getServiceDescriptor())
+                    {{#methods}}
+                    .addMethod(
+                            {{packageName}}.{{serviceName}}Grpc.METHOD_{{methodNameUpperUnderscore}},
+                            {{grpcCallsMethodName}}(
+                                    new MethodHandlers<
+                                            {{inputType}},
+                                            {{outputType}}>(
+                                            this, METHODID_{{methodNameUpperUnderscore}})))
+                    {{/methods}}
+                    .build();
         }
-        {{/oneToOne}}
-        {{#oneToMany}}{{#deprecated}}@Deprecated{{/deprecated}}
-        public Flux<{{outputType}}> {{methodName}}(Mono<{{inputType}}> request) {
-            throw new StatusRuntimeException(Status.UNIMPLEMENTED);
-        }
-
-        @Override
-        public void {{methodName}}({{inputType}} request, StreamObserver<{{outputType}}> responseObserver) {
-            ServerCalls.oneToMany(request, responseObserver, this::{{methodName}});
-        }
-        {{/oneToMany}}
-        {{#manyToOne}}{{#deprecated}}@Deprecated{{/deprecated}}
-        public Mono<{{outputType}}> {{methodName}}(Flux<{{inputType}}> request) {
-            throw new StatusRuntimeException(Status.UNIMPLEMENTED);
-        }
-
-        @Override
-        public StreamObserver<{{inputType}}> {{methodName}}(StreamObserver<{{outputType}}> responseObserver) {
-            return ServerCalls.manyToOne(responseObserver, this::{{methodName}});
-        }
-        {{/manyToOne}}
-        {{#manyToMany}}{{#deprecated}}@Deprecated{{/deprecated}}
-        public Flux<{{outputType}}> {{methodName}}(Flux<{{inputType}}> request) {
-            throw new StatusRuntimeException(Status.UNIMPLEMENTED);
-        }
-
-        @Override
-        public StreamObserver<{{inputType}}> {{methodName}}(StreamObserver<{{outputType}}> responseObserver) {
-            return ServerCalls.manyToMany(responseObserver, this::{{methodName}});
-        }
-        {{/manyToMany}}
     }
+
+    {{#methods}}
+    private static final int METHODID_{{methodNameUpperUnderscore}} = {{methodNumber}};
+    {{/methods}}
+
+    private static final class MethodHandlers<Req, Resp> implements
+            io.grpc.stub.ServerCalls.UnaryMethod<Req, Resp>,
+            io.grpc.stub.ServerCalls.ServerStreamingMethod<Req, Resp>,
+            io.grpc.stub.ServerCalls.ClientStreamingMethod<Req, Resp>,
+            io.grpc.stub.ServerCalls.BidiStreamingMethod<Req, Resp> {
+        private final {{serviceName}}ImplBase serviceImpl;
+        private final int methodId;
+
+        MethodHandlers({{serviceName}}ImplBase serviceImpl, int methodId) {
+            this.serviceImpl = serviceImpl;
+            this.methodId = methodId;
+        }
+
+        @java.lang.Override
+        @java.lang.SuppressWarnings("unchecked")
+        public void invoke(Req request, io.grpc.stub.StreamObserver<Resp> responseObserver) {
+            switch (methodId) {
+                {{#methods}}
+                {{^isManyInput}}
+                case METHODID_{{methodNameUpperUnderscore}}:
+                    com.salesforce.reactorgrpc.stub.ServerCalls.{{reactiveCallsMethodName}}(({{inputType}}) request,
+                            (io.grpc.stub.StreamObserver<{{outputType}}>) responseObserver,
+                            serviceImpl::{{methodName}});
+                    break;
+                {{/isManyInput}}
+                {{/methods}}
+                default:
+                    throw new java.lang.AssertionError();
+            }
+        }
+
+        @java.lang.Override
+        @java.lang.SuppressWarnings("unchecked")
+        public io.grpc.stub.StreamObserver<Req> invoke(io.grpc.stub.StreamObserver<Resp> responseObserver) {
+            switch (methodId) {
+                {{#methods}}
+                {{#isManyInput}}
+                case METHODID_{{methodNameUpperUnderscore}}:
+                    return (io.grpc.stub.StreamObserver<Req>) com.salesforce.reactorgrpc.stub.ServerCalls.{{reactiveCallsMethodName}}(
+                            (io.grpc.stub.StreamObserver<{{outputType}}>) responseObserver,
+                            serviceImpl::{{methodName}});
+                {{/isManyInput}}
+                {{/methods}}
+                default:
+                    throw new java.lang.AssertionError();
+            }
+        }
+    }
+
 }
