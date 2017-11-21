@@ -37,7 +37,7 @@ public class ConcurrentRequestIntegrationTest {
 
     @BeforeClass
     public static void setupServer() throws Exception {
-        GreeterGrpc.GreeterImplBase svc = new RxGreeterGrpc.GreeterImplBase() {
+        RxGreeterGrpc.GreeterImplBase svc = new RxGreeterGrpc.GreeterImplBase() {
 
             @Override
             public Single<HelloResponse> sayHello(Single<HelloRequest> rxRequest) {

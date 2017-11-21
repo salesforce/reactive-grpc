@@ -26,7 +26,7 @@ After installing the plugin, RxGrpc service stubs will be generated along with y
   methods.
   
   ```
-  GreeterGrpc.GreeterImplBase svc = new RxGreeterGrpc.GreeterImplBase() { 
+  RxGreeterGrpc.GreeterImplBase svc = new RxGreeterGrpc.GreeterImplBase() {
       @Override
       public Single<HelloResponse> sayHello(Single<HelloRequest> rxRequest) {
           return rxRequest.map(protoRequest -> greet("Hello", protoRequest));

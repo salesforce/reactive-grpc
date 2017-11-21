@@ -21,7 +21,7 @@ public class UnimplementedMethodIntegrationTest {
 
     @BeforeClass
     public static void setupServer() throws Exception {
-        GreeterGrpc.GreeterImplBase svc = new ReactorGreeterGrpc.GreeterImplBase() {
+        ReactorGreeterGrpc.GreeterImplBase svc = new ReactorGreeterGrpc.GreeterImplBase() {
             // Don't implement anything
         };
 

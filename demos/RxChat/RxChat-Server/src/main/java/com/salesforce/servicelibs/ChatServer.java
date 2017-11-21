@@ -35,7 +35,7 @@ public class ChatServer {
     }
 
     @Bean
-    public ChatGrpc.ChatImplBase chatImpl() {
+    public RxChatGrpc.ChatImplBase chatImpl() {
         return new ChatImpl();
     }
 }

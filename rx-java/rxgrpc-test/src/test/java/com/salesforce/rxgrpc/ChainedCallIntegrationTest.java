@@ -27,7 +27,7 @@ public class ChainedCallIntegrationTest {
 
     @Before
     public void setupServer() throws Exception {
-        GreeterGrpc.GreeterImplBase svc = new RxGreeterGrpc.GreeterImplBase() {
+        RxGreeterGrpc.GreeterImplBase svc = new RxGreeterGrpc.GreeterImplBase() {
 
             @Override
             public Single<HelloResponse> sayHello(Single<HelloRequest> rxRequest) {
