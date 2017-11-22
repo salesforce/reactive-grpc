@@ -20,11 +20,6 @@
     <artifactId>ReactorChat</artifactId>
     <packaging>pom</packaging>
 
-    <properties>
-        <maven.deploy.skip>true</maven.deploy.skip>
-        <skipNexusStagingDeployMojo>true</skipNexusStagingDeployMojo>
-    </properties>
-
     <modules>
         <module>ReactorChat-Client</module>
         <module>ReactorChat-Server</module>
