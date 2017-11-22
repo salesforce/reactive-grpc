@@ -16,7 +16,7 @@ import io.grpc.stub.ClientResponseObserver;
 /**
  * CancellableStreamObserver wraps a {@link io.grpc.stub.StreamObserver} and invokes an onCanceledHandler if
  * {@link io.grpc.stub.StreamObserver#onError(Throwable)} is invoked with a {@link StatusException} or
- * {@link StatusRuntimeException} of type {@link Status.Code#CANCELLED}. This class is used to hook gRPC server
+ * {@link StatusRuntimeException} of type {@code Status.Code.CANCELLED}. This class is used to hook gRPC server
  * cancellation events.
  *
  * @param <TRequest>
