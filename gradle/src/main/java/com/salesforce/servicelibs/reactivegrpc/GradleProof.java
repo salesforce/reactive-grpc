@@ -4,9 +4,9 @@ import io.grpc.ManagedChannel;
 import io.grpc.Server;
 import io.grpc.inprocess.InProcessChannelBuilder;
 import io.grpc.inprocess.InProcessServerBuilder;
-import io.grpc.stub.StreamObserver;
+import io.reactivex.Single;
 
-public class GradleProof extends GreeterGrpc.GreeterImplBase {
+public class GradleProof extends RxGreeterGrpc.GreeterImplBase {
     public static void main(String[] args) throws Exception {
         GradleProof proof = new GradleProof();
         try {
@@ -48,8 +48,10 @@ public class GradleProof extends GreeterGrpc.GreeterImplBase {
     }
 
     @Override
-    public void sayHello(HelloRequest request, StreamObserver<HelloResponse> responseObserver) {
-        responseObserver.onNext(HelloResponse.newBuilder().setMessage("Hello " + request.getName()).build());
-        responseObserver.onCompleted();
+    public Single<HelloResponse> sayHello(Single<HelloRequest> request) {
+        return request
+                .map(HelloRequest::getName)
+                .map(name -> "Hello " + name)
+                .map(message -> HelloResponse.newBuilder().setMessage(message).build());
     }
 }

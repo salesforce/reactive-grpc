@@ -37,6 +37,25 @@
                     <suppressionsLocation>../../checkstyle_ignore.xml</suppressionsLocation>
                 </configuration>
             </plugin>
+
+            <plugin>
+                <groupId>org.springframework.boot</groupId>
+                <artifactId>spring-boot-maven-plugin</artifactId>
+                <version>1.5.8.RELEASE</version>
+                <executions>
+                    <execution>
+                        <goals>
+                            <goal>repackage</goal>
+                        </goals>
+                    </execution>
+                </executions>
+                <configuration>
+                    <mainClass>com.salesforce.reactorgrpc.ReactorGrpcGenerator</mainClass>
+                    <layout>JAR</layout>
+                    <classifier>jdk8</classifier>
+                    <executable>true</executable>
+                </configuration>
+            </plugin>
         </plugins>
     </build>
 </project>
