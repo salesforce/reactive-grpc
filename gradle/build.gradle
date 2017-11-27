@@ -2,9 +2,13 @@ group 'com.salesforce.servicelibs'
 version '0.7.1-SNAPSHOT'
 
 apply plugin: 'java'
+apply plugin: "idea"
 apply plugin: 'com.google.protobuf'
 
 sourceCompatibility = 1.8
+
+def grpcVersion = '1.7.0'
+def protobufVersion = '3.4.0'
 
 repositories {
     mavenCentral()
@@ -20,9 +24,9 @@ buildscript {
 }
 
 dependencies {
-    compile 'com.google.protobuf:protobuf-java:3.4.0'
-    compile 'io.grpc:grpc-stub:1.7.0'
-    compile 'io.grpc:grpc-protobuf:1.7.0'
+    compile "com.google.protobuf:protobuf-java:${protobufVersion}"
+    compile "io.grpc:grpc-stub:${grpcVersion}"
+    compile "io.grpc:grpc-protobuf:${grpcVersion}"
 
     testCompile group: 'junit', name: 'junit', version: '4.12'
 }
@@ -30,14 +34,14 @@ dependencies {
 protobuf {
     protoc {
         // The artifact spec for the Protobuf Compiler
-        artifact = 'com.google.protobuf:protoc:3.4.0'
+        artifact = "com.google.protobuf:protoc:${protobufVersion}"
     }
     plugins {
         // Optional: an artifact spec for a protoc plugin, with "grpc" as
         // the identifier, which can be referred to in the "plugins"
         // container of the "generateProtoTasks" closure.
         grpc {
-            artifact = 'io.grpc:protoc-gen-grpc-java:1.7.0'
+            artifact = "io.grpc:protoc-gen-grpc-java:${grpcVersion}"
         }
     }
     generateProtoTasks {
@@ -48,5 +52,14 @@ protobuf {
             // NamedDomainObjectContainer binds the methods.
             grpc { }
         }
+    }
+}
+
+sourceSets.main.java.srcDir new File(buildDir, 'generated/source/proto/main/grpc')
+sourceSets.main.java.srcDir new File(buildDir, 'generated/source/proto/main/java')
+idea {
+    module {
+        generatedSourceDirs += file("build/generated/source/proto/main/grpc")
+        generatedSourceDirs += file("build/generated/source/proto/main/java")
     }
 }
