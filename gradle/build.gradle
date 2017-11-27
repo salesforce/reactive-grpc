@@ -2,6 +2,7 @@ group 'com.salesforce.servicelibs'
 version '0.7.1-SNAPSHOT'
 
 apply plugin: 'java'
+apply plugin: 'com.google.protobuf'
 
 sourceCompatibility = 1.8
 
@@ -9,6 +10,43 @@ repositories {
     mavenCentral()
 }
 
+buildscript {
+    repositories {
+        maven { url "https://plugins.gradle.org/m2/" }
+    }
+    dependencies {
+        classpath 'com.google.protobuf:protobuf-gradle-plugin:0.8.3'
+    }
+}
+
 dependencies {
+    compile 'com.google.protobuf:protobuf-java:3.4.0'
+    compile 'io.grpc:grpc-stub:1.7.0'
+    compile 'io.grpc:grpc-protobuf:1.7.0'
+
     testCompile group: 'junit', name: 'junit', version: '4.12'
+}
+
+protobuf {
+    protoc {
+        // The artifact spec for the Protobuf Compiler
+        artifact = 'com.google.protobuf:protoc:3.4.0'
+    }
+    plugins {
+        // Optional: an artifact spec for a protoc plugin, with "grpc" as
+        // the identifier, which can be referred to in the "plugins"
+        // container of the "generateProtoTasks" closure.
+        grpc {
+            artifact = 'io.grpc:protoc-gen-grpc-java:1.7.0'
+        }
+    }
+    generateProtoTasks {
+        ofSourceSet('main')*.plugins {
+            // Apply the "grpc" plugin whose spec is defined above, without
+            // options.  Note the braces cannot be omitted, otherwise the
+            // plugin will not be added. This is because of the implicit way
+            // NamedDomainObjectContainer binds the methods.
+            grpc { }
+        }
+    }
 }
