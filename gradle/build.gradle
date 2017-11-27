@@ -11,6 +11,7 @@ def grpcVersion = '1.7.0'
 def protobufVersion = '3.4.0'
 
 repositories {
+    mavenLocal()
     mavenCentral()
 }
 
@@ -37,20 +38,17 @@ protobuf {
         artifact = "com.google.protobuf:protoc:${protobufVersion}"
     }
     plugins {
-        // Optional: an artifact spec for a protoc plugin, with "grpc" as
-        // the identifier, which can be referred to in the "plugins"
-        // container of the "generateProtoTasks" closure.
         grpc {
             artifact = "io.grpc:protoc-gen-grpc-java:${grpcVersion}"
+        }
+        rxgrpc {
+            artifact = "com.salesforce.servicelibs:rxgrpc:0.7.1-SNAPSHOT:jdk8@jar"
         }
     }
     generateProtoTasks {
         ofSourceSet('main')*.plugins {
-            // Apply the "grpc" plugin whose spec is defined above, without
-            // options.  Note the braces cannot be omitted, otherwise the
-            // plugin will not be added. This is because of the implicit way
-            // NamedDomainObjectContainer binds the methods.
             grpc { }
+            rxgrpc {}
         }
     }
 }
