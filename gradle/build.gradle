@@ -1,0 +1,74 @@
+group 'com.salesforce.servicelibs'
+version '0.7.1-SNAPSHOT'
+
+apply plugin: 'java'
+apply plugin: "idea"
+apply plugin: 'com.google.protobuf'
+
+sourceCompatibility = 1.8
+
+def reactiveGrpcVersion = '0.7.1-SNAPSHOT'
+def grpcVersion = '1.7.0'
+def protobufVersion = '3.4.0'
+
+repositories {
+    mavenLocal()
+    mavenCentral()
+}
+
+buildscript {
+    repositories {
+        maven { url "https://plugins.gradle.org/m2/" }
+    }
+    dependencies {
+        classpath 'com.google.protobuf:protobuf-gradle-plugin:0.8.3'
+    }
+}
+
+dependencies {
+    compile "com.google.protobuf:protobuf-java:${protobufVersion}"
+    compile "io.grpc:grpc-stub:${grpcVersion}"
+    compile "io.grpc:grpc-protobuf:${grpcVersion}"
+    compile "com.salesforce.servicelibs:rxgrpc-stub:${reactiveGrpcVersion}"
+    compile "com.salesforce.servicelibs:reactor-grpc-stub:${reactiveGrpcVersion}"
+
+    testCompile group: 'junit', name: 'junit', version: '4.12'
+}
+
+protobuf {
+    protoc {
+        // The artifact spec for the Protobuf Compiler
+        artifact = "com.google.protobuf:protoc:${protobufVersion}"
+    }
+    plugins {
+        grpc {
+            artifact = "io.grpc:protoc-gen-grpc-java:${grpcVersion}"
+        }
+        rxgrpc {
+            artifact = "com.salesforce.servicelibs:rxgrpc:${reactiveGrpcVersion}:jdk8@jar"
+        }
+        reactor {
+            artifact = "com.salesforce.servicelibs:reactor-grpc:${reactiveGrpcVersion}:jdk8@jar"
+        }
+    }
+    generateProtoTasks {
+        ofSourceSet('main')*.plugins {
+            grpc { }
+            rxgrpc {}
+            reactor {}
+        }
+    }
+}
+
+sourceSets.main.java.srcDir new File(buildDir, 'generated/source/proto/main/grpc')
+sourceSets.main.java.srcDir new File(buildDir, 'generated/source/proto/main/rxgrpc')
+sourceSets.main.java.srcDir new File(buildDir, 'generated/source/proto/main/reactor')
+sourceSets.main.java.srcDir new File(buildDir, 'generated/source/proto/main/java')
+idea {
+    module {
+        generatedSourceDirs += file("build/generated/source/proto/main/grpc")
+        generatedSourceDirs += file("build/generated/source/proto/main/rxgrpc")
+        generatedSourceDirs += file("build/generated/source/proto/main/reactor")
+        generatedSourceDirs += file("build/generated/source/proto/main/java")
+    }
+}
