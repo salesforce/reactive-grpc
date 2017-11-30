@@ -2,8 +2,9 @@ Overview
 ========
 Reactor-gRPC is a set of gRPC bindings for reactive programming with [Reactor](http://projectreactor.io/).
 
-Usage
+Installation
 =====
+### Maven
 To use Reactor-gRPC with the `protobuf-maven-plugin`, add a [custom protoc plugin configuration section](https://www.xolstice.org/protobuf-maven-plugin/examples/protoc-plugin.html).
 ```xml
 <protocPlugins>
@@ -17,6 +18,34 @@ To use Reactor-gRPC with the `protobuf-maven-plugin`, add a [custom protoc plugi
 </protocPlugins>
 ```
 
+### Gradle
+To use RxGrpc with the `protobuf-gradle-plugin`, add a RxGrpc to the protobuf `plugins` section.
+```scala
+protobuf {
+    protoc {
+        // The artifact spec for the Protobuf Compiler
+        artifact = "com.google.protobuf:protoc:${protobufVersion}"
+    }
+    plugins {
+        grpc {
+            artifact = "io.grpc:protoc-gen-grpc-java:${grpcVersion}"
+        }
+        reactor {
+            artifact = "com.salesforce.servicelibs:reactor-grpc:${reactiveGrpcVersion}:jdk8@jar"
+        }
+    }
+    generateProtoTasks {
+        ofSourceSet("main")*.plugins {
+            grpc { }
+            reactor {}
+        }
+    }
+}
+```
+*At this time, RxGrpc with Gradle only supports bash-based environments. Windows users will need to build using Windows Subsystem for Linux (win 10), Gitbash, or Cygwin.*
+
+Usage
+=====
 After installing the plugin, Reactor-gRPC service stubs will be generated along with your gRPC service stubs.
   
 * To implement a service using an Reactor-gRPC service, subclass `Reactor[Name]Grpc.[Name]ImplBase` and override the Reactor-based
