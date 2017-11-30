@@ -10,8 +10,8 @@ back-pressure model.
 
 Reactive gRPC supports the following reactive programming models:
 
-* [RxJava 2](https://github.com/ReactiveX/RxJava)
-* [Spring Reactor](https://projectreactor.io/)
+* [RxJava 2](https://github.com/salesforce/reactive-grpc/tree/master/rx-java)
+* [Spring Reactor](https://github.com/salesforce/reactive-grpc/tree/master/reactor)
 * (Eventually) [Java9 Flow](https://community.oracle.com/docs/DOC-1006738)
 
 # Usage
