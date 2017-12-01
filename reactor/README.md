@@ -19,7 +19,7 @@ To use Reactor-gRPC with the `protobuf-maven-plugin`, add a [custom protoc plugi
 ```
 
 ### Gradle
-To use RxGrpc with the `protobuf-gradle-plugin`, add a RxGrpc to the protobuf `plugins` section.
+To use Reactor-gRPC with the `protobuf-gradle-plugin`, add the reactor-grpc plugin to the protobuf `plugins` section.
 ```scala
 protobuf {
     protoc {
@@ -42,7 +42,7 @@ protobuf {
     }
 }
 ```
-*At this time, RxGrpc with Gradle only supports bash-based environments. Windows users will need to build using Windows Subsystem for Linux (win 10), Gitbash, or Cygwin.*
+*At this time, Reactor-gRPC with Gradle only supports bash-based environments. Windows users will need to build using Windows Subsystem for Linux (win 10), Gitbash, or Cygwin.*
 
 Usage
 =====
