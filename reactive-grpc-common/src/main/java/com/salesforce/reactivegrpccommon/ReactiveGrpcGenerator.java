@@ -7,7 +7,6 @@
 
 package com.salesforce.reactivegrpccommon;
 
-import com.google.common.base.CaseFormat;
 import com.google.common.base.Strings;
 import com.google.protobuf.DescriptorProtos.FileDescriptorProto;
 import com.google.protobuf.DescriptorProtos.FileOptions;
@@ -172,7 +171,15 @@ public abstract class ReactiveGrpcGenerator extends Generator {
         public int methodNumber;
 
         public String methodNameUpperUnderscore() {
-            return CaseFormat.LOWER_CAMEL.to(CaseFormat.UPPER_UNDERSCORE, methodName);
+            StringBuilder s = new StringBuilder();
+            for (int i = 0; i < methodName.length(); i++) {
+                char c = methodName.charAt(i);
+                s.append(Character.toUpperCase(c));
+                if ((i < methodName.length() - 1) && Character.isLowerCase(c) && Character.isUpperCase(methodName.charAt(i + 1))) {
+                    s.append('_');
+                }
+            }
+            return s.toString();
         }
     }
 }
