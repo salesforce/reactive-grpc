@@ -30,8 +30,7 @@ public class ReactorChatServer {
     @Bean(initMethod = "start")
     public GrpcServerHost grpcServerHost(@Value("${port}") int port) {
         logger.info("Listening for gRPC on port " + port);
-        GrpcServerHost host = new GrpcServerHost(port);
-        return host;
+        return new GrpcServerHost(port);
     }
 
     @Bean

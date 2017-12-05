@@ -46,6 +46,7 @@
         <module>reactor/reactor-grpc-test</module>
         <module>demos/RxChat</module>
         <module>demos/ReactorChat</module>
+        <module>demos/ReactorChat-Kotlin</module>
     </modules>
 
     <properties>
