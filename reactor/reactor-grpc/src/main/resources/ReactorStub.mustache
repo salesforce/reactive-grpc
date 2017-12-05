@@ -9,7 +9,9 @@ import static io.grpc.stub.ServerCalls.asyncClientStreamingCall;
 import static io.grpc.stub.ServerCalls.asyncBidiStreamingCall;
 
 
-{{#deprecated}}@java.lang.Deprecated{{/deprecated}}
+{{#deprecated}}
+@java.lang.Deprecated
+{{/deprecated}}
 @javax.annotation.Generated(
 value = "by ReactorGrpc generator",
 comments = "Source: {{protoName}}")
@@ -20,14 +22,23 @@ public final class {{className}} {
         return new Reactor{{serviceName}}Stub(channel);
     }
 
+    {{#javaDoc}}
+    {{{javaDoc}}}
+    {{/javaDoc}}
     public static final class Reactor{{serviceName}}Stub {
         private {{serviceName}}Grpc.{{serviceName}}Stub delegateStub;
 
         private Reactor{{serviceName}}Stub(io.grpc.Channel channel) {
             delegateStub = {{serviceName}}Grpc.newStub(channel);
         }
+
         {{#methods}}
-        {{#deprecated}}@java.lang.Deprecated{{/deprecated}}
+            {{#javaDoc}}
+        {{{javaDoc}}}
+            {{/javaDoc}}
+            {{#deprecated}}
+        @java.lang.Deprecated
+            {{/deprecated}}
         public {{#isManyOutput}}reactor.core.publisher.Flux{{/isManyOutput}}{{^isManyOutput}}reactor.core.publisher.Mono{{/isManyOutput}}<{{outputType}}> {{methodName}}({{#isManyInput}}reactor.core.publisher.Flux{{/isManyInput}}{{^isManyInput}}reactor.core.publisher.Mono{{/isManyInput}}<{{inputType}}> reactorRequest) {
             return com.salesforce.reactorgrpc.stub.ClientCalls.{{reactiveCallsMethodName}}(reactorRequest, delegateStub::{{methodName}});
         }
@@ -35,9 +46,18 @@ public final class {{className}} {
         {{/methods}}
     }
 
+    {{#javaDoc}}
+    {{{javaDoc}}}
+    {{/javaDoc}}
     public static abstract class {{serviceName}}ImplBase implements io.grpc.BindableService {
+
         {{#methods}}
-        {{#deprecated}}@java.lang.Deprecated{{/deprecated}}
+            {{#javaDoc}}
+        {{{javaDoc}}}
+            {{/javaDoc}}
+            {{#deprecated}}
+        @java.lang.Deprecated
+            {{/deprecated}}
         public {{#isManyOutput}}reactor.core.publisher.Flux{{/isManyOutput}}{{^isManyOutput}}reactor.core.publisher.Mono{{/isManyOutput}}<{{outputType}}> {{methodName}}({{#isManyInput}}reactor.core.publisher.Flux{{/isManyInput}}{{^isManyInput}}reactor.core.publisher.Mono{{/isManyInput}}<{{inputType}}> request) {
             throw new io.grpc.StatusRuntimeException(io.grpc.Status.UNIMPLEMENTED);
         }

@@ -9,7 +9,9 @@ import static io.grpc.stub.ServerCalls.asyncClientStreamingCall;
 import static io.grpc.stub.ServerCalls.asyncBidiStreamingCall;
 
 
-{{#deprecated}}@java.lang.Deprecated{{/deprecated}}
+{{#deprecated}}
+@java.lang.Deprecated
+{{/deprecated}}
 @javax.annotation.Generated(
 value = "by RxGrpc generator",
 comments = "Source: {{protoName}}")
@@ -20,14 +22,23 @@ public final class {{className}} {
         return new Rx{{serviceName}}Stub(channel);
     }
 
+    {{#javaDoc}}
+    {{{javaDoc}}}
+    {{/javaDoc}}
     public static final class Rx{{serviceName}}Stub {
         private {{serviceName}}Grpc.{{serviceName}}Stub delegateStub;
 
         private Rx{{serviceName}}Stub(io.grpc.Channel channel) {
             delegateStub = {{serviceName}}Grpc.newStub(channel);
         }
+
         {{#methods}}
-        {{#deprecated}}@java.lang.Deprecated{{/deprecated}}
+            {{#javaDoc}}
+        {{{javaDoc}}}
+            {{/javaDoc}}
+            {{#deprecated}}
+        @java.lang.Deprecated
+            {{/deprecated}}
         public {{#isManyOutput}}io.reactivex.Flowable{{/isManyOutput}}{{^isManyOutput}}io.reactivex.Single{{/isManyOutput}}<{{outputType}}> {{methodName}}({{#isManyInput}}io.reactivex.Flowable{{/isManyInput}}{{^isManyInput}}io.reactivex.Single{{/isManyInput}}<{{inputType}}> rxRequest) {
             return com.salesforce.rxgrpc.stub.ClientCalls.{{reactiveCallsMethodName}}(rxRequest, delegateStub::{{methodName}});
         }
@@ -35,9 +46,18 @@ public final class {{className}} {
         {{/methods}}
     }
 
+    {{#javaDoc}}
+    {{{javaDoc}}}
+    {{/javaDoc}}
     public static abstract class {{serviceName}}ImplBase implements io.grpc.BindableService {
+
         {{#methods}}
-        {{#deprecated}}@java.lang.Deprecated{{/deprecated}}
+            {{#javaDoc}}
+        {{{javaDoc}}}
+            {{/javaDoc}}
+            {{#deprecated}}
+        @java.lang.Deprecated
+            {{/deprecated}}
         public {{#isManyOutput}}io.reactivex.Flowable{{/isManyOutput}}{{^isManyOutput}}io.reactivex.Single{{/isManyOutput}}<{{outputType}}> {{methodName}}({{#isManyInput}}io.reactivex.Flowable{{/isManyInput}}{{^isManyInput}}io.reactivex.Single{{/isManyInput}}<{{inputType}}> request) {
             throw new io.grpc.StatusRuntimeException(io.grpc.Status.UNIMPLEMENTED);
         }

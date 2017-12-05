@@ -12,22 +12,36 @@ import com.google.protobuf.DescriptorProtos.FileDescriptorProto;
 import com.google.protobuf.DescriptorProtos.FileOptions;
 import com.google.protobuf.DescriptorProtos.MethodDescriptorProto;
 import com.google.protobuf.DescriptorProtos.ServiceDescriptorProto;
+import com.google.protobuf.DescriptorProtos.SourceCodeInfo.Location;
 import com.google.protobuf.compiler.PluginProtos;
 import com.salesforce.jprotoc.Generator;
 import com.salesforce.jprotoc.GeneratorException;
 import com.salesforce.jprotoc.ProtoTypeMap;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
+
+import static com.google.common.html.HtmlEscapers.htmlEscaper;
 
 /**
  * Abstract class for protoc generators generating Reactive Streams bindings for gRPC.
  */
 public abstract class ReactiveGrpcGenerator extends Generator {
 
+    private static final int METHOD_NUMBER_OF_PATHS = 4;
+
     protected abstract String getClassPrefix();
+
+    private String getServiceJavaDocPrefix() {
+        return "    ";
+    }
+
+    private String getMethodJavaDocPrefix() {
+        return "        ";
+    }
 
     @Override
     public Stream<PluginProtos.CodeGeneratorResponse.File> generate(PluginProtos.CodeGeneratorRequest request) throws GeneratorException {
@@ -45,14 +59,19 @@ public abstract class ReactiveGrpcGenerator extends Generator {
     private List<ServiceContext> findServices(List<FileDescriptorProto> protos, ProtoTypeMap typeMap) {
         List<ServiceContext> contexts = new ArrayList<>();
 
-        for (FileDescriptorProto fileProto : protos) {
-            for (ServiceDescriptorProto serviceProto : fileProto.getServiceList()) {
-                ServiceContext serviceContext = buildServiceContext(serviceProto, typeMap);
-                serviceContext.protoName = fileProto.getName();
-                serviceContext.packageName = extractPackageName(fileProto);
-                contexts.add(serviceContext);
-            }
-        }
+        protos.forEach(fileProto -> {
+            List<Location> locations = fileProto.getSourceCodeInfo().getLocationList();
+            locations.stream()
+                    .filter(location -> location.getPathCount() == 2 && location.getPath(0) == FileDescriptorProto.SERVICE_FIELD_NUMBER)
+                    .forEach(location -> {
+                        int serviceNumber = location.getPath(1);
+                        ServiceContext serviceContext = buildServiceContext(fileProto.getService(serviceNumber), typeMap, locations, serviceNumber);
+                        serviceContext.javaDoc = getJavaDoc(getComments(location), getServiceJavaDocPrefix());
+                        serviceContext.protoName = fileProto.getName();
+                        serviceContext.packageName = extractPackageName(fileProto);
+                        contexts.add(serviceContext);
+                    });
+        });
 
         return contexts;
     }
@@ -69,26 +88,31 @@ public abstract class ReactiveGrpcGenerator extends Generator {
         return Strings.nullToEmpty(proto.getPackage());
     }
 
-    private ServiceContext buildServiceContext(ServiceDescriptorProto serviceProto, ProtoTypeMap typeMap) {
+    private ServiceContext buildServiceContext(ServiceDescriptorProto serviceProto, ProtoTypeMap typeMap, List<Location> locations, int serviceNumber) {
         ServiceContext serviceContext = new ServiceContext();
         serviceContext.fileName = getClassPrefix() + serviceProto.getName() + "Grpc.java";
         serviceContext.className = getClassPrefix() + serviceProto.getName() + "Grpc";
         serviceContext.serviceName = serviceProto.getName();
         serviceContext.deprecated = serviceProto.getOptions() != null && serviceProto.getOptions().getDeprecated();
 
-        int i = 0;
-        for (MethodDescriptorProto methodProto : serviceProto.getMethodList()) {
-            MethodContext methodContext = buildMethodContext(methodProto, typeMap, i++);
-            serviceContext.methods.add(methodContext);
-        }
-
+        locations.stream()
+                .filter(location -> location.getPathCount() == METHOD_NUMBER_OF_PATHS &&
+                        location.getPath(0) == FileDescriptorProto.SERVICE_FIELD_NUMBER &&
+                        location.getPath(1) == serviceNumber &&
+                        location.getPath(2) == ServiceDescriptorProto.METHOD_FIELD_NUMBER)
+                .forEach(location -> {
+                    int methodNumber = location.getPath(METHOD_NUMBER_OF_PATHS - 1);
+                    MethodContext methodContext = buildMethodContext(serviceProto.getMethod(methodNumber), typeMap);
+                    methodContext.methodNumber = methodNumber;
+                    methodContext.javaDoc = getJavaDoc(getComments(location), getMethodJavaDocPrefix());
+                    serviceContext.methods.add(methodContext);
+                });
         return serviceContext;
     }
 
-    private MethodContext buildMethodContext(MethodDescriptorProto methodProto, ProtoTypeMap typeMap, int methodNumber) {
+    private MethodContext buildMethodContext(MethodDescriptorProto methodProto, ProtoTypeMap typeMap) {
         MethodContext methodContext = new MethodContext();
         methodContext.methodName = lowerCaseFirst(methodProto.getName());
-        methodContext.methodNumber = methodNumber;
         methodContext.inputType = typeMap.toJavaTypeName(methodProto.getInputType());
         methodContext.outputType = typeMap.toJavaTypeName(methodProto.getOutputType());
         methodContext.deprecated = methodProto.getOptions() != null && methodProto.getOptions().getDeprecated();
@@ -141,17 +165,36 @@ public abstract class ReactiveGrpcGenerator extends Generator {
         }
     }
 
+    private String getComments(Location location) {
+        return location.getLeadingComments().isEmpty() ? location.getTrailingComments() : location.getLeadingComments();
+    }
+
+    private String getJavaDoc(String comments, String prefix) {
+        if (!comments.isEmpty()) {
+            StringBuilder builder = new StringBuilder("/**\n")
+                    .append(prefix).append(" * <pre>\n");
+            Arrays.stream(htmlEscaper().escape(comments).split("\n"))
+                    .forEach(line -> builder.append(prefix).append(" * ").append(line).append("\n"));
+            builder
+                    .append(prefix).append(" * <pre>\n")
+                    .append(prefix).append(" */");
+            return builder.toString();
+        }
+        return null;
+    }
+
     /**
      * Template class for proto Service objects.
      */
     private class ServiceContext {
-        // CHECKSTYLE DISABLE VisibilityModifier FOR 7 LINES
+        // CHECKSTYLE DISABLE VisibilityModifier FOR 8 LINES
         public String fileName;
         public String protoName;
         public String packageName;
         public String className;
         public String serviceName;
         public boolean deprecated;
+        public String javaDoc;
         public List<MethodContext> methods = new ArrayList<>();
     }
 
@@ -159,7 +202,7 @@ public abstract class ReactiveGrpcGenerator extends Generator {
      * Template class for proto RPC objects.
      */
     private class MethodContext {
-        // CHECKSTYLE DISABLE VisibilityModifier FOR 9 LINES
+        // CHECKSTYLE DISABLE VisibilityModifier FOR 10 LINES
         public String methodName;
         public String inputType;
         public String outputType;
@@ -169,6 +212,7 @@ public abstract class ReactiveGrpcGenerator extends Generator {
         public String reactiveCallsMethodName;
         public String grpcCallsMethodName;
         public int methodNumber;
+        public String javaDoc;
 
         // This method mimics the upper-casing method ogf gRPC to ensure compatibility
         // See https://github.com/grpc/grpc-java/blob/v1.8.0/compiler/src/java_plugin/cpp/java_generator.cpp#L58
