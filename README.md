@@ -17,10 +17,14 @@ Reactive gRPC supports the following reactive programming models:
 # Usage
 See the readme in each technology-specific sub-directory for usage details.
 
+* [Rx-Java](https://github.com/salesforce/reactive-grpc/tree/master/rx-java)
+* [Spring Reactor](https://github.com/salesforce/reactive-grpc/tree/master/reactor)
+
 # Demos
 
 * [RxChat](https://github.com/salesforce/reactive-grpc/tree/master/demos/RxChat) - An IRC-like chat system built using RxJava and RxGrpc.
 * [ReactorChat](https://github.com/salesforce/reactive-grpc/tree/master/demos/ReactorChat) - An IRC-like chat system using Spring Reactor and ReactorGrpc.
+* [ReactorChat-Kotlin](https://github.com/salesforce/reactive-grpc/tree/master/demos/ReactorChat-Kotlin) - ReactorChat, but showing Kotlin integration.
 
 # Back-pressure
 Reactive gRPC stubs support bi-directional streaming with back-pressure. Under the hood, Reactive gRPC is built atop the vanilla

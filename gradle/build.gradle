@@ -1,5 +1,5 @@
 group 'com.salesforce.servicelibs'
-version '0.7.2-SNAPSHOT'
+version '0.7.2'
 
 apply plugin: 'java'
 apply plugin: "idea"
@@ -7,7 +7,7 @@ apply plugin: 'com.google.protobuf'
 
 sourceCompatibility = 1.8
 
-def reactiveGrpcVersion = '0.7.2-SNAPSHOT'
+def reactiveGrpcVersion = '0.7.2'
 def grpcVersion = '1.7.0'
 def protobufVersion = '3.4.0'
 
