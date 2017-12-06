@@ -20,11 +20,6 @@
     <artifactId>ReactorChat-Kotlin</artifactId>
     <packaging>pom</packaging>
 
-    <properties>
-        <maven.deploy.skip>true</maven.deploy.skip>
-        <skipNexusStagingDeployMojo>true</skipNexusStagingDeployMojo>
-    </properties>
-
     <modules>
         <module>ReactorChat-Server-Kt</module>
         <module>ReactorChat-Client-Kt</module>
