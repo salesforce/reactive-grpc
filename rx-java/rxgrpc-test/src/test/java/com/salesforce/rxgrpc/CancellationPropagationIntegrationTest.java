@@ -113,8 +113,8 @@ public class CancellationPropagationIntegrationTest {
 
     @AfterClass
     public static void stopServer() throws InterruptedException {
-        server.shutdown();
-        server.awaitTermination();
+        server.shutdownNow();
+//        server.awaitTermination();
         channel.shutdown();
 
         server = null;
@@ -164,7 +164,7 @@ public class CancellationPropagationIntegrationTest {
         assertThat(svc.wasCanceled()).isTrue();
     }
 
-    @Test
+    @Test /////////
     public void serverCanCancelClientStreamImplicitly() {
         RxNumbersGrpc.RxNumbersStub stub = RxNumbersGrpc.newRxStub(channel);
 
@@ -200,7 +200,7 @@ public class CancellationPropagationIntegrationTest {
         assertThat(requestDidProduce.get()).isTrue();
     }
 
-    @Test
+    @Test /////////
     public void serverCanCancelClientStreamExplicitly() {
         RxNumbersGrpc.RxNumbersStub stub = RxNumbersGrpc.newRxStub(channel);
 
@@ -235,7 +235,7 @@ public class CancellationPropagationIntegrationTest {
         assertThat(requestDidProduce.get()).isTrue();
     }
 
-    @Test
+    @Test /////////
     public void serverCanCancelClientStreamImplicitlyBidi() {
         RxNumbersGrpc.RxNumbersStub stub = RxNumbersGrpc.newRxStub(channel);
 
@@ -269,7 +269,7 @@ public class CancellationPropagationIntegrationTest {
         assertThat(requestDidProduce.get()).isTrue();
     }
 
-    @Test
+    @Test /////////
     public void serverCanCancelClientStreamExplicitlyBidi() {
         RxNumbersGrpc.RxNumbersStub stub = RxNumbersGrpc.newRxStub(channel);
 
