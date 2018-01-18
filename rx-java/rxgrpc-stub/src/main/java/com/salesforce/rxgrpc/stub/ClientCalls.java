@@ -8,15 +8,17 @@
 package com.salesforce.rxgrpc.stub;
 
 import com.google.common.util.concurrent.Runnables;
-import com.salesforce.grpc.contrib.LambdaStreamObserver;
 import com.salesforce.reactivegrpccommon.CancellableStreamObserver;
 import com.salesforce.reactivegrpccommon.ReactiveProducerStreamObserver;
 import io.grpc.stub.StreamObserver;
 import io.reactivex.Flowable;
 import io.reactivex.Single;
 
-import java.util.function.BiConsumer;
-import java.util.function.Function;
+import com.salesforce.reactivegrpccommon.BiConsumer;
+import com.salesforce.reactivegrpccommon.Function;
+import io.reactivex.SingleEmitter;
+import io.reactivex.SingleOnSubscribe;
+import io.reactivex.functions.Consumer;
 
 /**
  * Utility functions for processing different client call idioms. We have one-to-one correspondence
@@ -32,19 +34,45 @@ public final class ClientCalls {
      * Implements a unary -> unary call using {@link Single} -> {@link Single}.
      */
     public static <TRequest, TResponse> Single<TResponse> oneToOne(
-            Single<TRequest> rxRequest,
-            BiConsumer<TRequest, StreamObserver<TResponse>> delegate) {
+            final Single<TRequest> rxRequest,
+            final BiConsumer<TRequest, StreamObserver<TResponse>> delegate) {
         try {
             return Single
-                    .<TResponse>create(emitter -> rxRequest.subscribe(
-                        request -> delegate.accept(request, new LambdaStreamObserver<TResponse>(
-                            emitter::onSuccess,
-                            emitter::onError,
-                            Runnables.doNothing()
-                        )),
-                        emitter::onError
-                    ))
-                    .lift(new SubscribeOnlyOnceSingleOperator<>());
+                .create(new SingleOnSubscribe<TResponse>() {
+                    @Override
+                    public void subscribe(final SingleEmitter<TResponse> emitter) {
+                        rxRequest.subscribe(
+                            new Consumer<TRequest>() {
+                                @Override
+                                public void accept(TRequest request) {
+                                    delegate.accept(request, new StreamObserver<TResponse>() {
+                                        @Override
+                                        public void onNext(TResponse tResponse) {
+                                            emitter.onSuccess(tResponse);
+                                        }
+
+                                        @Override
+                                        public void onError(Throwable throwable) {
+                                            emitter.onError(throwable);
+                                        }
+
+                                        @Override
+                                        public void onCompleted() {
+                                            // Do nothing
+                                        }
+                                    });
+                                }
+                            },
+                            new Consumer<Throwable>() {
+                                @Override
+                                public void accept(Throwable t) {
+                                    emitter.onError(t);
+                                }
+                            }
+                        );
+                    }
+                })
+                .lift(new SubscribeOnlyOnceSingleOperator<TResponse>());
         } catch (Throwable throwable) {
             return Single.error(throwable);
         }
@@ -56,12 +84,17 @@ public final class ClientCalls {
      */
     public static <TRequest, TResponse> Flowable<TResponse> oneToMany(
             Single<TRequest> rxRequest,
-            BiConsumer<TRequest, StreamObserver<TResponse>> delegate) {
+            final BiConsumer<TRequest, StreamObserver<TResponse>> delegate) {
         try {
-            RxConsumerStreamObserver<TRequest, TResponse> consumerStreamObserver = new RxConsumerStreamObserver<>();
-            rxRequest.subscribe(request -> delegate.accept(request, consumerStreamObserver));
+            final RxConsumerStreamObserver<TRequest, TResponse> consumerStreamObserver = new RxConsumerStreamObserver<TRequest, TResponse>();
+            rxRequest.subscribe(new Consumer<TRequest>() {
+                @Override
+                public void accept(TRequest request) {
+                    delegate.accept(request, consumerStreamObserver);
+                }
+            });
             return ((Flowable<TResponse>) consumerStreamObserver.getRxConsumer())
-                    .lift(new SubscribeOnlyOnceFlowableOperator<>());
+                    .lift(new SubscribeOnlyOnceFlowableOperator<TResponse>());
         } catch (Throwable throwable) {
             return Flowable.error(throwable);
         }
@@ -72,21 +105,39 @@ public final class ClientCalls {
      * messages.
      */
     public static <TRequest, TResponse> Single<TResponse> manyToOne(
-            Flowable<TRequest> rxRequest,
-            Function<StreamObserver<TResponse>, StreamObserver<TRequest>> delegate) {
+            final Flowable<TRequest> rxRequest,
+            final Function<StreamObserver<TResponse>, StreamObserver<TRequest>> delegate) {
         try {
             return Single
-                    .<TResponse>create(emitter -> {
-                        ReactiveProducerStreamObserver<TRequest, TResponse> rxProducerStreamObserver = new ReactiveProducerStreamObserver<>(
-                                rxRequest,
-                                emitter::onSuccess,
-                                emitter::onError,
-                                Runnables.doNothing());
+                .create(new SingleOnSubscribe<TResponse>() {
+                    @Override
+                    public void subscribe(final SingleEmitter<TResponse> emitter) {
+                        final ReactiveProducerStreamObserver<TRequest, TResponse> rxProducerStreamObserver = new ReactiveProducerStreamObserver<TRequest, TResponse>(
+                            rxRequest,
+                            new com.salesforce.reactivegrpccommon.Consumer<TResponse>() {
+                                @Override
+                                public void accept(TResponse t) {
+                                    emitter.onSuccess(t);
+                                }
+                            },
+                            new com.salesforce.reactivegrpccommon.Consumer<Throwable>() {
+                                @Override
+                                public void accept(Throwable t) {
+                                    emitter.onError(t);
+                                }
+                            },
+                            Runnables.doNothing());
                         delegate.apply(
-                                new CancellableStreamObserver<>(rxProducerStreamObserver,
-                                rxProducerStreamObserver::cancel));
+                            new CancellableStreamObserver<TRequest, TResponse>(rxProducerStreamObserver,
+                                new Runnable() {
+                                    @Override
+                                    public void run() {
+                                        rxProducerStreamObserver.cancel();
+                                    }
+                                }));
                         rxProducerStreamObserver.rxSubscribe();
-                    }).lift(new SubscribeOnlyOnceSingleOperator<>());
+                    }
+                }).lift(new SubscribeOnlyOnceSingleOperator<TResponse>());
         } catch (Throwable throwable) {
             return Single.error(throwable);
         }
@@ -100,11 +151,16 @@ public final class ClientCalls {
             Flowable<TRequest> rxRequest,
             Function<StreamObserver<TResponse>, StreamObserver<TRequest>> delegate) {
         try {
-            RxProducerConsumerStreamObserver<TRequest, TResponse> consumerStreamObserver = new RxProducerConsumerStreamObserver<>(rxRequest);
-            delegate.apply(new CancellableStreamObserver<>(consumerStreamObserver, consumerStreamObserver::cancel));
+            final RxProducerConsumerStreamObserver<TRequest, TResponse> consumerStreamObserver = new RxProducerConsumerStreamObserver<TRequest, TResponse>(rxRequest);
+            delegate.apply(new CancellableStreamObserver<TRequest, TResponse>(consumerStreamObserver, new Runnable() {
+                @Override
+                public void run() {
+                    consumerStreamObserver.cancel();
+                }
+            }));
             consumerStreamObserver.rxSubscribe();
             return ((Flowable<TResponse>) consumerStreamObserver.getRxConsumer())
-                    .lift(new SubscribeOnlyOnceFlowableOperator<>());
+                    .lift(new SubscribeOnlyOnceFlowableOperator<TResponse>());
         } catch (Throwable throwable) {
             return Flowable.error(throwable);
         }

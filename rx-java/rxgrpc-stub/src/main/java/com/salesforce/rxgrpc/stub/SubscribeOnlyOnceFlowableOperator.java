@@ -24,7 +24,7 @@ public class SubscribeOnlyOnceFlowableOperator<T> implements FlowableOperator<T,
     private AtomicBoolean subscribedOnce = new AtomicBoolean(false);
 
     @Override
-    public Subscriber<? super T> apply(Subscriber<? super T> observer) throws Exception {
+    public Subscriber<? super T> apply(final Subscriber<? super T> observer) {
         return new Subscriber<T>() {
             @Override
             public void onSubscribe(Subscription subscription) {

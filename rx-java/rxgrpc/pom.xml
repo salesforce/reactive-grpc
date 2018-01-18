@@ -22,7 +22,7 @@
     <dependencies>
         <dependency>
             <groupId>${project.groupId}</groupId>
-            <artifactId>reactive-grpc-common</artifactId>
+            <artifactId>reactive-grpc-gencommon</artifactId>
             <version>${project.version}</version>
         </dependency>
     </dependencies>
