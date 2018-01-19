@@ -40,7 +40,7 @@ public abstract class ReactiveConsumerStreamObserver<TRequest, TResponse> implem
 
     @Override
     public void beforeStart(ClientCallStreamObserver<TRequest> requestStream) {
-        publisher = new ReactiveStreamObserverPublisher<>(Preconditions.checkNotNull(requestStream));
+        publisher = new ReactiveStreamObserverPublisher<TResponse>(Preconditions.checkNotNull(requestStream));
         rxConsumer = getReactiveConsumerFromPublisher(publisher);
         beforeStartCalled.countDown();
     }

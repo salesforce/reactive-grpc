@@ -55,7 +55,12 @@ public class ReactivePublisherBackpressureOnReadyHandler<T> implements Subscribe
     public ReactivePublisherBackpressureOnReadyHandler(ServerCallStreamObserver<T> requestStream) {
         this.requestStream = Preconditions.checkNotNull(requestStream);
         requestStream.setOnReadyHandler(this);
-        requestStream.setOnCancelHandler(() -> subscription.cancel());
+        requestStream.setOnCancelHandler(new Runnable() {
+            @Override
+            public void run() {
+                subscription.cancel();
+            }
+        });
     }
 
     @Override

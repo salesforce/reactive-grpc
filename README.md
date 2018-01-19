@@ -13,6 +13,7 @@ Reactive gRPC supports the following reactive programming models:
 * [RxJava 2](https://github.com/salesforce/reactive-grpc/tree/master/rx-java)
 * [Spring Reactor](https://github.com/salesforce/reactive-grpc/tree/master/reactor)
 * (Eventually) [Java9 Flow](https://community.oracle.com/docs/DOC-1006738)
+* (Eventually) [Akka Streams](https://doc.akka.io/docs/akka/2.5/stream/index.html)
 
 # Usage
 See the readme in each technology-specific sub-directory for usage details.
@@ -25,6 +26,13 @@ See the readme in each technology-specific sub-directory for usage details.
 * [RxChat](https://github.com/salesforce/reactive-grpc/tree/master/demos/RxChat) - An IRC-like chat system built using RxJava and RxGrpc.
 * [ReactorChat](https://github.com/salesforce/reactive-grpc/tree/master/demos/ReactorChat) - An IRC-like chat system using Spring Reactor and ReactorGrpc.
 * [ReactorChat-Kotlin](https://github.com/salesforce/reactive-grpc/tree/master/demos/ReactorChat-Kotlin) - ReactorChat, but showing Kotlin integration.
+
+# Android support
+Reactive gRPC supports Android to the same level of the underlying reactive technologies.
+
+* Rx-Java - Generated code targets Java 6, so it _should_ work with all versions of Android >= 2.3 (SDK 9).
+* Spring Reactor - [Not officially supported.](http://projectreactor.io/docs/core/release/reference/docs/index.html#prerequisites) 
+  "Reactor 3 does not officially support or target Android, however, it should work fine with Android SDK 26 (Android O) and above."
 
 # Back-pressure
 Reactive gRPC stubs support bi-directional streaming with back-pressure. Under the hood, Reactive gRPC is built atop the vanilla

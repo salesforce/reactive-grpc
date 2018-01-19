@@ -18,7 +18,7 @@ public class ReactivePublisherBackpressureOnReadyHandlerTest {
     @Test
     public void runPrimesThePump() {
         ClientCallStreamObserver<Object> obs = mock(ClientCallStreamObserver.class);
-        ReactivePublisherBackpressureOnReadyHandler<Object> handler = new ReactivePublisherBackpressureOnReadyHandler<>(obs);
+        ReactivePublisherBackpressureOnReadyHandler<Object> handler = new ReactivePublisherBackpressureOnReadyHandler<Object>(obs);
         Subscription sub = mock(Subscription.class);
 
         handler.onSubscribe(sub);
@@ -32,7 +32,7 @@ public class ReactivePublisherBackpressureOnReadyHandlerTest {
         ClientCallStreamObserver<Object> obs = mock(ClientCallStreamObserver.class);
         when(obs.isReady()).thenReturn(true);
 
-        ReactivePublisherBackpressureOnReadyHandler<Object> handler = new ReactivePublisherBackpressureOnReadyHandler<>(obs);
+        ReactivePublisherBackpressureOnReadyHandler<Object> handler = new ReactivePublisherBackpressureOnReadyHandler<Object>(obs);
         Subscription sub = mock(Subscription.class);
 
         handler.onSubscribe(sub);
@@ -49,7 +49,7 @@ public class ReactivePublisherBackpressureOnReadyHandlerTest {
         ClientCallStreamObserver<Object> obs = mock(ClientCallStreamObserver.class);
         when(obs.isReady()).thenReturn(false);
 
-        ReactivePublisherBackpressureOnReadyHandler<Object> handler = new ReactivePublisherBackpressureOnReadyHandler<>(obs);
+        ReactivePublisherBackpressureOnReadyHandler<Object> handler = new ReactivePublisherBackpressureOnReadyHandler<Object>(obs);
         Subscription sub = mock(Subscription.class);
 
         handler.onSubscribe(sub);

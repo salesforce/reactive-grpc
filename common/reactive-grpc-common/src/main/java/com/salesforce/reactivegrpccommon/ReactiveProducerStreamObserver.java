@@ -8,12 +8,10 @@
 package com.salesforce.reactivegrpccommon;
 
 import com.google.common.base.Preconditions;
-import com.salesforce.grpc.contrib.LambdaStreamObserver;
 import io.grpc.stub.ClientCallStreamObserver;
 import io.grpc.stub.ClientResponseObserver;
+import io.grpc.stub.StreamObserver;
 import org.reactivestreams.Publisher;
-
-import java.util.function.Consumer;
 
 /**
  * LambdaStreamObserver configures client-side manual flow control for the producing end of a message stream.
@@ -21,16 +19,17 @@ import java.util.function.Consumer;
  * @param <TRequest>
  * @param <TResponse>
  */
-public class ReactiveProducerStreamObserver<TRequest, TResponse> extends LambdaStreamObserver<TResponse> implements ClientResponseObserver<TRequest, TResponse> {
-    private Publisher<TRequest> rxProducer;
+public class ReactiveProducerStreamObserver<TRequest, TResponse> implements StreamObserver<TResponse>, ClientResponseObserver<TRequest, TResponse> {
+    private final Publisher<TRequest> rxProducer;
+    private final Consumer<TResponse> onNext;
+    private final Consumer<Throwable> onError;
+    private final Runnable onCompleted;
     private ReactivePublisherBackpressureOnReadyHandler<TRequest> onReadyHandler;
 
     public ReactiveProducerStreamObserver(Publisher<TRequest> rxProducer, Consumer<TResponse> onNext, Consumer<Throwable> onError, Runnable onCompleted) {
-        super(
-            Preconditions.checkNotNull(onNext),
-            Preconditions.checkNotNull(onError),
-            Preconditions.checkNotNull(onCompleted)
-        );
+        this.onNext = Preconditions.checkNotNull(onNext);
+        this.onError = Preconditions.checkNotNull(onError);
+        this.onCompleted = Preconditions.checkNotNull(onCompleted);
         this.rxProducer = Preconditions.checkNotNull(rxProducer);
     }
 
@@ -39,7 +38,7 @@ public class ReactiveProducerStreamObserver<TRequest, TResponse> extends LambdaS
         Preconditions.checkNotNull(producerStream);
         // Subscribe to the rxProducer with an adapter to a gRPC StreamObserver that respects backpressure
         // signals from the underlying gRPC client transport.
-        onReadyHandler = new ReactivePublisherBackpressureOnReadyHandler<>(producerStream);
+        onReadyHandler = new ReactivePublisherBackpressureOnReadyHandler<TRequest>(producerStream);
     }
 
     public void rxSubscribe() {
@@ -48,5 +47,20 @@ public class ReactiveProducerStreamObserver<TRequest, TResponse> extends LambdaS
 
     public void cancel() {
         onReadyHandler.cancel();
+    }
+
+    @Override
+    public void onNext(TResponse tResponse) {
+        onNext.accept(tResponse);
+    }
+
+    @Override
+    public void onError(Throwable throwable) {
+        onError.accept(throwable);
+    }
+
+    @Override
+    public void onCompleted() {
+        onCompleted.run();
     }
 }

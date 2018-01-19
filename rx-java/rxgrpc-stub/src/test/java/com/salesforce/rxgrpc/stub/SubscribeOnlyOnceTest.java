@@ -9,6 +9,7 @@ package com.salesforce.rxgrpc.stub;
 
 import io.reactivex.SingleObserver;
 import io.reactivex.disposables.Disposable;
+import org.assertj.core.api.ThrowableAssert;
 import org.junit.Test;
 import org.reactivestreams.Subscriber;
 import org.reactivestreams.Subscription;
@@ -18,15 +19,20 @@ import static org.assertj.core.api.Assertions.*;
 
 public class SubscribeOnlyOnceTest {
     @Test
-    public void subscribeOnlyOnceFlowableOperatorErrorsWhenMultipleSubscribe() throws Exception {
-        SubscribeOnlyOnceFlowableOperator<Object> op = new SubscribeOnlyOnceFlowableOperator<>();
+    public void subscribeOnlyOnceFlowableOperatorErrorsWhenMultipleSubscribe() {
+        SubscribeOnlyOnceFlowableOperator<Object> op = new SubscribeOnlyOnceFlowableOperator<Object>();
         Subscriber<Object> innerSub = mock(Subscriber.class);
-        Subscription subscription = mock(Subscription.class);
+        final Subscription subscription = mock(Subscription.class);
 
-        Subscriber<Object> outerSub = op.apply(innerSub);
+        final Subscriber<Object> outerSub = op.apply(innerSub);
 
         outerSub.onSubscribe(subscription);
-        assertThatThrownBy(() -> outerSub.onSubscribe(subscription))
+        assertThatThrownBy(new ThrowableAssert.ThrowingCallable() {
+            @Override
+            public void call() {
+                outerSub.onSubscribe(subscription);
+            }
+        })
                 .isInstanceOf(NullPointerException.class)
                 .hasMessageContaining("cannot directly subscribe to a gRPC service multiple times");
 
@@ -34,15 +40,20 @@ public class SubscribeOnlyOnceTest {
     }
 
     @Test
-    public void subscribeOnlyOnceSingleOperatorErrorsWhenMultipleSubscribe() throws Exception {
-        SubscribeOnlyOnceSingleOperator<Object> op = new SubscribeOnlyOnceSingleOperator<>();
+    public void subscribeOnlyOnceSingleOperatorErrorsWhenMultipleSubscribe() {
+        SubscribeOnlyOnceSingleOperator<Object> op = new SubscribeOnlyOnceSingleOperator<Object>();
         SingleObserver<Object> innerSub = mock(SingleObserver.class);
-        Disposable disposable = mock(Disposable.class);
+        final Disposable disposable = mock(Disposable.class);
 
-        SingleObserver<Object> outerSub = op.apply(innerSub);
+        final SingleObserver<Object> outerSub = op.apply(innerSub);
 
         outerSub.onSubscribe(disposable);
-        assertThatThrownBy(() -> outerSub.onSubscribe(disposable))
+        assertThatThrownBy(new ThrowableAssert.ThrowingCallable() {
+            @Override
+            public void call() {
+                outerSub.onSubscribe(disposable);
+            }
+        })
                 .isInstanceOf(NullPointerException.class)
                 .hasMessageContaining("cannot directly subscribe to a gRPC service multiple times");
 

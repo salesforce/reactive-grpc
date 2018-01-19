@@ -2,6 +2,11 @@ Overview
 ========
 Reactor-gRPC is a set of gRPC bindings for reactive programming with [Reactor](http://projectreactor.io/).
 
+### Android support
+Reactive gRPC supports Android to the same level of the underlying reactive technologies. Spring Reactor 
+does [not officially support Android](http://projectreactor.io/docs/core/release/reference/docs/index.html#prerequisites), 
+however, "it should work fine with Android SDK 26 (Android O) and above."
+
 Installation
 =====
 ### Maven

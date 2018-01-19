@@ -35,7 +35,8 @@
     </developers>
 
     <modules>
-        <module>reactive-grpc-common</module>
+        <module>common/reactive-grpc-common</module>
+        <module>common/reactive-grpc-gencommon</module>
         <module>rx-java/rxgrpc</module>
         <module>rx-java/rxgrpc-stub</module>
         <module>rx-java/rxgrpc-tck</module>

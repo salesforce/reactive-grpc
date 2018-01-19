@@ -23,7 +23,7 @@ public class SubscribeOnlyOnceSingleOperator<T> implements SingleOperator<T, T> 
     private AtomicBoolean subscribedOnce = new AtomicBoolean(false);
 
     @Override
-    public SingleObserver<? super T> apply(SingleObserver<? super T> observer) throws Exception {
+    public SingleObserver<? super T> apply(final SingleObserver<? super T> observer) {
         return new SingleObserver<T>() {
             @Override
             public void onSubscribe(Disposable d) {
