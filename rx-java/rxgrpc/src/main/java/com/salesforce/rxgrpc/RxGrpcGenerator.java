@@ -8,7 +8,7 @@
 package com.salesforce.rxgrpc;
 
 import com.salesforce.jprotoc.ProtocPlugin;
-import com.salesforce.reactivegrpccommon.ReactiveGrpcGenerator;
+import com.salesforce.reactivegrpcgencommon.ReactiveGrpcGenerator;
 
 /**
  * A protoc generator for generating ReactiveX 2.0 bindings for gRPC.

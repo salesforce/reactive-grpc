@@ -22,9 +22,14 @@ public class CancellableStreamObserverTest {
     @Test
     public void statusExceptionTriggersHandler() {
         ClientResponseObserver<Object, Object> delegate = mock(ClientResponseObserver.class);
-        AtomicBoolean called = new AtomicBoolean(false);
+        final AtomicBoolean called = new AtomicBoolean(false);
 
-        CancellableStreamObserver<Object, Object> observer = new CancellableStreamObserver<>(delegate, () -> called.set(true));
+        CancellableStreamObserver<Object, Object> observer = new CancellableStreamObserver<Object, Object>(delegate, new Runnable() {
+            @Override
+            public void run() {
+                called.set(true);
+            }
+        });
 
         observer.onError(Status.CANCELLED.asException());
 
@@ -34,9 +39,14 @@ public class CancellableStreamObserverTest {
     @Test
     public void statusRuntimeExceptionTriggersHandler() {
         ClientResponseObserver<Object, Object> delegate = mock(ClientResponseObserver.class);
-        AtomicBoolean called = new AtomicBoolean(false);
+        final AtomicBoolean called = new AtomicBoolean(false);
 
-        CancellableStreamObserver<Object, Object> observer = new CancellableStreamObserver<>(delegate, () -> called.set(true));
+        CancellableStreamObserver<Object, Object> observer = new CancellableStreamObserver<Object, Object>(delegate, new Runnable() {
+            @Override
+            public void run() {
+                called.set(true);
+            }
+        });
 
         observer.onError(Status.CANCELLED.asRuntimeException());
 
@@ -46,9 +56,14 @@ public class CancellableStreamObserverTest {
     @Test
     public void otherExceptionDoesNotTriggersHandler() {
         ClientResponseObserver<Object, Object> delegate = mock(ClientResponseObserver.class);
-        AtomicBoolean called = new AtomicBoolean(false);
+        final AtomicBoolean called = new AtomicBoolean(false);
 
-        CancellableStreamObserver<Object, Object> observer = new CancellableStreamObserver<>(delegate, () -> called.set(true));
+        CancellableStreamObserver<Object, Object> observer = new CancellableStreamObserver<Object, Object>(delegate, new Runnable() {
+            @Override
+            public void run() {
+                called.set(true);
+            }
+        });
 
         observer.onError(Status.INTERNAL.asRuntimeException());
 

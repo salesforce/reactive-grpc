@@ -9,6 +9,8 @@ package com.salesforce.reactivegrpccommon;
 
 import io.grpc.stub.CallStreamObserver;
 import org.junit.Test;
+import org.mockito.invocation.InvocationOnMock;
+import org.mockito.stubbing.Answer;
 import org.reactivestreams.Subscriber;
 import org.reactivestreams.Subscription;
 
@@ -24,7 +26,7 @@ public class ReactiveStreamObserverPublisherTest {
         CallStreamObserver<Object> obs = mock(CallStreamObserver.class);
         Subscriber<Object> sub = mock(Subscriber.class);
 
-        ReactiveStreamObserverPublisher<Object> pub = new ReactiveStreamObserverPublisher<>(obs);
+        ReactiveStreamObserverPublisher<Object> pub = new ReactiveStreamObserverPublisher<Object>(obs);
         pub.subscribe(sub);
 
         Object obj = new Object();
@@ -38,7 +40,7 @@ public class ReactiveStreamObserverPublisherTest {
         CallStreamObserver<Object> obs = mock(CallStreamObserver.class);
         Subscriber<Object> sub = mock(Subscriber.class);
 
-        ReactiveStreamObserverPublisher<Object> pub = new ReactiveStreamObserverPublisher<>(obs);
+        ReactiveStreamObserverPublisher<Object> pub = new ReactiveStreamObserverPublisher<Object>(obs);
         pub.subscribe(sub);
 
         Throwable obj = new Exception();
@@ -52,7 +54,7 @@ public class ReactiveStreamObserverPublisherTest {
         CallStreamObserver<Object> obs = mock(CallStreamObserver.class);
         Subscriber<Object> sub = mock(Subscriber.class);
 
-        ReactiveStreamObserverPublisher<Object> pub = new ReactiveStreamObserverPublisher<>(obs);
+        ReactiveStreamObserverPublisher<Object> pub = new ReactiveStreamObserverPublisher<Object>(obs);
         pub.subscribe(sub);
 
         pub.onCompleted();
@@ -64,13 +66,16 @@ public class ReactiveStreamObserverPublisherTest {
         CallStreamObserver<Object> obs = mock(CallStreamObserver.class);
         Subscriber<Object> sub = mock(Subscriber.class);
 
-        AtomicReference<Subscription> subscription = new AtomicReference<>();
-        doAnswer(invocationOnMock -> {
-            subscription.set((Subscription)invocationOnMock.getArguments()[0]);
-            return null;
+        final AtomicReference<Subscription> subscription = new AtomicReference<Subscription>();
+        doAnswer(new Answer() {
+            @Override
+            public Object answer(InvocationOnMock invocationOnMock) {
+                subscription.set((Subscription) invocationOnMock.getArguments()[0]);
+                return null;
+            }
         }).when(sub).onSubscribe(any(Subscription.class));
 
-        ReactiveStreamObserverPublisher<Object> pub = new ReactiveStreamObserverPublisher<>(obs);
+        ReactiveStreamObserverPublisher<Object> pub = new ReactiveStreamObserverPublisher<Object>(obs);
         pub.subscribe(sub);
 
         assertThat(subscription.get()).isNotNull();

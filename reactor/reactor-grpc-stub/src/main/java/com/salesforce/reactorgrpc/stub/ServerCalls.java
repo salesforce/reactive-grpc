@@ -8,7 +8,6 @@
 package com.salesforce.reactorgrpc.stub;
 
 import com.google.common.base.Preconditions;
-import com.salesforce.grpc.contrib.LambdaStreamObserver;
 import com.salesforce.reactivegrpccommon.ReactiveExecutor;
 import com.salesforce.reactivegrpccommon.ReactivePublisherBackpressureOnReadyHandler;
 import com.salesforce.reactivegrpccommon.ReactiveStreamObserverPublisher;
@@ -111,10 +110,7 @@ public final class ServerCalls {
             responseObserver.onError(prepareError(throwable));
         }
 
-        return new LambdaStreamObserver<>(
-                streamObserverPublisher::onNext,
-                streamObserverPublisher::onError,
-                streamObserverPublisher::onCompleted);
+        return streamObserverPublisher;
     }
 
     /**
@@ -156,10 +152,7 @@ public final class ServerCalls {
             responseObserver.onError(prepareError(throwable));
         }
 
-        return new LambdaStreamObserver<>(
-                streamObserverPublisher::onNext,
-                streamObserverPublisher::onError,
-                streamObserverPublisher::onCompleted);
+        return streamObserverPublisher;
     }
 
     private static Throwable prepareError(Throwable throwable) {

@@ -31,6 +31,10 @@
             <artifactId>grpc-netty</artifactId>
         </dependency>
         <dependency>
+            <groupId>io.grpc</groupId>
+            <artifactId>grpc-protobuf</artifactId>
+        </dependency>
+        <dependency>
             <groupId>${project.groupId}</groupId>
             <artifactId>rxgrpc-stub</artifactId>
         </dependency>

@@ -5,9 +5,10 @@
  *  For full license text, see LICENSE.txt file in the repo root  or https://opensource.org/licenses/BSD-3-Clause
  */
 
-package com.salesforce.reactivegrpccommon;
+package com.salesforce.reactivegrpcgencommon;
 
 import com.google.common.base.Strings;
+import com.google.common.html.HtmlEscapers;
 import com.google.protobuf.DescriptorProtos.FileDescriptorProto;
 import com.google.protobuf.DescriptorProtos.FileOptions;
 import com.google.protobuf.DescriptorProtos.MethodDescriptorProto;
@@ -23,8 +24,6 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
-
-import static com.google.common.html.HtmlEscapers.htmlEscaper;
 
 /**
  * Abstract class for protoc generators generating Reactive Streams bindings for gRPC.
@@ -173,7 +172,7 @@ public abstract class ReactiveGrpcGenerator extends Generator {
         if (!comments.isEmpty()) {
             StringBuilder builder = new StringBuilder("/**\n")
                     .append(prefix).append(" * <pre>\n");
-            Arrays.stream(htmlEscaper().escape(comments).split("\n"))
+            Arrays.stream(HtmlEscapers.htmlEscaper().escape(comments).split("\n"))
                     .forEach(line -> builder.append(prefix).append(" * ").append(line).append("\n"));
             builder
                     .append(prefix).append(" * <pre>\n")

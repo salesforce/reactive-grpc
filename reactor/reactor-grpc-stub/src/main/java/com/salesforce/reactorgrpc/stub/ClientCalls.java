@@ -8,7 +8,6 @@
 package com.salesforce.reactorgrpc.stub;
 
 import com.google.common.util.concurrent.Runnables;
-import com.salesforce.grpc.contrib.LambdaStreamObserver;
 import com.salesforce.reactivegrpccommon.CancellableStreamObserver;
 import com.salesforce.reactivegrpccommon.ReactiveProducerStreamObserver;
 import io.grpc.stub.StreamObserver;
@@ -38,11 +37,22 @@ public final class ClientCalls {
         try {
             return Mono
                     .<TResponse>create(emitter -> rxRequest.subscribe(
-                        request -> delegate.accept(request, new LambdaStreamObserver<TResponse>(
-                            emitter::success,
-                            emitter::error,
-                            Runnables.doNothing()
-                        )),
+                        request -> delegate.accept(request, new StreamObserver<TResponse>() {
+                            @Override
+                            public void onNext(TResponse tResponse) {
+                                emitter.success(tResponse);
+                            }
+
+                            @Override
+                            public void onError(Throwable throwable) {
+                                emitter.error(throwable);
+                            }
+
+                            @Override
+                            public void onCompleted() {
+                                // Do nothing
+                            }
+                        }),
                         emitter::error
                     ))
                     .transform(Operators.lift(new SubscribeOnlyOnceLifter<TResponse>()));

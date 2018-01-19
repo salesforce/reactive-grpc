@@ -61,7 +61,7 @@ public class ReactiveStreamObserverPublisher<T> implements Publisher<T>, StreamO
             @Override
             public void request(long l) {
                 // Some Reactive Streams implementations use Long.MAX_VALUE to indicate "all messages"; gRPC uses Integer.MAX_VALUE.
-                int i = (int) Long.min(l, Integer.MAX_VALUE);
+                int i = (int) Math.min(l, Integer.MAX_VALUE);
 
                 // Very rarely, request() gets called before the client has finished setting up its stream. If this
                 // happens, wait momentarily and try again.

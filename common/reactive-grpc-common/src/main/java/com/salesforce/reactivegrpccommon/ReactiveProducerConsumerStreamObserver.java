@@ -29,7 +29,7 @@ public abstract class ReactiveProducerConsumerStreamObserver<TRequest, TResponse
     @Override
     public void beforeStart(ClientCallStreamObserver<TRequest> requestStream) {
         super.beforeStart(Preconditions.checkNotNull(requestStream));
-        onReadyHandler = new ReactivePublisherBackpressureOnReadyHandler<>(requestStream);
+        onReadyHandler = new ReactivePublisherBackpressureOnReadyHandler<TRequest>(requestStream);
     }
 
     public void rxSubscribe() {

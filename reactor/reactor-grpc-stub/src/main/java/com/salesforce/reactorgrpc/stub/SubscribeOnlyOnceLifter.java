@@ -30,7 +30,7 @@ public class SubscribeOnlyOnceLifter<T> implements BiFunction<Scannable, CoreSub
             public void onSubscribe(Subscription subscription) {
                 if (subscribedOnce.getAndSet(true)) {
                     throw new NullPointerException("You cannot directly subscribe to a gRPC service multiple times " +
-                            "concurrently. Use Flowable.share() instead.");
+                            "concurrently. Use Flux.share() instead.");
                 } else {
                     coreSubscriber.onSubscribe(subscription);
                 }

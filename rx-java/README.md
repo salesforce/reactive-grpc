@@ -2,6 +2,12 @@ Overview
 ========
 RxGrpc is a new set of gRPC bindings for reactive programming with [RxJava](https://github.com/ReactiveX/RxJava).
 
+### Android support
+Reactive gRPC supports Android to the same level of the underlying reactive technologies. The generated Rx-Java binding
+code targets Java 6, so it _should_ work with all versions of Android >= 2.3 (SDK 9).
+
+See: https://github.com/ReactiveX/RxJava#version-2x-javadoc
+
 Installation
 ============
 ### Maven
