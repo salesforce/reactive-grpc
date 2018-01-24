@@ -114,9 +114,9 @@ public class CancellationPropagationIntegrationTest {
 
     @AfterClass
     public static void stopServer() throws InterruptedException {
+        channel.shutdown();
         server.shutdown();
         server.awaitTermination();
-        channel.shutdown();
 
         server = null;
         channel = null;

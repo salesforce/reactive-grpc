@@ -8,6 +8,7 @@
 package com.salesforce.reactivegrpccommon;
 
 import com.google.common.base.Preconditions;
+import com.google.common.util.concurrent.Runnables;
 import io.grpc.Status;
 import io.grpc.StatusException;
 import io.grpc.StatusRuntimeException;
@@ -18,6 +19,7 @@ import org.reactivestreams.Subscriber;
 import org.reactivestreams.Subscription;
 
 import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
  * ReactivePublisherBackpressureOnReadyHandler bridges the manual flow control idioms of Reactive Streams and gRPC. This class takes
@@ -44,12 +46,19 @@ import java.util.concurrent.CountDownLatch;
 public class ReactivePublisherBackpressureOnReadyHandler<T> implements Subscriber<T>, Runnable {
     private CallStreamObserver<T> requestStream;
     private Subscription subscription;
-    private boolean canceled = false;
+    private AtomicBoolean canceled = new AtomicBoolean(false);
     private CountDownLatch subscribed = new CountDownLatch(1);
+    private Runnable cancelRequestStream = Runnables.doNothing();
 
-    public ReactivePublisherBackpressureOnReadyHandler(ClientCallStreamObserver<T> requestStream) {
+    public ReactivePublisherBackpressureOnReadyHandler(final ClientCallStreamObserver<T> requestStream) {
         this.requestStream = Preconditions.checkNotNull(requestStream);
         requestStream.setOnReadyHandler(this);
+        cancelRequestStream = new Runnable() {
+            @Override
+            public void run() {
+                requestStream.cancel("Cancelled", Status.CANCELLED.asException());
+            }
+        };
     }
 
     public ReactivePublisherBackpressureOnReadyHandler(ServerCallStreamObserver<T> requestStream) {
@@ -78,15 +87,16 @@ public class ReactivePublisherBackpressureOnReadyHandler<T> implements Subscribe
     }
 
     public void cancel() {
-        canceled = true;
+        canceled.set(true);
         if (subscription != null) {
             subscription.cancel();
             subscription = null;
         }
+        cancelRequestStream.run();
     }
 
     public boolean isCanceled() {
-        return canceled;
+        return canceled.get();
     }
 
     @Override
@@ -117,7 +127,9 @@ public class ReactivePublisherBackpressureOnReadyHandler<T> implements Subscribe
 
     @Override
     public void onComplete() {
-        requestStream.onCompleted();
+        if (!isCanceled()) {
+            requestStream.onCompleted();
+        }
     }
 
     private static Throwable prepareError(Throwable throwable) {
