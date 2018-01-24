@@ -8,6 +8,7 @@
 package com.salesforce.reactivegrpccommon;
 
 import com.google.common.base.Preconditions;
+import com.google.common.util.concurrent.Runnables;
 import io.grpc.Status;
 import io.grpc.StatusException;
 import io.grpc.StatusRuntimeException;
@@ -46,10 +47,17 @@ public class ReactivePublisherBackpressureOnReadyHandler<T> implements Subscribe
     private Subscription subscription;
     private boolean canceled = false;
     private CountDownLatch subscribed = new CountDownLatch(1);
+    private Runnable cancelRequestStream = Runnables.doNothing();
 
-    public ReactivePublisherBackpressureOnReadyHandler(ClientCallStreamObserver<T> requestStream) {
+    public ReactivePublisherBackpressureOnReadyHandler(final ClientCallStreamObserver<T> requestStream) {
         this.requestStream = Preconditions.checkNotNull(requestStream);
         requestStream.setOnReadyHandler(this);
+        cancelRequestStream = new Runnable() {
+            @Override
+            public void run() {
+                requestStream.cancel("Canceled", Status.CANCELLED.asException());
+            }
+        };
     }
 
     public ReactivePublisherBackpressureOnReadyHandler(ServerCallStreamObserver<T> requestStream) {
@@ -83,6 +91,7 @@ public class ReactivePublisherBackpressureOnReadyHandler<T> implements Subscribe
             subscription.cancel();
             subscription = null;
         }
+        cancelRequestStream.run();
     }
 
     public boolean isCanceled() {
