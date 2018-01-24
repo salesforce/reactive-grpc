@@ -19,6 +19,7 @@ import org.reactivestreams.Subscriber;
 import org.reactivestreams.Subscription;
 
 import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
  * ReactivePublisherBackpressureOnReadyHandler bridges the manual flow control idioms of Reactive Streams and gRPC. This class takes
@@ -45,7 +46,7 @@ import java.util.concurrent.CountDownLatch;
 public class ReactivePublisherBackpressureOnReadyHandler<T> implements Subscriber<T>, Runnable {
     private CallStreamObserver<T> requestStream;
     private Subscription subscription;
-    private boolean canceled = false;
+    private AtomicBoolean canceled = new AtomicBoolean(false);
     private CountDownLatch subscribed = new CountDownLatch(1);
     private Runnable cancelRequestStream = Runnables.doNothing();
 
@@ -86,7 +87,7 @@ public class ReactivePublisherBackpressureOnReadyHandler<T> implements Subscribe
     }
 
     public void cancel() {
-        canceled = true;
+        canceled.set(true);
         if (subscription != null) {
             subscription.cancel();
             subscription = null;
@@ -95,7 +96,7 @@ public class ReactivePublisherBackpressureOnReadyHandler<T> implements Subscribe
     }
 
     public boolean isCanceled() {
-        return canceled;
+        return canceled.get();
     }
 
     @Override
@@ -126,7 +127,9 @@ public class ReactivePublisherBackpressureOnReadyHandler<T> implements Subscribe
 
     @Override
     public void onComplete() {
-        requestStream.onCompleted();
+        if (!isCanceled()) {
+            requestStream.onCompleted();
+        }
     }
 
     private static Throwable prepareError(Throwable throwable) {
