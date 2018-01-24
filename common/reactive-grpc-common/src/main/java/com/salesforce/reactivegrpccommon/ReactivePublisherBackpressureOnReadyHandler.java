@@ -55,7 +55,7 @@ public class ReactivePublisherBackpressureOnReadyHandler<T> implements Subscribe
         cancelRequestStream = new Runnable() {
             @Override
             public void run() {
-                requestStream.cancel("Canceled", Status.CANCELLED.asException());
+                requestStream.cancel("Cancelled", Status.CANCELLED.asException());
             }
         };
     }
