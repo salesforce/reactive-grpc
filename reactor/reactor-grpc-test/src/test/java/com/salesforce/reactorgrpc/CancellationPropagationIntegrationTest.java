@@ -28,7 +28,7 @@ import java.util.stream.IntStream;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-@SuppressWarnings("ALL")
+@SuppressWarnings({"unchecked", "Duplicates"})
 public class CancellationPropagationIntegrationTest {
     private static final int NUMBER_OF_STREAM_ELEMENTS = 10000;
     private static final int SEQUENCE_DELAY_MILLIS = 10;

@@ -17,6 +17,7 @@ import org.reactivestreams.Subscription;
 import static org.mockito.Mockito.*;
 import static org.assertj.core.api.Assertions.*;
 
+@SuppressWarnings("unchecked")
 public class SubscribeOnlyOnceTest {
     @Test
     public void subscribeOnlyOnceFlowableOperatorErrorsWhenMultipleSubscribe() {

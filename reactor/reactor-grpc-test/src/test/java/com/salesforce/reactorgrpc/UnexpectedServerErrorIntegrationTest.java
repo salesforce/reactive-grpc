@@ -19,7 +19,7 @@ import reactor.test.StepVerifier;
 import java.time.Duration;
 import java.util.concurrent.TimeUnit;
 
-@SuppressWarnings("ALL")
+@SuppressWarnings("unchecked")
 public class UnexpectedServerErrorIntegrationTest {
     private static Server server;
     private static ManagedChannel channel;
@@ -84,7 +84,7 @@ public class UnexpectedServerErrorIntegrationTest {
         ReactorGreeterGrpc.ReactorGreeterStub stub = ReactorGreeterGrpc.newReactorStub(channel);
         Flux<HelloResponse> resp = stub.sayHelloRespStream(Mono.just(HelloRequest.getDefaultInstance()));
         Flux<HelloResponse> test = resp
-                .doOnNext(msg -> System.out.println(msg))
+                .doOnNext(System.out::println)
                 .doOnError(throwable -> System.out.println(throwable.getMessage()))
                 .doOnComplete(() -> System.out.println("Completed"))
                 .doOnCancel(() -> System.out.println("Client canceled"));

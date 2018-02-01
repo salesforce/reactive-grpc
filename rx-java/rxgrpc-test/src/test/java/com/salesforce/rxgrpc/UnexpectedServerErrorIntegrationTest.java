@@ -18,7 +18,7 @@ import org.junit.Test;
 
 import java.util.concurrent.TimeUnit;
 
-@SuppressWarnings("ALL")
+@SuppressWarnings("unchecked")
 public class UnexpectedServerErrorIntegrationTest {
     private static Server server;
     private static ManagedChannel channel;

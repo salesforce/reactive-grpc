@@ -17,7 +17,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.mock;
 
 
-@SuppressWarnings("ALL")
+@SuppressWarnings("unchecked")
 public class CancellableStreamObserverTest {
     @Test
     public void statusExceptionTriggersHandler() {

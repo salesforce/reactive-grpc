@@ -18,7 +18,7 @@ import org.junit.Test;
 
 import java.util.concurrent.TimeUnit;
 
-@SuppressWarnings("ALL")
+@SuppressWarnings("unchecked")
 public class ServerErrorIntegrationTest {
     private static Server server;
     private static ManagedChannel channel;
@@ -76,7 +76,7 @@ public class ServerErrorIntegrationTest {
         RxGreeterGrpc.RxGreeterStub stub = RxGreeterGrpc.newRxStub(channel);
         Flowable<HelloResponse> resp = stub.sayHelloRespStream(Single.just(HelloRequest.getDefaultInstance()));
         TestSubscriber<HelloResponse> test = resp
-                .doOnNext(msg -> System.out.println(msg))
+                .doOnNext(System.out::println)
                 .doOnError(throwable -> System.out.println(throwable.getMessage()))
                 .doOnComplete(() -> System.out.println("Completed"))
                 .doOnCancel(() -> System.out.println("Client canceled"))

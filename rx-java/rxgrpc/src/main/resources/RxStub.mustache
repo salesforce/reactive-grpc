@@ -67,7 +67,7 @@ public final class {{className}} {
             return io.grpc.ServerServiceDefinition.builder(getServiceDescriptor())
                     {{#methods}}
                     .addMethod(
-                            {{packageName}}.{{serviceName}}Grpc.METHOD_{{methodNameUpperUnderscore}},
+                            {{packageName}}.{{serviceName}}Grpc.get{{methodNamePascalCase}}Method(),
                             {{grpcCallsMethodName}}(
                                     new MethodHandlers<
                                             {{inputType}},
