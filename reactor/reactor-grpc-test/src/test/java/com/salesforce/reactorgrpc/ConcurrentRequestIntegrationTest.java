@@ -30,7 +30,7 @@ import java.util.concurrent.TimeUnit;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-@SuppressWarnings("Duplicates")
+@SuppressWarnings({"Duplicates", "unchecked"})
 public class ConcurrentRequestIntegrationTest {
     private static Server server;
     private static ManagedChannel channel;

@@ -29,7 +29,7 @@ import java.util.stream.IntStream;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-@SuppressWarnings("ALL")
+@SuppressWarnings({"unchecked", "Duplicates"})
 public class CancellationPropagationIntegrationTest {
     private static final int NUMBER_OF_STREAM_ELEMENTS = 10000;
 
