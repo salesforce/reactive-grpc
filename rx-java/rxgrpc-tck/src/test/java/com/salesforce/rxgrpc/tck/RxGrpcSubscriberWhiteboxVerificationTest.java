@@ -7,7 +7,7 @@
 
 package com.salesforce.rxgrpc.tck;
 
-import com.salesforce.reactivegrpccommon.ReactivePublisherBackpressureOnReadyHandler;
+import com.salesforce.reactivegrpc.common.ReactivePublisherBackpressureOnReadyHandler;
 import io.grpc.stub.ClientCallStreamObserver;
 import org.reactivestreams.Subscriber;
 import org.reactivestreams.Subscription;

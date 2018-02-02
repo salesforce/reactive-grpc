@@ -8,7 +8,7 @@
 package com.salesforce.reactorgrpc;
 
 import com.salesforce.jprotoc.ProtocPlugin;
-import com.salesforce.reactivegrpcgencommon.ReactiveGrpcGenerator;
+import com.salesforce.reactivegrpc.gen.ReactiveGrpcGenerator;
 
 /**
  * A protoc generator for generating Reactor bindings for gRPC.

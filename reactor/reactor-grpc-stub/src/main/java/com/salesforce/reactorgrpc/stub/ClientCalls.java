@@ -8,8 +8,8 @@
 package com.salesforce.reactorgrpc.stub;
 
 import com.google.common.util.concurrent.Runnables;
-import com.salesforce.reactivegrpccommon.CancellableStreamObserver;
-import com.salesforce.reactivegrpccommon.ReactiveProducerStreamObserver;
+import com.salesforce.reactivegrpc.common.CancellableStreamObserver;
+import com.salesforce.reactivegrpc.common.ReactiveProducerStreamObserver;
 import io.grpc.stub.StreamObserver;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
