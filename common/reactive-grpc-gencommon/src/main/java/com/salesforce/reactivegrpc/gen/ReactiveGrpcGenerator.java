@@ -5,7 +5,7 @@
  *  For full license text, see LICENSE.txt file in the repo root  or https://opensource.org/licenses/BSD-3-Clause
  */
 
-package com.salesforce.reactivegrpcgencommon;
+package com.salesforce.reactivegrpc.gen;
 
 import com.google.common.base.Strings;
 import com.google.common.html.HtmlEscapers;

@@ -7,9 +7,9 @@
 
 package com.salesforce.reactorgrpc.stub;
 
-import com.salesforce.reactivegrpccommon.ReactiveConsumerStreamObserver;
-import com.salesforce.reactivegrpccommon.ReactiveExecutor;
-import com.salesforce.reactivegrpccommon.ReactiveStreamObserverPublisher;
+import com.salesforce.reactivegrpc.common.ReactiveConsumerStreamObserver;
+import com.salesforce.reactivegrpc.common.ReactiveExecutor;
+import com.salesforce.reactivegrpc.common.ReactiveStreamObserverPublisher;
 import org.reactivestreams.Publisher;
 import reactor.core.publisher.Flux;
 import reactor.core.scheduler.Schedulers;

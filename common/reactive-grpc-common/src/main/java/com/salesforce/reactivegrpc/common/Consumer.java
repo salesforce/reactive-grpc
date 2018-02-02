@@ -5,21 +5,19 @@
  *  For full license text, see LICENSE.txt file in the repo root  or https://opensource.org/licenses/BSD-3-Clause
  */
 
-package com.salesforce.reactivegrpccommon;
+package com.salesforce.reactivegrpc.common;
 
 /**
  * Java6 compatibility.
  *
  * @param <T>
- * @param <U>
  */
-public interface BiConsumer<T, U> {
+public interface Consumer<T> {
 
     /**
-     * Performs this operation on the given arguments.
+     * Performs this operation on the given argument.
      *
-     * @param t the first input argument
-     * @param u the second input argument
+     * @param t the input argument
      */
-    void accept(T t, U u);
+    void accept(T t);
 }

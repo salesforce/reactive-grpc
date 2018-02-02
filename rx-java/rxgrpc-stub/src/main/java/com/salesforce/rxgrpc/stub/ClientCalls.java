@@ -8,14 +8,14 @@
 package com.salesforce.rxgrpc.stub;
 
 import com.google.common.util.concurrent.Runnables;
-import com.salesforce.reactivegrpccommon.CancellableStreamObserver;
-import com.salesforce.reactivegrpccommon.ReactiveProducerStreamObserver;
+import com.salesforce.reactivegrpc.common.CancellableStreamObserver;
+import com.salesforce.reactivegrpc.common.ReactiveProducerStreamObserver;
 import io.grpc.stub.StreamObserver;
 import io.reactivex.Flowable;
 import io.reactivex.Single;
 
-import com.salesforce.reactivegrpccommon.BiConsumer;
-import com.salesforce.reactivegrpccommon.Function;
+import com.salesforce.reactivegrpc.common.BiConsumer;
+import com.salesforce.reactivegrpc.common.Function;
 import io.reactivex.SingleEmitter;
 import io.reactivex.SingleOnSubscribe;
 import io.reactivex.functions.Consumer;
@@ -114,13 +114,13 @@ public final class ClientCalls {
                     public void subscribe(final SingleEmitter<TResponse> emitter) {
                         final ReactiveProducerStreamObserver<TRequest, TResponse> rxProducerStreamObserver = new ReactiveProducerStreamObserver<TRequest, TResponse>(
                             rxRequest,
-                            new com.salesforce.reactivegrpccommon.Consumer<TResponse>() {
+                            new com.salesforce.reactivegrpc.common.Consumer<TResponse>() {
                                 @Override
                                 public void accept(TResponse t) {
                                     emitter.onSuccess(t);
                                 }
                             },
-                            new com.salesforce.reactivegrpccommon.Consumer<Throwable>() {
+                            new com.salesforce.reactivegrpc.common.Consumer<Throwable>() {
                                 @Override
                                 public void accept(Throwable t) {
                                     emitter.onError(t);

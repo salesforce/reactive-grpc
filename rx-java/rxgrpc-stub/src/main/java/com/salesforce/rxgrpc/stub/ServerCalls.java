@@ -8,10 +8,10 @@
 package com.salesforce.rxgrpc.stub;
 
 import com.google.common.base.Preconditions;
-import com.salesforce.reactivegrpccommon.Function;
-import com.salesforce.reactivegrpccommon.ReactiveExecutor;
-import com.salesforce.reactivegrpccommon.ReactivePublisherBackpressureOnReadyHandler;
-import com.salesforce.reactivegrpccommon.ReactiveStreamObserverPublisher;
+import com.salesforce.reactivegrpc.common.Function;
+import com.salesforce.reactivegrpc.common.ReactiveExecutor;
+import com.salesforce.reactivegrpc.common.ReactivePublisherBackpressureOnReadyHandler;
+import com.salesforce.reactivegrpc.common.ReactiveStreamObserverPublisher;
 import io.grpc.Status;
 import io.grpc.StatusException;
 import io.grpc.StatusRuntimeException;
