@@ -1,0 +1,17 @@
+syntax = "proto3";
+
+package demo;
+
+option java_multiple_files = true;
+option java_package = "com.salesforce.reactivegrpc.examples";
+
+service Numbers {
+    rpc OneToOne (Message) returns (Message) {}
+    rpc OneToMany (Message) returns (stream Message) {}
+    rpc ManyToOne (stream Message) returns (Message) {}
+    rpc ManyToMany (stream Message) returns (stream Message) {}
+}
+
+message Message {
+    int32 number = 1;
+}

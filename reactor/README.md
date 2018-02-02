@@ -86,6 +86,31 @@ After installing the plugin, Reactor-gRPC service stubs will be generated along 
   resp.subscribe(...);
   ```
   
+Re-establishing the Stream
+=======
+One simple way to reuse it is to wrap it in a class extending Flux:
+
+```java
+public class GrpcRetryFlux<T> extends Flux<T> {
+    private static final Logger LOGGER = LoggerFactory.getLogger(GrpcRetryFlux.class);
+    private final Flux<T> retryFlux;
+
+    public GrpcRetryFlux(Supplier<Flux<T>> fluxSupplier) {
+        this.retryFlux = Flux.<T>create(sink -> fluxSupplier.get().subscribe(sink::next, sink::error, sink::complete))
+                        .retryWhen(attempts -> attempts.doOnNext(err -> LOGGER.warn("Received error", err)).flatMap(i -> Mono.delay(ofMillis(500))));
+    }
+
+    @Override
+    public void subscribe(CoreSubscriber<? super T> actual) {
+        retryFlux.subscribe(actual);
+    }
+}
+```
+
+Then we can use it like that: 
+
+`Flux<ResultType> resulfFlux = new GrpcRetryFlux<>(() -> myService.myMethod(sourceFlux));`
+  
 Modules
 =======
 
