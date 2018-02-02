@@ -48,6 +48,7 @@
         <module>demos/RxChat</module>
         <module>demos/ReactorChat</module>
         <module>demos/ReactorChat-Kotlin</module>
+        <module>demos/reactive-grpc-examples</module>
     </modules>
 
     <properties>
