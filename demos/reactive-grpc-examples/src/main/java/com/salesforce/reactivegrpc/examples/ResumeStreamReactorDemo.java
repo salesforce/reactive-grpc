@@ -1,7 +1,8 @@
 /*
- * Copyright, 1999-2018, SALESFORCE.com
- * All Rights Reserved
- * Company Confidential
+ *  Copyright (c) 2017, salesforce.com, inc.
+ *  All rights reserved.
+ *  Licensed under the BSD 3-Clause license.
+ *  For full license text, see LICENSE.txt file in the repo root  or https://opensource.org/licenses/BSD-3-Clause
  */
 
 package com.salesforce.reactivegrpc.examples;
@@ -18,7 +19,16 @@ import java.util.concurrent.ThreadLocalRandom;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Supplier;
 
-public class ResumeStreamDemoReactor {
+/**
+ * A demo for re-establishing a server stream in the face of an error using Reactor.
+ */
+public final class ResumeStreamReactorDemo {
+    private ResumeStreamReactorDemo() { }
+
+    /**
+     * FlakyNumberService tries to return the values 1..10, but fails most of the time.
+     */
+    // CHECKSTYLE DISABLE MagicNumber FOR 10 LINES
     private static class FlakyNumberService extends ReactorNumbersGrpc.NumbersImplBase {
         @Override
         public Flux<Message> oneToMany(Mono<Message> request) {
@@ -35,12 +45,12 @@ public class ResumeStreamDemoReactor {
 
     public static void main(String[] args) throws Exception {
         Server server = InProcessServerBuilder
-                .forName("ResumeStreamDemoReactor")
+                .forName("ResumeStreamReactorDemo")
                 .addService(new FlakyNumberService())
                 .build()
                 .start();
         ManagedChannel channel = InProcessChannelBuilder
-                .forName("ResumeStreamDemoReactor")
+                .forName("ResumeStreamReactorDemo")
                 .usePlaintext(true)
                 .build();
         ReactorNumbersGrpc.ReactorNumbersStub stub = ReactorNumbersGrpc.newReactorStub(channel);
@@ -55,12 +65,15 @@ public class ResumeStreamDemoReactor {
         server.shutdownNow();
     }
 
+    /**
+     * GrpcRetryFlux automatically restarts a gRPC Flowable stream in the face of an error.
+     * @param <T>
+     */
     private static class GrpcRetryFlux<T> extends Flux<T> {
         private final Flux<T> retryFlux;
 
-        public GrpcRetryFlux(Supplier<Flux<T>> fluxSupplier) {
-            this.retryFlux = Flux.<T>create(sink -> fluxSupplier.get().subscribe(sink::next, sink::error, sink::complete))
-                    .retryWhen(attempts -> attempts.doOnNext(err -> System.out.println("Retrying stream")));
+        GrpcRetryFlux(Supplier<Flux<T>> fluxSupplier) {
+            this.retryFlux = Flux.<T>create(sink -> fluxSupplier.get().subscribe(sink::next, sink::error, sink::complete)).retry();
         }
 
         @Override
