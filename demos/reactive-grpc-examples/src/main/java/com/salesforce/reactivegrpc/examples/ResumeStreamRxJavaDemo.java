@@ -13,7 +13,6 @@ import io.grpc.inprocess.InProcessChannelBuilder;
 import io.grpc.inprocess.InProcessServerBuilder;
 import io.reactivex.Flowable;
 import io.reactivex.Single;
-import org.reactivestreams.Publisher;
 import org.reactivestreams.Subscriber;
 
 import java.util.concurrent.ThreadLocalRandom;
@@ -74,8 +73,7 @@ public final class ResumeStreamRxJavaDemo {
         private final Flowable<T> retryFlowable;
 
         GrpcRetryFlowable(Supplier<Flowable<T>> flowableSupplier) {
-            this.retryFlowable = Flowable.unsafeCreate(
-                    (Publisher<T>) subscriber -> flowableSupplier.get().subscribe(subscriber)).retry();
+            this.retryFlowable = Flowable.defer(flowableSupplier::get).retry();
         }
 
         @Override

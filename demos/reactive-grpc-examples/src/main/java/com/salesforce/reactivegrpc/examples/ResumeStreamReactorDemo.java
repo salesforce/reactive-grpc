@@ -66,14 +66,14 @@ public final class ResumeStreamReactorDemo {
     }
 
     /**
-     * GrpcRetryFlux automatically restarts a gRPC Flowable stream in the face of an error.
+     * GrpcRetryFlux automatically restarts a gRPC Flux stream in the face of an error.
      * @param <T>
      */
     private static class GrpcRetryFlux<T> extends Flux<T> {
         private final Flux<T> retryFlux;
 
         GrpcRetryFlux(Supplier<Flux<T>> fluxSupplier) {
-            this.retryFlux = Flux.<T>create(sink -> fluxSupplier.get().subscribe(sink::next, sink::error, sink::complete)).retry();
+            this.retryFlux = Flux.defer(fluxSupplier::get).retry();
         }
 
         @Override
