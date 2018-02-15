@@ -34,7 +34,7 @@ public final class {{className}} {
         }
 
         private Reactor{{serviceName}}Stub(io.grpc.Channel channel, io.grpc.CallOptions callOptions) {
-            super(channel);
+            super(channel, callOptions);
             delegateStub = {{serviceName}}Grpc.newStub(channel).build(channel, callOptions);
         }
 
