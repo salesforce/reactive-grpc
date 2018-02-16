@@ -25,11 +25,22 @@ public final class {{className}} {
     {{#javaDoc}}
     {{{javaDoc}}}
     {{/javaDoc}}
-    public static final class Rx{{serviceName}}Stub {
+    public static final class Rx{{serviceName}}Stub extends io.grpc.stub.AbstractStub<Rx{{serviceName}}Stub> {
         private {{serviceName}}Grpc.{{serviceName}}Stub delegateStub;
 
         private Rx{{serviceName}}Stub(io.grpc.Channel channel) {
+            super(channel);
             delegateStub = {{serviceName}}Grpc.newStub(channel);
+        }
+
+        private Rx{{serviceName}}Stub(io.grpc.Channel channel, io.grpc.CallOptions callOptions) {
+            super(channel, callOptions);
+            delegateStub = {{serviceName}}Grpc.newStub(channel).build(channel, callOptions);
+        }
+
+        @Override
+        protected Rx{{serviceName}}Stub build(io.grpc.Channel channel, io.grpc.CallOptions callOptions) {
+            return new Rx{{serviceName}}Stub(channel, callOptions);
         }
 
         {{#methods}}
