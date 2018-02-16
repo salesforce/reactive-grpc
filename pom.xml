@@ -55,7 +55,7 @@
         <!-- Dependency Versions -->
         <grpc.version>1.9.0</grpc.version>
         <protoc.version>3.5.1</protoc.version> <!-- Same version as grpc-proto -->
-        <grpc.contrib.version>0.7.0</grpc.contrib.version>
+        <grpc.contrib.version>0.7.2-SNAPSHOT</grpc.contrib.version>
 
         <!-- Test Dependency Versions -->
         <junit.version>4.12</junit.version>
