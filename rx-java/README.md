@@ -86,6 +86,32 @@ After installing the plugin, RxGrpc service stubs will be generated along with y
   resp.subscribe(...);
   ```
   
+## Context propagation
+Because the non-blocking nature of RX, RX-Java tends to switch between threads a lot. 
+GRPC stores its context in the Thread context and is therefore often lost when RX 
+switches threads. To solve this problem, you can add a hook that makes the Context
+switch when RX switches threads:
+
+```java
+RxJavaPlugins.setScheduleHandler(original -> Context.current().wrap(original))
+```    
+    
+To make sure you only run this piece of code once, you can for example add a utiltily class 
+you can call after creating a stub, to make sure the handler is installed.
+
+```java
+public class RxContextPropagator {
+
+	private static AtomicBoolean INSTALLED = new AtomicBoolean();
+
+	public static void ensureInstalled() {
+		if (INSTALLED.compareAndSet(false, true)) {
+			RxJavaPlugins.setScheduleHandler(original -> Context.current().wrap(original));
+		}
+	}
+}
+```
+  
 Modules
 =======
 
