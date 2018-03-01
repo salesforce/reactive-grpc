@@ -1,3 +1,10 @@
+/*
+ *  Copyright (c) 2017, salesforce.com, inc.
+ *  All rights reserved.
+ *  Licensed under the BSD 3-Clause license.
+ *  For full license text, see LICENSE.txt file in the repo root  or https://opensource.org/licenses/BSD-3-Clause
+ */
+
 package com.salesforce.reactivegrpc.examples;
 
 import io.grpc.Server;
@@ -17,12 +24,16 @@ import java.util.concurrent.atomic.AtomicInteger;
  * Varying the size of the flow control window increases or decreases how much buffer space is available for
  * backpressure.
  */
-public class ContinuousBackpressureDemoServer extends RxNumbersGrpc.NumbersImplBase {
+public final class ContinuousBackpressureDemoServer extends RxNumbersGrpc.NumbersImplBase {
+    public static final int PORT = 9999;
+
+    private ContinuousBackpressureDemoServer() { }
+
     public static void main(String[] args) throws Exception {
         Server server = NettyServerBuilder
-                .forPort(9999)
+                .forPort(PORT)
                 .addService(new ContinuousBackpressureDemoServer())
-                .flowControlWindow(NettyServerBuilder.DEFAULT_FLOW_CONTROL_WINDOW / 1024)
+                .flowControlWindow(NettyServerBuilder.DEFAULT_FLOW_CONTROL_WINDOW)
                 .build()
                 .start();
 

@@ -1,3 +1,10 @@
+/*
+ *  Copyright (c) 2017, salesforce.com, inc.
+ *  All rights reserved.
+ *  Licensed under the BSD 3-Clause license.
+ *  For full license text, see LICENSE.txt file in the repo root  or https://opensource.org/licenses/BSD-3-Clause
+ */
+
 package com.salesforce.reactivegrpc.examples;
 
 import io.grpc.ManagedChannel;
@@ -14,12 +21,16 @@ import io.reactivex.Single;
  * Varying the size of the flow control window increases or decreases how much buffer space is available for
  * backpressure.
  */
-public class ContinuousBackpressureDemoClient {
+public final class ContinuousBackpressureDemoClient {
+    private static final int PAUSE_AFTER_N_MESSAGES = 20;
+
+    private ContinuousBackpressureDemoClient() { }
+
     public static void main(String[] args) throws Exception {
         ManagedChannel channel = NettyChannelBuilder
-                .forAddress("localhost", 9999)
+                .forAddress("localhost", ContinuousBackpressureDemoServer.PORT)
                 .usePlaintext(true)
-                .flowControlWindow(NettyChannelBuilder.DEFAULT_FLOW_CONTROL_WINDOW / 1024)
+                .flowControlWindow(NettyChannelBuilder.DEFAULT_FLOW_CONTROL_WINDOW)
                 .build();
         RxNumbersGrpc.RxNumbersStub stub = RxNumbersGrpc.newRxStub(channel);
 
@@ -29,10 +40,10 @@ public class ContinuousBackpressureDemoClient {
                     System.out.println(i);
 
                     try {
-                        if (i % 20 == 0) {
+                        if (i % PAUSE_AFTER_N_MESSAGES == 0) {
                             Thread.sleep(1);
                         }
-                    } catch (Exception e) {}
+                    } catch (Exception e) { }
                 });
 
         System.in.read();
