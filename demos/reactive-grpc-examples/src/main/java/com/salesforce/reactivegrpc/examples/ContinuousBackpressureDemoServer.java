@@ -26,6 +26,7 @@ import java.util.concurrent.atomic.AtomicInteger;
  */
 public final class ContinuousBackpressureDemoServer extends RxNumbersGrpc.NumbersImplBase {
     public static final int PORT = 9999;
+    private static final int PRINT_EVERY = 100;
 
     private ContinuousBackpressureDemoServer() { }
 
@@ -55,7 +56,9 @@ public final class ContinuousBackpressureDemoServer extends RxNumbersGrpc.Number
                 @Override
                 public Message next() {
                     int j = i.getAndIncrement();
-                    System.out.println(j);
+                    if (j % PRINT_EVERY == 0) {
+                        System.out.println(j);
+                    }
                     return Message.newBuilder().setNumber(j).build();
                 }
             };

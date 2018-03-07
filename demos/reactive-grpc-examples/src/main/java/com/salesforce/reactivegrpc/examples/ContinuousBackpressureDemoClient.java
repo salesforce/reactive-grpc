@@ -23,6 +23,7 @@ import io.reactivex.Single;
  */
 public final class ContinuousBackpressureDemoClient {
     private static final int PAUSE_AFTER_N_MESSAGES = 20;
+    private static final int PRINT_EVERY = 100;
 
     private ContinuousBackpressureDemoClient() { }
 
@@ -37,11 +38,13 @@ public final class ContinuousBackpressureDemoClient {
         stub.oneToMany(Single.just(Message.getDefaultInstance()))
                 .subscribe(m -> {
                     int i = m.getNumber();
-                    System.out.println(i);
+                    if (i % PRINT_EVERY == 0) {
+                        System.out.println(i);
+                    }
 
                     try {
-                        if (i % PAUSE_AFTER_N_MESSAGES == 0) {
-                            Thread.sleep(1);
+                        if (PAUSE_AFTER_N_MESSAGES != 0 && i % PAUSE_AFTER_N_MESSAGES == 0) {
+                            Thread.sleep(2);
                         }
                     } catch (Exception e) { }
                 });

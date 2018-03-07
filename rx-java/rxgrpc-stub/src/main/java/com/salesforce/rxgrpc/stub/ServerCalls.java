@@ -8,8 +8,8 @@
 package com.salesforce.rxgrpc.stub;
 
 import com.google.common.base.Preconditions;
+import com.google.common.util.concurrent.MoreExecutors;
 import com.salesforce.reactivegrpc.common.Function;
-import com.salesforce.reactivegrpc.common.ReactiveExecutor;
 import com.salesforce.reactivegrpc.common.ReactivePublisherBackpressureOnReadyHandler;
 import com.salesforce.reactivegrpc.common.ReactiveStreamObserverPublisher;
 import io.grpc.Status;
@@ -100,7 +100,7 @@ public final class ServerCalls {
         try {
             Single<TResponse> rxResponse = Preconditions.checkNotNull(delegate.apply(
                     Flowable.unsafeCreate(streamObserverPublisher)
-                            .observeOn(Schedulers.from(ReactiveExecutor.getSerializingExecutor()))
+                            .observeOn(Schedulers.from(MoreExecutors.directExecutor()))
                     ));
             rxResponse.subscribe(
                     new Consumer<TResponse>() {
@@ -143,7 +143,7 @@ public final class ServerCalls {
         try {
             Flowable<TResponse> rxResponse = Preconditions.checkNotNull(delegate.apply(
                     Flowable.unsafeCreate(streamObserverPublisher)
-                            .observeOn(Schedulers.from(ReactiveExecutor.getSerializingExecutor()))
+                            .observeOn(Schedulers.from(MoreExecutors.directExecutor()))
                     ));
             final Subscriber<TResponse> subscriber = new ReactivePublisherBackpressureOnReadyHandler<TResponse>(
                     (ServerCallStreamObserver<TResponse>) responseObserver);

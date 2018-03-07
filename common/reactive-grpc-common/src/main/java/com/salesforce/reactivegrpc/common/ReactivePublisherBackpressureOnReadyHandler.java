@@ -50,6 +50,12 @@ public class ReactivePublisherBackpressureOnReadyHandler<T> implements Subscribe
     private CountDownLatch subscribed = new CountDownLatch(1);
     private Runnable cancelRequestStream = Runnables.doNothing();
 
+    // Guard against spurious onReady() calls caused by a race between onNext() and onReady(). If the transport
+    // toggles isReady() from false to true while onNext() is executing, but before onNext() checks isReady(),
+    // request(1) would be called twice - once by onNext() and once by the onReady() scheduled during onNext()'s
+    // execution.
+    private final AtomicBoolean wasReady = new AtomicBoolean(false);
+
     public ReactivePublisherBackpressureOnReadyHandler(final ClientCallStreamObserver<T> requestStream) {
         this.requestStream = Preconditions.checkNotNull(requestStream);
         requestStream.setOnReadyHandler(this);
@@ -80,7 +86,7 @@ public class ReactivePublisherBackpressureOnReadyHandler<T> implements Subscribe
 
         }
         Preconditions.checkState(subscription != null, "onSubscribe() not yet called");
-        if (!isCanceled()) {
+        if (!isCanceled() && requestStream.isReady() && wasReady.compareAndSet(false, true)) {
             // restart the pump
             subscription.request(1);
         }
@@ -116,6 +122,9 @@ public class ReactivePublisherBackpressureOnReadyHandler<T> implements Subscribe
             if (requestStream.isReady()) {
                 // keep the pump going
                 subscription.request(1);
+            } else {
+                // note that back-pressure has begun
+                wasReady.set(false);
             }
         }
     }
