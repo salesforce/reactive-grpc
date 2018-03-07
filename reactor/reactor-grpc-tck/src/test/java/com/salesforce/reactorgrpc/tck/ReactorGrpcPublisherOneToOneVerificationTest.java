@@ -75,12 +75,6 @@ public class ReactorGrpcPublisherOneToOneVerificationTest extends PublisherVerif
         return publisher.flux();
     }
 
-    @Test(enabled = false)
-    @Override
-    public void required_spec317_mustNotSignalOnErrorWhenPendingAboveLongMaxValue() throws Throwable {
-        super.required_spec317_mustNotSignalOnErrorWhenPendingAboveLongMaxValue();
-    }
-
     private Message toMessage(int i) {
         return Message.newBuilder().setNumber(i).build();
     }

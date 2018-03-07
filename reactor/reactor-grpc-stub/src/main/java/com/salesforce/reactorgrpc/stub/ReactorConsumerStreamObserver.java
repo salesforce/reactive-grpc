@@ -8,7 +8,6 @@
 package com.salesforce.reactorgrpc.stub;
 
 import com.salesforce.reactivegrpc.common.ReactiveConsumerStreamObserver;
-import com.salesforce.reactivegrpc.common.ReactiveExecutor;
 import com.salesforce.reactivegrpc.common.ReactiveStreamObserverPublisher;
 import org.reactivestreams.Publisher;
 import reactor.core.publisher.Flux;
@@ -24,7 +23,7 @@ public class ReactorConsumerStreamObserver<TRequest, TResponse> extends Reactive
 
     @Override
     public Publisher<TResponse> getReactiveConsumerFromPublisher(ReactiveStreamObserverPublisher<TResponse> publisher) {
-        return Flux.from(publisher).publishOn(Schedulers.fromExecutor(ReactiveExecutor.getSerializingExecutor()));
+        return Flux.from(publisher).publishOn(Schedulers.immediate());
     }
 
 }

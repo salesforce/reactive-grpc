@@ -8,7 +8,6 @@
 package com.salesforce.reactorgrpc.stub;
 
 import com.google.common.base.Preconditions;
-import com.salesforce.reactivegrpc.common.ReactiveExecutor;
 import com.salesforce.reactivegrpc.common.ReactivePublisherBackpressureOnReadyHandler;
 import com.salesforce.reactivegrpc.common.ReactiveStreamObserverPublisher;
 import io.grpc.Status;
@@ -17,10 +16,10 @@ import io.grpc.StatusRuntimeException;
 import io.grpc.stub.CallStreamObserver;
 import io.grpc.stub.ServerCallStreamObserver;
 import io.grpc.stub.StreamObserver;
-import reactor.core.scheduler.Schedulers;
 import org.reactivestreams.Subscriber;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
+import reactor.core.scheduler.Schedulers;
 
 import java.util.function.Function;
 
@@ -90,7 +89,7 @@ public final class ServerCalls {
         try {
             Mono<TResponse> rxResponse = Preconditions.checkNotNull(delegate.apply(
                     Flux.from(streamObserverPublisher)
-                            .publishOn(Schedulers.fromExecutor(ReactiveExecutor.getSerializingExecutor()))));
+                            .publishOn(Schedulers.immediate())));
             rxResponse.subscribe(
                 value -> {
                     // Don't try to respond if the server has already canceled the request
@@ -126,7 +125,7 @@ public final class ServerCalls {
         try {
             Flux<TResponse> rxResponse = Preconditions.checkNotNull(delegate.apply(
                     Flux.from(streamObserverPublisher)
-                            .publishOn(Schedulers.fromExecutor(ReactiveExecutor.getSerializingExecutor()))));
+                            .publishOn(Schedulers.immediate())));
             Subscriber<TResponse> subscriber = new ReactivePublisherBackpressureOnReadyHandler<>(
                     (ServerCallStreamObserver<TResponse>) responseObserver);
             // Don't try to respond if the server has already canceled the request

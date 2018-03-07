@@ -18,6 +18,7 @@ public class ReactivePublisherBackpressureOnReadyHandlerTest {
     @Test
     public void runPrimesThePump() {
         ClientCallStreamObserver<Object> obs = mock(ClientCallStreamObserver.class);
+        when(obs.isReady()).thenReturn(true);
         ReactivePublisherBackpressureOnReadyHandler<Object> handler = new ReactivePublisherBackpressureOnReadyHandler<Object>(obs);
         Subscription sub = mock(Subscription.class);
 
