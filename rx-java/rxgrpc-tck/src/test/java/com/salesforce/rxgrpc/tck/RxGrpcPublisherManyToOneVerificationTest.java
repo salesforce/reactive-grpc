@@ -76,7 +76,7 @@ public class RxGrpcPublisherManyToOneVerificationTest extends PublisherVerificat
         return publisher.toFlowable();
     }
 
-    @Test(enabled = false)
+    @Test
     @Override
     public void required_spec317_mustNotSignalOnErrorWhenPendingAboveLongMaxValue() throws Throwable {
         super.required_spec317_mustNotSignalOnErrorWhenPendingAboveLongMaxValue();
