@@ -119,7 +119,7 @@ public class ContextPropagationIntegrationTest {
         RxGreeterGrpc.RxGreeterStub stub = RxGreeterGrpc.newRxStub(channel);
         Context.current()
                 .withValue(ctxKey, "ClientSendsContext")
-                .run(() -> stub.sayHello(worldReq).test().awaitTerminalEvent(1, TimeUnit.SECONDS));
+                .run(() -> worldReq.compose(stub::sayHello).test().awaitTerminalEvent(1, TimeUnit.SECONDS));
 
         assertThat(clientInterceptor.getSendMessageCtxValue()).isEqualTo("ClientSendsContext");
     }
@@ -128,7 +128,8 @@ public class ContextPropagationIntegrationTest {
     public void ClientGetsContext() {
         RxGreeterGrpc.RxGreeterStub stub = RxGreeterGrpc.newRxStub(channel);
 
-        TestObserver<HelloResponse> testObserver = stub.sayHello(worldReq)
+        TestObserver<HelloResponse> testObserver = worldReq
+                .compose(stub::sayHello)
                 .doOnSuccess(resp -> {
                     Context ctx = Context.current();
                     assertThat(ctxKey.get(ctx)).isEqualTo("ClientGetsContext");
@@ -143,7 +144,7 @@ public class ContextPropagationIntegrationTest {
     public void ServerAcceptsContext() {
         RxGreeterGrpc.RxGreeterStub stub = RxGreeterGrpc.newRxStub(channel);
 
-        stub.sayHello(worldReq).test().awaitTerminalEvent(1, TimeUnit.SECONDS);
+        worldReq.compose(stub::sayHello).test().awaitTerminalEvent(1, TimeUnit.SECONDS);
 
         assertThat(svc.getReceivedCtxValue()).isEqualTo("ServerAcceptsContext");
     }

@@ -39,10 +39,10 @@ public final class ChatClient {
         // Prompt the user for their name
         console.println("Press ctrl+D to quit");
         String author = console.readLine("Who are you? > ");
-        stub.postMessage(toMessage(author, author + " joined.")).subscribe();
+        toMessage(author, author + " joined.").compose(stub::postMessage).subscribe();
 
         // Subscribe to incoming messages
-        Disposable chatSubscription = stub.getMessages(Single.just(Empty.getDefaultInstance())).subscribe(
+        Disposable chatSubscription = Single.just(Empty.getDefaultInstance()).as(stub::getMessages).subscribe(
             message -> {
                 // Don't re-print our own messages
                 if (!message.getAuthor().equals(author)) {
@@ -71,7 +71,7 @@ public final class ChatClient {
 
         // Wait for a signal to exit, then clean up
         done.await();
-        stub.postMessage(toMessage(author, author + " left.")).subscribe();
+        toMessage(author, author + " left.").compose(stub::postMessage).subscribe();
         chatSubscription.dispose();
         channel.shutdown();
         channel.awaitTermination(1, TimeUnit.SECONDS);

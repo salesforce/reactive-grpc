@@ -28,25 +28,25 @@ public class UnexpectedServerErrorIntegrationTest {
         RxGreeterGrpc.GreeterImplBase svc = new RxGreeterGrpc.GreeterImplBase() {
             @Override
             public Single<HelloResponse> sayHello(Single<HelloRequest> rxRequest) {
-                return rxRequest.map(this::map);
+                return rxRequest.map(this::kaboom);
             }
 
             @Override
             public Flowable<HelloResponse> sayHelloRespStream(Single<HelloRequest> rxRequest) {
-                return rxRequest.map(this::map).toFlowable();
+                return rxRequest.map(this::kaboom).toFlowable();
             }
 
             @Override
             public Single<HelloResponse> sayHelloReqStream(Flowable<HelloRequest> rxRequest) {
-                return rxRequest.map(this::map).firstOrError();
+                return rxRequest.map(this::kaboom).firstOrError();
             }
 
             @Override
             public Flowable<HelloResponse> sayHelloBothStream(Flowable<HelloRequest> rxRequest) {
-                return rxRequest.map(this::map);
+                return rxRequest.map(this::kaboom);
             }
 
-            private HelloResponse map(HelloRequest request) throws Exception{
+            private HelloResponse kaboom(HelloRequest request) throws Exception{
                 throw Status.INTERNAL.withDescription("Kaboom!").asException();
             }
         };
@@ -67,7 +67,7 @@ public class UnexpectedServerErrorIntegrationTest {
     @Test
     public void oneToOne() {
         RxGreeterGrpc.RxGreeterStub stub = RxGreeterGrpc.newRxStub(channel);
-        Single<HelloResponse> resp = stub.sayHello(Single.just(HelloRequest.getDefaultInstance()));
+        Single<HelloResponse> resp = Single.just(HelloRequest.getDefaultInstance()).compose(stub::sayHello);
         TestObserver<HelloResponse> test = resp.test();
 
         test.awaitTerminalEvent(3, TimeUnit.SECONDS);
@@ -78,9 +78,9 @@ public class UnexpectedServerErrorIntegrationTest {
     @Test
     public void oneToMany() {
         RxGreeterGrpc.RxGreeterStub stub = RxGreeterGrpc.newRxStub(channel);
-        Flowable<HelloResponse> resp = stub.sayHelloRespStream(Single.just(HelloRequest.getDefaultInstance()));
+        Flowable<HelloResponse> resp = Single.just(HelloRequest.getDefaultInstance()).as(stub::sayHelloRespStream);
         TestSubscriber<HelloResponse> test = resp
-                .doOnNext(msg -> System.out.println(msg))
+                .doOnNext(System.out::println)
                 .doOnError(throwable -> System.out.println(throwable.getMessage()))
                 .doOnComplete(() -> System.out.println("Completed"))
                 .doOnCancel(() -> System.out.println("Client canceled"))
@@ -95,7 +95,7 @@ public class UnexpectedServerErrorIntegrationTest {
     public void manyToOne() {
         RxGreeterGrpc.RxGreeterStub stub = RxGreeterGrpc.newRxStub(channel);
         Flowable<HelloRequest> req = Flowable.just(HelloRequest.getDefaultInstance());
-        Single<HelloResponse> resp = stub.sayHelloReqStream(req);
+        Single<HelloResponse> resp = req.as(stub::sayHelloReqStream);
         TestObserver<HelloResponse> test = resp.test();
 
         test.awaitTerminalEvent(3, TimeUnit.SECONDS);
@@ -108,7 +108,7 @@ public class UnexpectedServerErrorIntegrationTest {
     public void manyToMany() {
         RxGreeterGrpc.RxGreeterStub stub = RxGreeterGrpc.newRxStub(channel);
         Flowable<HelloRequest> req = Flowable.just(HelloRequest.getDefaultInstance());
-        Flowable<HelloResponse> resp = stub.sayHelloBothStream(req);
+        Flowable<HelloResponse> resp = req.compose(stub::sayHelloBothStream);
         TestSubscriber<HelloResponse> test = resp.test();
 
         test.awaitTerminalEvent(3, TimeUnit.SECONDS);

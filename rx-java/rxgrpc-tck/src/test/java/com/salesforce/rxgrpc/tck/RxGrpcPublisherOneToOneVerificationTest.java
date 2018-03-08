@@ -61,7 +61,7 @@ public class RxGrpcPublisherOneToOneVerificationTest extends PublisherVerificati
     public Publisher<Message> createPublisher(long elements) {
         RxTckGrpc.RxTckStub stub = RxTckGrpc.newRxStub(channel);
         Single<Message> request = Single.just(toMessage((int) elements));
-        Single<Message> publisher = stub.oneToOne(request);
+        Single<Message> publisher = request.compose(stub::oneToOne);
 
         return publisher.toFlowable();
     }
@@ -70,7 +70,7 @@ public class RxGrpcPublisherOneToOneVerificationTest extends PublisherVerificati
     public Publisher<Message> createFailedPublisher() {
         RxTckGrpc.RxTckStub stub = RxTckGrpc.newRxStub(channel);
         Single<Message> request = Single.just(toMessage(TckService.KABOOM));
-        Single<Message> publisher = stub.oneToOne(request);
+        Single<Message> publisher = request.compose(stub::oneToOne);
 
         return publisher.toFlowable();
     }

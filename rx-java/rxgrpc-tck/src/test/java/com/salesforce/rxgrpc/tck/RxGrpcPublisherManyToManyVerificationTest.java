@@ -56,7 +56,7 @@ public class RxGrpcPublisherManyToManyVerificationTest extends PublisherVerifica
     public Publisher<Message> createPublisher(long elements) {
         RxTckGrpc.RxTckStub stub = RxTckGrpc.newRxStub(channel);
         Flowable<Message> request = Flowable.range(0, (int)elements).map(this::toMessage);
-        Publisher<Message> publisher = stub.manyToMany(request);
+        Publisher<Message> publisher = request.compose(stub::manyToMany);
 
         return publisher;
     }
@@ -65,7 +65,7 @@ public class RxGrpcPublisherManyToManyVerificationTest extends PublisherVerifica
     public Publisher<Message> createFailedPublisher() {
         RxTckGrpc.RxTckStub stub = RxTckGrpc.newRxStub(channel);
         Flowable<Message> request = Flowable.just(toMessage(TckService.KABOOM));
-        Publisher<Message> publisher = stub.manyToMany(request);
+        Publisher<Message> publisher = request.compose(stub::manyToMany);
 
         return publisher;
     }

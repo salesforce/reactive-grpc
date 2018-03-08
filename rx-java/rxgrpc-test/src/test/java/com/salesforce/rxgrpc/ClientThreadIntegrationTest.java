@@ -93,7 +93,7 @@ public class ClientThreadIntegrationTest {
     public void oneToOne() {
         RxGreeterGrpc.RxGreeterStub stub = RxGreeterGrpc.newRxStub(channel);
         Single<HelloRequest> req = Single.just(HelloRequest.newBuilder().setName("rxjava").build());
-        Single<HelloResponse> resp = stub.sayHello(req);
+        Single<HelloResponse> resp = req.compose(stub::sayHello);
 
         AtomicReference<String> clientThreadName = new AtomicReference<>();
 
@@ -119,7 +119,7 @@ public class ClientThreadIntegrationTest {
 
         AtomicReference<String> clientThreadName = new AtomicReference<>();
 
-        Flowable<HelloResponse> resp = stub.sayHelloBothStream(req);
+        Flowable<HelloResponse> resp = req.compose(stub::sayHelloBothStream);
 
         TestSubscriber<String> testSubscriber = resp
                 .map(HelloResponse::getMessage)
