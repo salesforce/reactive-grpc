@@ -57,6 +57,8 @@
         <protoc.version>3.5.1</protoc.version> <!-- Same version as grpc-proto -->
         <grpc.contrib.version>0.8.0</grpc.contrib.version>
 
+        <reactor.version>3.1.1.RELEASE</reactor.version>
+
         <!-- Test Dependency Versions -->
         <junit.version>4.12</junit.version>
         <assertj.version>3.6.2</assertj.version>

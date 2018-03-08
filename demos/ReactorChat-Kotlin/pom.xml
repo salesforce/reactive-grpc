@@ -25,6 +25,10 @@
         <module>ReactorChat-Client-Kt</module>
     </modules>
 
+    <properties>
+        <kotlin.version>1.2.30</kotlin.version>
+    </properties>
+
     <dependencies>
         <dependency>
             <groupId>io.grpc</groupId>
