@@ -104,11 +104,11 @@ public class ConcurrentRequestIntegrationTest {
         // == MAKE REQUESTS ==
         // One to One
         Single<HelloRequest> req1 = Single.just(HelloRequest.newBuilder().setName("rxjava").build());
-        Single<HelloResponse> resp1 = stub.sayHello(req1);
+        Single<HelloResponse> resp1 = req1.compose(stub::sayHello);
 
         // One to Many
         Single<HelloRequest> req2 = Single.just(HelloRequest.newBuilder().setName("rxjava").build());
-        Flowable<HelloResponse> resp2 = stub.sayHelloRespStream(req2);
+        Flowable<HelloResponse> resp2 = req2.as(stub::sayHelloRespStream);
 
         // Many to One
         Flowable<HelloRequest> req3 = Flowable.just(
@@ -116,7 +116,7 @@ public class ConcurrentRequestIntegrationTest {
                 HelloRequest.newBuilder().setName("b").build(),
                 HelloRequest.newBuilder().setName("c").build());
 
-        Single<HelloResponse> resp3 = stub.sayHelloReqStream(req3);
+        Single<HelloResponse> resp3 = req3.as(stub::sayHelloReqStream);
 
         // Many to Many
         Flowable<HelloRequest> req4 = Flowable.just(
@@ -126,7 +126,7 @@ public class ConcurrentRequestIntegrationTest {
                 HelloRequest.newBuilder().setName("d").build(),
                 HelloRequest.newBuilder().setName("e").build());
 
-        Flowable<HelloResponse> resp4 = stub.sayHelloBothStream(req4);
+        Flowable<HelloResponse> resp4 = req4.compose(stub::sayHelloBothStream);
 
         // == VERIFY RESPONSES ==
         ListeningExecutorService executorService = MoreExecutors.listeningDecorator(Executors.newCachedThreadPool());

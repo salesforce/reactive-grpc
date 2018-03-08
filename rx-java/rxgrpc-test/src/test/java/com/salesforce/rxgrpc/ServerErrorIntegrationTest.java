@@ -63,7 +63,7 @@ public class ServerErrorIntegrationTest {
     @Test
     public void oneToOne() {
         RxGreeterGrpc.RxGreeterStub stub = RxGreeterGrpc.newRxStub(channel);
-        Single<HelloResponse> resp = stub.sayHello(Single.just(HelloRequest.getDefaultInstance()));
+        Single<HelloResponse> resp = Single.just(HelloRequest.getDefaultInstance()).compose(stub::sayHello);
         TestObserver<HelloResponse> test = resp.test();
 
         test.awaitTerminalEvent(3, TimeUnit.SECONDS);
@@ -74,7 +74,7 @@ public class ServerErrorIntegrationTest {
     @Test
     public void oneToMany() {
         RxGreeterGrpc.RxGreeterStub stub = RxGreeterGrpc.newRxStub(channel);
-        Flowable<HelloResponse> resp = stub.sayHelloRespStream(Single.just(HelloRequest.getDefaultInstance()));
+        Flowable<HelloResponse> resp = Single.just(HelloRequest.getDefaultInstance()).as(stub::sayHelloRespStream);
         TestSubscriber<HelloResponse> test = resp
                 .doOnNext(System.out::println)
                 .doOnError(throwable -> System.out.println(throwable.getMessage()))
@@ -90,7 +90,7 @@ public class ServerErrorIntegrationTest {
     @Test
     public void manyToOne() {
         RxGreeterGrpc.RxGreeterStub stub = RxGreeterGrpc.newRxStub(channel);
-        Single<HelloResponse> resp = stub.sayHelloReqStream(Flowable.just(HelloRequest.getDefaultInstance()));
+        Single<HelloResponse> resp = Flowable.just(HelloRequest.getDefaultInstance()).as(stub::sayHelloReqStream);
         TestObserver<HelloResponse> test = resp.test();
 
         test.awaitTerminalEvent(3, TimeUnit.SECONDS);
@@ -101,7 +101,7 @@ public class ServerErrorIntegrationTest {
     @Test
     public void manyToMany() {
         RxGreeterGrpc.RxGreeterStub stub = RxGreeterGrpc.newRxStub(channel);
-        Flowable<HelloResponse> resp = stub.sayHelloBothStream(Flowable.just(HelloRequest.getDefaultInstance()));
+        Flowable<HelloResponse> resp = Flowable.just(HelloRequest.getDefaultInstance()).compose(stub::sayHelloBothStream);
         TestSubscriber<HelloResponse> test = resp.test();
 
         test.awaitTerminalEvent(3, TimeUnit.SECONDS);

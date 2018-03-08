@@ -82,11 +82,27 @@ After installing the plugin, RxGrpc service stubs will be generated along with y
           HelloRequest.newBuilder().setName("a").build(),
           HelloRequest.newBuilder().setName("b").build(),
           HelloRequest.newBuilder().setName("c").build());
-  Flowable<HelloResponse> resp = stub.sayHelloBothStream(req);
+  Flowable<HelloResponse> resp = req.compose(stub::sayHelloBothStream);
   resp.subscribe(...);
   ```
   
-## Context propagation
+## Don't break the chain
+Used on their own, the generated RxGrpc stub methods do not cleanly chain with other RxJava operators.
+Using the `compose()` and `as()` methods of `Single` and `Flowable` are preferred over direct invocation.
+
+#### One→One, Many→Many
+```java
+Single<HelloResponse> singleResponse = singleRequest.compose(stub::sayHello);
+Flowable<HelloResponse> flowableResponse = flowableRequest.compose(stub::sayHelloBothStream);
+```
+
+#### One→Many, Many→One
+```java
+Single<HelloResponse> singleResponse = flowableRequest.as(stub::sayHelloRequestStream);
+Flowable<HelloResponse> flowableResponse = singleRequest.as(stub::sayHelloResponseStream);
+```
+  
+## gRPC Context propagation
 Because the non-blocking nature of RX, RX-Java tends to switch between threads a lot. 
 GRPC stores its context in the Thread context and is therefore often lost when RX 
 switches threads. To solve this problem, you can add a hook that makes the Context

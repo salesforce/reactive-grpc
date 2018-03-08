@@ -95,7 +95,7 @@ public class BackpressureIntegrationTest {
     }
 
     @Test
-    public void clientToServerBackpressure() throws InterruptedException {
+    public void clientToServerBackpressure() {
         RxNumbersGrpc.RxNumbersStub stub = RxNumbersGrpc.newRxStub(channel);
 
         Flowable<NumberProto.Number> rxRequest = Flowable
@@ -104,7 +104,7 @@ public class BackpressureIntegrationTest {
                 .doOnNext(i -> updateNumberOfWaits(lastValueTime, numberOfWaits))
                 .map(BackpressureIntegrationTest::protoNum);
 
-        TestObserver<NumberProto.Number> rxResponse = stub.requestPressure(rxRequest).test();
+        TestObserver<NumberProto.Number> rxResponse = rxRequest.as(stub::requestPressure).test();
 
         rxResponse.awaitTerminalEvent(5, TimeUnit.SECONDS);
         rxResponse.assertComplete()
@@ -114,12 +114,12 @@ public class BackpressureIntegrationTest {
     }
 
     @Test
-    public void serverToClientBackpressure() throws InterruptedException {
+    public void serverToClientBackpressure() {
         RxNumbersGrpc.RxNumbersStub stub = RxNumbersGrpc.newRxStub(channel);
 
         Single<Empty> rxRequest = Single.just(Empty.getDefaultInstance());
 
-        TestSubscriber<NumberProto.Number> rxResponse = stub.responsePressure(rxRequest)
+        TestSubscriber<NumberProto.Number> rxResponse = rxRequest.as(stub::responsePressure)
                 .doOnNext(n -> System.out.println(n.getNumber(0) + "  <--"))
                 .doOnNext(n -> waitIfValuesAreEqual(n.getNumber(0), 3))
                 .test();
@@ -132,10 +132,11 @@ public class BackpressureIntegrationTest {
     }
 
     @Test
-    public void bidiResponseBackpressure() throws InterruptedException {
+    public void bidiResponseBackpressure() {
         RxNumbersGrpc.RxNumbersStub stub = RxNumbersGrpc.newRxStub(channel);
 
-        TestSubscriber<NumberProto.Number> rxResponse = stub.twoWayResponsePressure(Flowable.empty())
+        TestSubscriber<NumberProto.Number> rxResponse = Flowable.<NumberProto.Number>empty()
+                .compose(stub::twoWayResponsePressure)
                 .doOnNext(n -> System.out.println(n.getNumber(0) + "  <--"))
                 .doOnNext(n -> waitIfValuesAreEqual(n.getNumber(0), 3))
                 .test();
@@ -148,7 +149,7 @@ public class BackpressureIntegrationTest {
     }
 
     @Test
-    public void bidiRequestBackpressure() throws InterruptedException {
+    public void bidiRequestBackpressure() {
         RxNumbersGrpc.RxNumbersStub stub = RxNumbersGrpc.newRxStub(channel);
 
         Flowable<NumberProto.Number> rxRequest = Flowable
@@ -157,7 +158,7 @@ public class BackpressureIntegrationTest {
                 .doOnNext(i -> updateNumberOfWaits(lastValueTime, numberOfWaits))
                 .map(BackpressureIntegrationTest::protoNum);
 
-        TestSubscriber<NumberProto.Number> rxResponse = stub.twoWayRequestPressure(rxRequest).test();
+        TestSubscriber<NumberProto.Number> rxResponse = rxRequest.compose(stub::twoWayRequestPressure).test();
 
         rxResponse.awaitTerminalEvent(5, TimeUnit.SECONDS);
         rxResponse.assertComplete()
@@ -180,7 +181,7 @@ public class BackpressureIntegrationTest {
         if (value == other) {
             try {
                 Thread.sleep(2000);
-                } catch (InterruptedException e) {
+            } catch (InterruptedException e) {
             }
         }
     }

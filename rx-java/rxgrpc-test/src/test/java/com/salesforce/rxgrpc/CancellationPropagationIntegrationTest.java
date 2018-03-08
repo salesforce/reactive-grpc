@@ -42,21 +42,21 @@ public class CancellationPropagationIntegrationTest {
         private AtomicBoolean wasCanceled = new AtomicBoolean(false);
         private AtomicBoolean explicitCancel = new AtomicBoolean(false);
 
-        public void reset() {
+        void reset() {
             lastNumberProduced.set(Integer.MIN_VALUE);
             wasCanceled.set(false);
             explicitCancel.set(false);
         }
 
-        public int getLastNumberProduced() {
+        int getLastNumberProduced() {
             return lastNumberProduced.get();
         }
 
-        public boolean wasCanceled() {
+        boolean wasCanceled() {
             return wasCanceled.get();
         }
 
-        public void setExplicitCancel(boolean explicitCancel) {
+        void setExplicitCancel(boolean explicitCancel) {
             this.explicitCancel.set(explicitCancel);
         }
 
@@ -124,8 +124,8 @@ public class CancellationPropagationIntegrationTest {
     @Test
     public void clientCanCancelServerStreamExplicitly() throws InterruptedException {
         RxNumbersGrpc.RxNumbersStub stub = RxNumbersGrpc.newRxStub(channel);
-        TestSubscriber<NumberProto.Number> subscription = stub
-                .responsePressure(Single.just(Empty.getDefaultInstance()))
+        TestSubscriber<NumberProto.Number> subscription = Single.just(Empty.getDefaultInstance())
+                .as(stub::responsePressure)
                 .doOnNext(number -> System.out.println(number.getNumber(0)))
                 .doOnError(throwable -> System.out.println(throwable.getMessage()))
                 .doOnComplete(() -> System.out.println("Completed"))
@@ -145,8 +145,8 @@ public class CancellationPropagationIntegrationTest {
     @Test
     public void clientCanCancelServerStreamImplicitly() throws InterruptedException {
         RxNumbersGrpc.RxNumbersStub stub = RxNumbersGrpc.newRxStub(channel);
-        TestSubscriber<NumberProto.Number> subscription = stub
-                .responsePressure(Single.just(Empty.getDefaultInstance()))
+        TestSubscriber<NumberProto.Number> subscription =  Single.just(Empty.getDefaultInstance())
+                .as(stub::responsePressure)
                 .doOnNext(number -> System.out.println(number.getNumber(0)))
                 .doOnError(throwable -> System.out.println(throwable.getMessage()))
                 .doOnComplete(() -> System.out.println("Completed"))
@@ -186,8 +186,8 @@ public class CancellationPropagationIntegrationTest {
                     System.out.println("Client canceled");
                 });
 
-        TestObserver<NumberProto.Number> observer = stub
-                .requestPressure(request)
+        TestObserver<NumberProto.Number> observer = request
+                .as(stub::requestPressure)
                 .doOnSuccess(number -> System.out.println(number.getNumber(0)))
                 .doOnError(throwable -> System.out.println(throwable.getMessage()))
                 .test();
@@ -222,8 +222,8 @@ public class CancellationPropagationIntegrationTest {
                     System.out.println("Client canceled");
                 });
 
-        TestObserver<NumberProto.Number> observer = stub
-                .requestPressure(request)
+        TestObserver<NumberProto.Number> observer = request
+                .as(stub::requestPressure)
                 .doOnSuccess(number -> System.out.println(number.getNumber(0)))
                 .doOnError(throwable -> System.out.println(throwable.getMessage()))
                 .test();
@@ -257,8 +257,8 @@ public class CancellationPropagationIntegrationTest {
                     System.out.println("Client canceled");
                 });
 
-        TestSubscriber<NumberProto.Number> observer = stub
-                .twoWayPressure(request)
+        TestSubscriber<NumberProto.Number> observer = request
+                .compose(stub::twoWayPressure)
                 .doOnNext(number -> System.out.println(number.getNumber(0)))
                 .doOnError(throwable -> System.out.println(throwable.getMessage()))
                 .test();
@@ -291,8 +291,8 @@ public class CancellationPropagationIntegrationTest {
                     System.out.println("Client canceled");
                 });
 
-        TestSubscriber<NumberProto.Number> observer = stub
-                .twoWayPressure(request)
+        TestSubscriber<NumberProto.Number> observer = request
+                .compose(stub::twoWayPressure)
                 .doOnNext(number -> System.out.println(number.getNumber(0)))
                 .doOnError(throwable -> System.out.println(throwable.getMessage()))
                 .test();

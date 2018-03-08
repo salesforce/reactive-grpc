@@ -117,7 +117,10 @@ public class ReactiveClientStandardServerInteropTest {
     public void oneToOne() {
         RxGreeterGrpc.RxGreeterStub stub = RxGreeterGrpc.newRxStub(channel);
         Single<String> rxRequest = Single.just("World");
-        Single<String> rxResponse = stub.sayHello(rxRequest.map(this::toRequest)).map(this::fromResponse);
+        Single<String> rxResponse = rxRequest
+                .map(this::toRequest)
+                .compose(stub::sayHello)
+                .map(this::fromResponse);
 
         TestObserver<String> test = rxResponse.test();
         test.awaitTerminalEvent(1, TimeUnit.SECONDS);
@@ -130,7 +133,10 @@ public class ReactiveClientStandardServerInteropTest {
     public void oneToMany() {
         RxGreeterGrpc.RxGreeterStub stub = RxGreeterGrpc.newRxStub(channel);
         Single<String> rxRequest = Single.just("World");
-        Flowable<String> rxResponse = stub.sayHelloRespStream(rxRequest.map(this::toRequest)).map(this::fromResponse);
+        Flowable<String> rxResponse = rxRequest
+                .map(this::toRequest)
+                .as(stub::sayHelloRespStream)
+                .map(this::fromResponse);
 
         TestSubscriber<String> test = rxResponse.test();
         test.awaitTerminalEvent(1, TimeUnit.SECONDS);
@@ -143,7 +149,10 @@ public class ReactiveClientStandardServerInteropTest {
     public void manyToOne() {
         RxGreeterGrpc.RxGreeterStub stub = RxGreeterGrpc.newRxStub(channel);
         Flowable<String> rxRequest = Flowable.just("A", "B", "C");
-        Single<String> rxResponse = stub.sayHelloReqStream(rxRequest.map(this::toRequest)).map(this::fromResponse);
+        Single<String> rxResponse = rxRequest
+                .map(this::toRequest)
+                .as(stub::sayHelloReqStream)
+                .map(this::fromResponse);
 
         TestObserver<String> test = rxResponse.test();
         test.awaitTerminalEvent(1, TimeUnit.SECONDS);
@@ -156,7 +165,10 @@ public class ReactiveClientStandardServerInteropTest {
     public void manyToMany() {
         RxGreeterGrpc.RxGreeterStub stub = RxGreeterGrpc.newRxStub(channel);
         Flowable<String> rxRequest = Flowable.just("A", "B", "C", "D");
-        Flowable<String> rxResponse = stub.sayHelloBothStream(rxRequest.map(this::toRequest)).map(this::fromResponse);
+        Flowable<String> rxResponse = rxRequest
+                .map(this::toRequest)
+                .compose(stub::sayHelloBothStream)
+                .map(this::fromResponse);
 
         TestSubscriber<String> test = rxResponse.test();
         test.awaitTerminalEvent(1, TimeUnit.SECONDS);

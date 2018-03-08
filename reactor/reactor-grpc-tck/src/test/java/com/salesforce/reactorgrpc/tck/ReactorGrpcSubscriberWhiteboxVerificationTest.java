@@ -21,6 +21,7 @@ import javax.annotation.Nullable;
  * Subscriber tests from the Reactive Streams Technology Compatibility Kit.
  * https://github.com/reactive-streams/reactive-streams-jvm/tree/master/tck
  */
+@SuppressWarnings("Duplicates")
 public class ReactorGrpcSubscriberWhiteboxVerificationTest extends SubscriberWhiteboxVerification<Message> {
     public ReactorGrpcSubscriberWhiteboxVerificationTest() {
         super(new TestEnvironment());

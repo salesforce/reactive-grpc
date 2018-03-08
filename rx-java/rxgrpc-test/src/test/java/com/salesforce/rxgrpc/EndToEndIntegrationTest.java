@@ -84,10 +84,10 @@ public class EndToEndIntegrationTest {
     }
 
     @Test
-    public void oneToOne() throws IOException {
+    public void oneToOne() {
         RxGreeterGrpc.RxGreeterStub stub = RxGreeterGrpc.newRxStub(channel);
         Single<HelloRequest> req = Single.just(HelloRequest.newBuilder().setName("rxjava").build());
-        Single<HelloResponse> resp = stub.sayHello(req);
+        Single<HelloResponse> resp = req.compose(stub::sayHello);
 
         TestObserver<String> testObserver = resp.map(HelloResponse::getMessage).test();
         testObserver.awaitTerminalEvent(3, TimeUnit.SECONDS);
@@ -95,10 +95,10 @@ public class EndToEndIntegrationTest {
     }
 
     @Test
-    public void oneToMany() throws IOException {
+    public void oneToMany() {
         RxGreeterGrpc.RxGreeterStub stub = RxGreeterGrpc.newRxStub(channel);
         Single<HelloRequest> req = Single.just(HelloRequest.newBuilder().setName("rxjava").build());
-        Flowable<HelloResponse> resp = stub.sayHelloRespStream(req);
+        Flowable<HelloResponse> resp = req.as(stub::sayHelloRespStream);
 
         TestSubscriber<String> testSubscriber = resp.map(HelloResponse::getMessage).test();
         testSubscriber.awaitTerminalEvent(3, TimeUnit.SECONDS);
@@ -106,14 +106,14 @@ public class EndToEndIntegrationTest {
     }
 
     @Test
-    public void manyToOne() throws Exception {
+    public void manyToOne() {
         RxGreeterGrpc.RxGreeterStub stub = RxGreeterGrpc.newRxStub(channel);
         Flowable<HelloRequest> req = Flowable.just(
                 HelloRequest.newBuilder().setName("a").build(),
                 HelloRequest.newBuilder().setName("b").build(),
                 HelloRequest.newBuilder().setName("c").build());
 
-        Single<HelloResponse> resp = stub.sayHelloReqStream(req);
+        Single<HelloResponse> resp = req.as(stub::sayHelloReqStream);
 
         TestObserver<String> testObserver = resp.map(HelloResponse::getMessage).test();
         testObserver.awaitTerminalEvent(3, TimeUnit.SECONDS);
@@ -121,7 +121,7 @@ public class EndToEndIntegrationTest {
     }
 
     @Test
-    public void manyToMany() throws Exception {
+    public void manyToMany() {
         RxGreeterGrpc.RxGreeterStub stub = RxGreeterGrpc.newRxStub(channel);
         Flowable<HelloRequest> req = Flowable.just(
                 HelloRequest.newBuilder().setName("a").build(),
@@ -130,7 +130,7 @@ public class EndToEndIntegrationTest {
                 HelloRequest.newBuilder().setName("d").build(),
                 HelloRequest.newBuilder().setName("e").build());
 
-        Flowable<HelloResponse> resp = stub.sayHelloBothStream(req);
+        Flowable<HelloResponse> resp = req.compose(stub::sayHelloBothStream);
 
         TestSubscriber<String> testSubscriber = resp.map(HelloResponse::getMessage).test();
         testSubscriber.awaitTerminalEvent(3, TimeUnit.SECONDS);

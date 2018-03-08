@@ -82,24 +82,30 @@ public class ChainedCallIntegrationTest {
     public void servicesCanCallOtherServices() throws InterruptedException {
         RxGreeterGrpc.RxGreeterStub stub = RxGreeterGrpc.newRxStub(channel);
 
-        Single<HelloRequest> input = Single.just(request("X"));
-        Single<HelloRequest> one = stub.sayHello(input)
+        Single<String> chain = Single.just(request("X"))
+                // one -> one
+                .compose(stub::sayHello)
                 .map(ChainedCallIntegrationTest::bridge)
-                .doOnSuccess(System.out::println);
-        Flowable<HelloRequest> two = stub.sayHelloRespStream(one)
+                .doOnSuccess(System.out::println)
+                // one -> many
+                .as(stub::sayHelloRespStream)
                 .map(ChainedCallIntegrationTest::bridge)
-                .doOnNext(System.out::println);
-        Flowable<HelloRequest> three = stub.sayHelloBothStream(two)
+                .doOnNext(System.out::println)
+                // many -> many
+                .compose(stub::sayHelloBothStream)
                 .map(ChainedCallIntegrationTest::bridge)
-                .doOnNext(System.out::println);
-        Single<HelloRequest> four = stub.sayHelloReqStream(three)
+                .doOnNext(System.out::println)
+                // many -> one
+                .as(stub::sayHelloReqStream)
                 .map(ChainedCallIntegrationTest::bridge)
-                .doOnSuccess(System.out::println);
-        Single<String> five = stub.sayHello(four)
+                .doOnSuccess(System.out::println)
+                // one -> one
+                .compose(stub::sayHello)
                 .map(HelloResponse::getMessage)
                 .doOnSuccess(System.out::println);
 
-        TestObserver<String> test = five.test();
+
+        TestObserver<String> test = chain.test();
 
         test.awaitTerminalEvent(2, TimeUnit.SECONDS);
         test.assertComplete();
