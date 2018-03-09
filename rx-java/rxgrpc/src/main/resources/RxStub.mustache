@@ -51,7 +51,7 @@ public final class {{className}} {
         @java.lang.Deprecated
             {{/deprecated}}
         public {{#isManyOutput}}io.reactivex.Flowable{{/isManyOutput}}{{^isManyOutput}}io.reactivex.Single{{/isManyOutput}}<{{outputType}}> {{methodName}}({{#isManyInput}}io.reactivex.Flowable{{/isManyInput}}{{^isManyInput}}io.reactivex.Single{{/isManyInput}}<{{inputType}}> rxRequest) {
-            return com.salesforce.rxgrpc.stub.ClientCalls.{{reactiveCallsMethodName}}(rxRequest, delegateStub::{{methodName}});
+            return com.salesforce.rxgrpc.stub.ClientCalls.{{reactiveCallsMethodName}}(rxRequest, delegateStub::{{methodNameCamelCase}});
         }
 
         {{/methods}}
@@ -69,7 +69,7 @@ public final class {{className}} {
             {{#deprecated}}
         @java.lang.Deprecated
             {{/deprecated}}
-        public {{#isManyOutput}}io.reactivex.Flowable{{/isManyOutput}}{{^isManyOutput}}io.reactivex.Single{{/isManyOutput}}<{{outputType}}> {{methodName}}({{#isManyInput}}io.reactivex.Flowable{{/isManyInput}}{{^isManyInput}}io.reactivex.Single{{/isManyInput}}<{{inputType}}> request) {
+        public {{#isManyOutput}}io.reactivex.Flowable{{/isManyOutput}}{{^isManyOutput}}io.reactivex.Single{{/isManyOutput}}<{{outputType}}> {{methodNameCamelCase}}({{#isManyInput}}io.reactivex.Flowable{{/isManyInput}}{{^isManyInput}}io.reactivex.Single{{/isManyInput}}<{{inputType}}> request) {
             throw new io.grpc.StatusRuntimeException(io.grpc.Status.UNIMPLEMENTED);
         }
 
@@ -115,7 +115,7 @@ public final class {{className}} {
                 case METHODID_{{methodNameUpperUnderscore}}:
                     com.salesforce.rxgrpc.stub.ServerCalls.{{reactiveCallsMethodName}}(({{inputType}}) request,
                             (io.grpc.stub.StreamObserver<{{outputType}}>) responseObserver,
-                            serviceImpl::{{methodName}});
+                            serviceImpl::{{methodNameCamelCase}});
                     break;
                 {{/isManyInput}}
                 {{/methods}}
@@ -133,7 +133,7 @@ public final class {{className}} {
                 case METHODID_{{methodNameUpperUnderscore}}:
                     return (io.grpc.stub.StreamObserver<Req>) com.salesforce.rxgrpc.stub.ServerCalls.{{reactiveCallsMethodName}}(
                             (io.grpc.stub.StreamObserver<{{outputType}}>) responseObserver,
-                            serviceImpl::{{methodName}});
+                            serviceImpl::{{methodNameCamelCase}});
                 {{/isManyInput}}
                 {{/methods}}
                 default:
