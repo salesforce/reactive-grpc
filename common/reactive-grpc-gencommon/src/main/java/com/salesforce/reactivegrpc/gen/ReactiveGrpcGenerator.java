@@ -228,7 +228,13 @@ public abstract class ReactiveGrpcGenerator extends Generator {
         }
 
         public String methodNamePascalCase() {
-            return String.valueOf(Character.toUpperCase(methodName.charAt(0))) + methodName.substring(1);
+            String mn = methodName.replace("_", "");
+            return String.valueOf(Character.toUpperCase(mn.charAt(0))) + mn.substring(1);
+        }
+
+        public String methodNameCamelCase() {
+            String mn = methodName.replace("_", "");
+            return String.valueOf(Character.toLowerCase(mn.charAt(0))) + mn.substring(1);
         }
     }
 }
