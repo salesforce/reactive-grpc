@@ -101,6 +101,7 @@ public final class ServerCalls {
                 throwable -> {
                     // Don't try to respond if the server has already canceled the request
                     if (!streamObserverPublisher.isCanceled()) {
+                        streamObserverPublisher.abortPendingCancel();
                         responseObserver.onError(prepareError(throwable));
                     }
                 }
@@ -137,6 +138,7 @@ public final class ServerCalls {
                 },
                 throwable -> {
                     if (!streamObserverPublisher.isCanceled()) {
+                        streamObserverPublisher.abortPendingCancel();
                         subscriber.onError(throwable);
                     }
                 },

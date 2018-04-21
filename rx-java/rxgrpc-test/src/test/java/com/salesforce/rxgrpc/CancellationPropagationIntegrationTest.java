@@ -16,6 +16,7 @@ import io.reactivex.Single;
 import io.reactivex.disposables.Disposable;
 import io.reactivex.observers.TestObserver;
 import io.reactivex.subscribers.TestSubscriber;
+import org.awaitility.Duration;
 import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.BeforeClass;
@@ -28,6 +29,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.IntStream;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.awaitility.Awaitility.await;
 
 @SuppressWarnings({"unchecked", "Duplicates"})
 public class CancellationPropagationIntegrationTest {
@@ -193,9 +195,11 @@ public class CancellationPropagationIntegrationTest {
                 .test();
 
         observer.awaitTerminalEvent(3, TimeUnit.SECONDS);
-
-        observer.assertError(StatusRuntimeException.class);
+        observer.assertComplete();
         observer.assertTerminated();
+
+        await().atMost(Duration.FIVE_HUNDRED_MILLISECONDS).untilTrue(requestWasCanceled);
+
         assertThat(requestWasCanceled.get()).isTrue();
         assertThat(requestDidProduce.get()).isTrue();
     }
@@ -229,8 +233,11 @@ public class CancellationPropagationIntegrationTest {
                 .test();
 
         observer.awaitTerminalEvent();
-        observer.assertError(StatusRuntimeException.class);
+        observer.assertComplete();
         observer.assertTerminated();
+
+        await().atMost(Duration.FIVE_HUNDRED_MILLISECONDS).untilTrue(requestWasCanceled);
+
         assertThat(requestWasCanceled.get()).isTrue();
         assertThat(requestDidProduce.get()).isTrue();
     }

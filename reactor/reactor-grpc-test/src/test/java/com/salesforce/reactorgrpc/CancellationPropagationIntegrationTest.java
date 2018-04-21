@@ -27,6 +27,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.IntStream;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.awaitility.Awaitility.await;
 
 @SuppressWarnings({"unchecked", "Duplicates"})
 public class CancellationPropagationIntegrationTest {
@@ -190,7 +191,10 @@ public class CancellationPropagationIntegrationTest {
                 .doOnError(throwable -> System.out.println(throwable.getMessage()));
 
         StepVerifier.create(observer)
-                .verifyError(StatusRuntimeException.class);
+                .expectNext(protoNum(9))
+                .verifyComplete();
+
+        await().atMost(org.awaitility.Duration.FIVE_HUNDRED_MILLISECONDS).untilTrue(requestWasCanceled);
 
         assertThat(requestWasCanceled.get()).isTrue();
         assertThat(requestDidProduce.get()).isTrue();
@@ -224,7 +228,11 @@ public class CancellationPropagationIntegrationTest {
                 .doOnError(throwable -> System.out.println(throwable.getMessage()));
 
         StepVerifier.create(observer)
-                .verifyError(StatusRuntimeException.class);
+                .expectNext(protoNum(-1))
+                .verifyComplete();
+
+        await().atMost(org.awaitility.Duration.FIVE_HUNDRED_MILLISECONDS).untilTrue(requestWasCanceled);
+
         assertThat(requestWasCanceled.get()).isTrue();
         assertThat(requestDidProduce.get()).isTrue();
     }
@@ -257,7 +265,11 @@ public class CancellationPropagationIntegrationTest {
                 .doOnError(throwable -> System.out.println(throwable.getMessage()));
 
         StepVerifier.create(observer)
-                .verifyError(StatusRuntimeException.class);
+                .expectNext(protoNum(9))
+                .verifyComplete();
+
+        await().atMost(org.awaitility.Duration.FIVE_HUNDRED_MILLISECONDS).untilTrue(requestWasCanceled);
+
         assertThat(requestWasCanceled.get()).isTrue();
         assertThat(requestDidProduce.get()).isTrue();
     }
@@ -290,7 +302,11 @@ public class CancellationPropagationIntegrationTest {
                 .doOnError(throwable -> System.out.println(throwable.getMessage()));
 
         StepVerifier.create(observer)
-                .verifyError(StatusRuntimeException.class);
+                .expectNext(protoNum(-1))
+                .verifyComplete();
+
+        await().atMost(org.awaitility.Duration.FIVE_HUNDRED_MILLISECONDS).untilTrue(requestWasCanceled);
+
         assertThat(requestWasCanceled.get()).isTrue();
         assertThat(requestDidProduce.get()).isTrue();
     }

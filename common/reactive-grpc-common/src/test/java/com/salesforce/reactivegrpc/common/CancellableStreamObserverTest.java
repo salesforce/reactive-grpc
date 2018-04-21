@@ -52,21 +52,4 @@ public class CancellableStreamObserverTest {
 
         assertThat(called.get()).isTrue();
     }
-
-    @Test
-    public void otherExceptionDoesNotTriggersHandler() {
-        ClientResponseObserver<Object, Object> delegate = mock(ClientResponseObserver.class);
-        final AtomicBoolean called = new AtomicBoolean(false);
-
-        CancellableStreamObserver<Object, Object> observer = new CancellableStreamObserver<Object, Object>(delegate, new Runnable() {
-            @Override
-            public void run() {
-                called.set(true);
-            }
-        });
-
-        observer.onError(Status.INTERNAL.asRuntimeException());
-
-        assertThat(called.get()).isFalse();
-    }
 }

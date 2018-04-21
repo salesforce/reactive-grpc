@@ -87,6 +87,11 @@
             <artifactId>grpc-contrib</artifactId>
             <scope>test</scope>
         </dependency>
+        <dependency>
+            <groupId>com.salesforce.servicelibs</groupId>
+            <artifactId>grpc-testing-contrib</artifactId>
+            <scope>test</scope>
+        </dependency>
     </dependencies>
 
     <build>

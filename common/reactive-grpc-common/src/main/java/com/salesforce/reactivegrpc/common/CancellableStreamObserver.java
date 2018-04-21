@@ -7,17 +7,14 @@
 
 package com.salesforce.reactivegrpc.common;
 
-import io.grpc.Status;
-import io.grpc.StatusException;
-import io.grpc.StatusRuntimeException;
 import io.grpc.stub.ClientCallStreamObserver;
 import io.grpc.stub.ClientResponseObserver;
 
 /**
- * CancellableStreamObserver wraps a {@link io.grpc.stub.StreamObserver} and invokes an onCanceledHandler if
- * {@link io.grpc.stub.StreamObserver#onError(Throwable)} is invoked with a {@link StatusException} or
- * {@link StatusRuntimeException} of type {@code Status.Code.CANCELLED}. This class is used to hook gRPC server
- * cancellation events.
+ * {@code CancellableStreamObserver} is used by {@code ClientCalls} and wraps a {@link io.grpc.stub.StreamObserver},
+ * invoking an {@code onCanceledHandler} when a terminal event occurs ({@code onComplete()} or {@code onError()}.
+ * This is needed to ensure that upstream reactive streams are cancelled when downstream reactive streams are notified
+ * of a terminal event.
  *
  * @param <TRequest>
  * @param <TResponse>
@@ -38,21 +35,17 @@ public class CancellableStreamObserver<TRequest, TResponse> implements ClientRes
 
     @Override
     public void onError(Throwable t) {
-        if (t instanceof StatusException) {
-            if (((StatusException) t).getStatus().getCode() == Status.Code.CANCELLED) {
-                onCanceledHandler.run();
-            }
-        }
-        if (t instanceof StatusRuntimeException) {
-            if (((StatusRuntimeException) t).getStatus().getCode() == Status.Code.CANCELLED) {
-                onCanceledHandler.run();
-            }
-        }
+        // Signal the upstream that it shouldn't produce any more messages
+        onCanceledHandler.run();
+        // Signal the downstream of the error
         delegate.onError(t);
     }
 
     @Override
     public void onCompleted() {
+        // Signal the upstream that it shouldn't produce any more messages
+        onCanceledHandler.run();
+        // Signal the downstream completion
         delegate.onCompleted();
     }
 
