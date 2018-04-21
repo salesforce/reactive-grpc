@@ -101,7 +101,7 @@ public class UnexpectedServerErrorIntegrationTest {
         test.awaitTerminalEvent(3, TimeUnit.SECONDS);
         test.assertError(t -> t instanceof StatusRuntimeException);
         // Flowable requests get canceled when unexpected errors happen
-        test.assertError(t -> ((StatusRuntimeException)t).getStatus().getCode() == Status.Code.CANCELLED);
+        test.assertError(t -> ((StatusRuntimeException)t).getStatus().getCode() == Status.Code.INTERNAL);
     }
 
     @Test
@@ -113,6 +113,6 @@ public class UnexpectedServerErrorIntegrationTest {
 
         test.awaitTerminalEvent(3, TimeUnit.SECONDS);
         test.assertError(t -> t instanceof StatusRuntimeException);
-        test.assertError(t -> ((StatusRuntimeException)t).getStatus().getCode() == Status.Code.CANCELLED);
+        test.assertError(t -> ((StatusRuntimeException)t).getStatus().getCode() == Status.Code.INTERNAL);
     }
 }

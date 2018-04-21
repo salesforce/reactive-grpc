@@ -40,6 +40,7 @@ public class ReactiveStreamObserverPublisher<T> implements Publisher<T>, StreamO
     private CallStreamObserver callStreamObserver;
     private Subscriber<? super T> subscriber;
     private volatile boolean isCanceled;
+    private volatile boolean abandonDelayedCancel;
 
     // A gRPC server can sometimes send messages before subscribe() has been called and the consumer may not have
     // finished setting up the consumer pipeline. Use a countdown latch to prevent messages from processing before
@@ -89,11 +90,26 @@ public class ReactiveStreamObserverPublisher<T> implements Publisher<T>, StreamO
                     return;
                 }
 
-                isCanceled = true;
                 if (callStreamObserver instanceof ClientCallStreamObserver) {
+                    isCanceled = true;
                     ((ClientCallStreamObserver) callStreamObserver).cancel("Client canceled request", null);
-                } else {
-                    callStreamObserver.onError(Status.CANCELLED.withDescription("Server canceled request").asRuntimeException());
+                } else { // ServerCallStreamObserver
+                    new Thread() {
+                        private final int WAIT_FOR_ERROR_DELAY_MILLS = 100;
+
+                        @Override
+                        public void run() {
+                            try {
+                                Thread.sleep(WAIT_FOR_ERROR_DELAY_MILLS);
+                                if (!abandonDelayedCancel) {
+                                    isCanceled = true;
+                                    callStreamObserver.onError(Status.CANCELLED.withDescription("Server canceled request").asRuntimeException());
+                                }
+                            } catch (Throwable ex) {
+
+                            }
+                        }
+                    }.start();
                 }
             }
         });
@@ -119,7 +135,6 @@ public class ReactiveStreamObserverPublisher<T> implements Publisher<T>, StreamO
         } catch (InterruptedException e) {
 
         }
-
         subscriber.onError(Preconditions.checkNotNull(t));
         // Release the subscriber, we don't need a reference to it anymore
         subscriber = null;
@@ -139,5 +154,9 @@ public class ReactiveStreamObserverPublisher<T> implements Publisher<T>, StreamO
 
     public boolean isCanceled() {
         return isCanceled;
+    }
+
+    public void abortPendingCancel() {
+        abandonDelayedCancel = true;
     }
 }

@@ -18,6 +18,9 @@ import reactor.test.StepVerifier;
 
 import java.time.Duration;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicBoolean;
+
+import static org.assertj.core.api.Assertions.assertThat;
 
 @SuppressWarnings("unchecked")
 public class UnexpectedServerErrorIntegrationTest {
@@ -100,7 +103,7 @@ public class UnexpectedServerErrorIntegrationTest {
         Mono<HelloResponse> resp = stub.sayHelloReqStream(req);
 
         StepVerifier.create(resp)
-                .verifyErrorMatches(t -> t instanceof StatusRuntimeException && ((StatusRuntimeException)t).getStatus().getCode() == Status.Code.CANCELLED);
+                .verifyErrorMatches(t -> t instanceof StatusRuntimeException && ((StatusRuntimeException)t).getStatus().getCode() == Status.Code.INTERNAL);
     }
 
     @Test
@@ -110,7 +113,7 @@ public class UnexpectedServerErrorIntegrationTest {
         Flux<HelloResponse> resp = stub.sayHelloBothStream(req);
 
         StepVerifier.create(resp)
-                .verifyErrorMatches(t -> t instanceof StatusRuntimeException && ((StatusRuntimeException)t).getStatus().getCode() == Status.Code.CANCELLED);
+                .verifyErrorMatches(t -> t instanceof StatusRuntimeException && ((StatusRuntimeException)t).getStatus().getCode() == Status.Code.INTERNAL);
     }
 
 }
