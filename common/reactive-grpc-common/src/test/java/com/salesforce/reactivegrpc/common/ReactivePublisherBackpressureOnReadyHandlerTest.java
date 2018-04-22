@@ -63,7 +63,7 @@ public class ReactivePublisherBackpressureOnReadyHandlerTest {
     }
     
     @Test
-    public void onNextWontThrowAndPropagatesThrowableToOnError() {
+    public void exceptionInOnNextCancelsUpstreamSubscription() {
         ClientCallStreamObserver<Object> obs = mock(ClientCallStreamObserver.class);
         doThrow(new IllegalStateException("won't be propagated to handler caller")).when(obs).onNext(any());
         ReactivePublisherBackpressureOnReadyHandler<Object> handler = new ReactivePublisherBackpressureOnReadyHandler<Object>(obs);
@@ -71,11 +71,12 @@ public class ReactivePublisherBackpressureOnReadyHandlerTest {
         handler.onSubscribe(sub);
         
         handler.onNext(new Object());
+        verify(obs).cancel(anyString(), any(Throwable.class));
         verify(obs).onError(any(Throwable.class));
     }
     
     @Test
-    public void onErrorWontThrow() {
+    public void exceptionInOnOnErrorCancelsUpstreamSubscription() {
         ClientCallStreamObserver<Object> obs = mock(ClientCallStreamObserver.class);
         doThrow(new IllegalStateException("won't be propagated to handler caller")).when(obs).onError(any(Throwable.class));
         ReactivePublisherBackpressureOnReadyHandler<Object> handler = new ReactivePublisherBackpressureOnReadyHandler<Object>(obs);
@@ -83,10 +84,11 @@ public class ReactivePublisherBackpressureOnReadyHandlerTest {
         handler.onSubscribe(sub);
         
         handler.onError(new RuntimeException());
+        verify(obs).cancel(anyString(), any(Throwable.class));
     }
     
     @Test
-    public void onCompleteWontThrowAndPropagatesThrowableToOnError() {
+    public void exceptionInOnCompleteCancelsUpstreamSubscription() {
         ClientCallStreamObserver<Object> obs = mock(ClientCallStreamObserver.class);
         doThrow(new IllegalStateException("won't be propagated to handler caller")).when(obs).onCompleted();
         ReactivePublisherBackpressureOnReadyHandler<Object> handler = new ReactivePublisherBackpressureOnReadyHandler<Object>(obs);
@@ -94,6 +96,7 @@ public class ReactivePublisherBackpressureOnReadyHandlerTest {
         handler.onSubscribe(sub);
         
         handler.onComplete();
+        verify(obs).cancel(anyString(), any(Throwable.class));
         verify(obs).onError(any(Throwable.class));
     }
     

@@ -21,9 +21,11 @@ import org.reactivestreams.Subscription;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.atomic.AtomicBoolean;
 
+import static com.google.common.base.Preconditions.checkNotNull;
+
 /**
- * ReactivePublisherBackpressureOnReadyHandler bridges the manual flow control idioms of Reactive Streams and gRPC. This class takes
- * messages off of a {@link org.reactivestreams.Publisher} and feeds them into a {@link CallStreamObserver}
+ * ReactivePublisherBackpressureOnReadyHandler bridges the manual flow control idioms of Reactive Streams and gRPC. This
+ * class takes messages off of a {@link org.reactivestreams.Publisher} and feeds them into a {@link CallStreamObserver}
  * while respecting backpressure. This class is the inverse of {@link ReactiveStreamObserverPublisher}.
  * <p>
  * When a gRPC publisher's transport wants more data to transmit, the {@link CallStreamObserver}'s onReady handler is
@@ -57,7 +59,7 @@ public class ReactivePublisherBackpressureOnReadyHandler<T> implements Subscribe
     private final AtomicBoolean wasReady = new AtomicBoolean(false);
 
     public ReactivePublisherBackpressureOnReadyHandler(final ClientCallStreamObserver<T> requestStream) {
-        this.requestStream = Preconditions.checkNotNull(requestStream);
+        this.requestStream = checkNotNull(requestStream);
         requestStream.setOnReadyHandler(this);
         cancelRequestStream = new Runnable() {
             @Override
@@ -68,7 +70,7 @@ public class ReactivePublisherBackpressureOnReadyHandler<T> implements Subscribe
     }
 
     public ReactivePublisherBackpressureOnReadyHandler(ServerCallStreamObserver<T> requestStream) {
-        this.requestStream = Preconditions.checkNotNull(requestStream);
+        this.requestStream = checkNotNull(requestStream);
         requestStream.setOnReadyHandler(this);
         requestStream.setOnCancelHandler(new Runnable() {
             @Override
@@ -107,37 +109,61 @@ public class ReactivePublisherBackpressureOnReadyHandler<T> implements Subscribe
 
     @Override
     public void onSubscribe(Subscription subscription) {
+        checkNotNull(subscription);
         if (this.subscription != null) {
             subscription.cancel();
         } else {
-            this.subscription = Preconditions.checkNotNull(subscription);
+            this.subscription = subscription;
             subscribed.countDown();
         }
     }
 
+    // Calling onSubscribe, onNext, onError or onComplete MUST return normally except when any provided parameter is
+    // null in which case it MUST throw a java.lang.NullPointerException to the caller, for all other situations the
+    // only legal way for a Subscriber to signal failure is by cancelling its Subscription. In the case that this rule
+    // is violated, any associated Subscription to the Subscriber MUST be considered as cancelled, and the caller MUST
+    // raise this error condition in a fashion that is adequate for the runtime environment.
+    // https://github.com/reactive-streams/reactive-streams-jvm/blob/v1.0.2/README.md#user-content-2.13
+
     @Override
     public void onNext(T t) {
+        checkNotNull(t);
         if (!isCanceled()) {
-            requestStream.onNext(Preconditions.checkNotNull(t));
-            if (requestStream.isReady()) {
-                // keep the pump going
-                subscription.request(1);
-            } else {
-                // note that back-pressure has begun
-                wasReady.set(false);
+            try {
+                requestStream.onNext(t);
+                if (requestStream.isReady()) {
+                    // keep the pump going
+                    subscription.request(1);
+                } else {
+                    // note that back-pressure has begun
+                    wasReady.set(false);
+                }
+            } catch (Throwable throwable) {
+                cancel();
+                onError(throwable);
             }
         }
     }
 
     @Override
     public void onError(Throwable throwable) {
-        requestStream.onError(prepareError(Preconditions.checkNotNull(throwable)));
+        checkNotNull(throwable);
+        try {
+            requestStream.onError(prepareError(throwable));
+        } catch (Throwable ignore) {
+            cancel();
+        }
     }
 
     @Override
     public void onComplete() {
         if (!isCanceled()) {
-            requestStream.onCompleted();
+            try {
+                requestStream.onCompleted();
+            } catch (Throwable throwable) {
+                cancel();
+                onError(throwable);
+            }
         }
     }
 
