@@ -19,7 +19,7 @@ import io.grpc.stub.StreamObserver;
 import org.reactivestreams.Subscriber;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
-import reactor.core.scheduler.Schedulers;
+import reactor.core.publisher.Operators;
 
 import java.util.function.Function;
 
@@ -89,7 +89,7 @@ public final class ServerCalls {
         try {
             Mono<TResponse> rxResponse = Preconditions.checkNotNull(delegate.apply(
                     Flux.from(streamObserverPublisher)
-                            .publishOn(Schedulers.immediate())));
+                            .transform(Operators.<TRequest, TRequest>lift(new BackpressureChunkingLifter<TRequest>()))));
             rxResponse.subscribe(
                 value -> {
                     // Don't try to respond if the server has already canceled the request
@@ -126,7 +126,7 @@ public final class ServerCalls {
         try {
             Flux<TResponse> rxResponse = Preconditions.checkNotNull(delegate.apply(
                     Flux.from(streamObserverPublisher)
-                            .publishOn(Schedulers.immediate())));
+                            .transform(Operators.<TRequest, TRequest>lift(new BackpressureChunkingLifter<TRequest>()))));
             Subscriber<TResponse> subscriber = new ReactivePublisherBackpressureOnReadyHandler<>(
                     (ServerCallStreamObserver<TResponse>) responseObserver);
             // Don't try to respond if the server has already canceled the request
