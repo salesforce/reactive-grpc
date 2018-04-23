@@ -29,7 +29,7 @@ import org.reactivestreams.Subscription;
  * @param <T> the type of response message
  */
 public class ReactiveBackpressureChunker<T> {
-    public static final int DEFAULT_CHUNK_SIZE = 128;
+    public static final int DEFAULT_CHUNK_SIZE = 16;
 
     private final long chunkSize;
 
