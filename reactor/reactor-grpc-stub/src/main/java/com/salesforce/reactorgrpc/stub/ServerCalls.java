@@ -23,6 +23,8 @@ import reactor.core.scheduler.Schedulers;
 
 import java.util.function.Function;
 
+import static com.salesforce.reactivegrpc.common.ReactiveConstants.PRODUCER_STREAM_PREFETCH;
+
 /**
  * Utility functions for processing different server call idioms. We have one-to-one correspondence
  * between utilities in this class and the potential signatures in a generated server stub class so
@@ -89,7 +91,7 @@ public final class ServerCalls {
         try {
             Mono<TResponse> rxResponse = Preconditions.checkNotNull(delegate.apply(
                     Flux.from(streamObserverPublisher)
-                            .publishOn(Schedulers.immediate())));
+                            .publishOn(Schedulers.immediate(), PRODUCER_STREAM_PREFETCH)));
             rxResponse.subscribe(
                 value -> {
                     // Don't try to respond if the server has already canceled the request
@@ -126,7 +128,7 @@ public final class ServerCalls {
         try {
             Flux<TResponse> rxResponse = Preconditions.checkNotNull(delegate.apply(
                     Flux.from(streamObserverPublisher)
-                            .publishOn(Schedulers.immediate())));
+                            .publishOn(Schedulers.immediate(), PRODUCER_STREAM_PREFETCH)));
             Subscriber<TResponse> subscriber = new ReactivePublisherBackpressureOnReadyHandler<>(
                     (ServerCallStreamObserver<TResponse>) responseObserver);
             // Don't try to respond if the server has already canceled the request

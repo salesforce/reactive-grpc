@@ -14,6 +14,8 @@ import io.reactivex.Flowable;
 import io.reactivex.schedulers.Schedulers;
 import org.reactivestreams.Publisher;
 
+import static com.salesforce.reactivegrpc.common.ReactiveConstants.PRODUCER_STREAM_PREFETCH;
+
 /**
  * RxProducerConsumerStreamObserver configures client-side manual flow control for when the client is both producing
  * and consuming streams of messages.
@@ -29,6 +31,7 @@ public class RxProducerConsumerStreamObserver<TRequest, TResponse> extends React
 
     @Override
     public Publisher<TResponse> getReactiveConsumerFromPublisher(ReactiveStreamObserverPublisher<TResponse> publisher) {
-        return Flowable.unsafeCreate(publisher).observeOn(Schedulers.from(MoreExecutors.directExecutor()));
+        return Flowable.unsafeCreate(publisher)
+                .observeOn(Schedulers.from(MoreExecutors.directExecutor()), false, PRODUCER_STREAM_PREFETCH);
     }
 }

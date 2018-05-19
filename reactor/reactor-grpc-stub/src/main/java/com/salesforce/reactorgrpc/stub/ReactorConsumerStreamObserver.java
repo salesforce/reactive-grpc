@@ -13,6 +13,8 @@ import org.reactivestreams.Publisher;
 import reactor.core.publisher.Flux;
 import reactor.core.scheduler.Schedulers;
 
+import static com.salesforce.reactivegrpc.common.ReactiveConstants.PRODUCER_STREAM_PREFETCH;
+
 /**
  * ReactorConsumerStreamObserver configures client-side manual flow control for the consuming end of a message stream.
  *
@@ -23,7 +25,7 @@ public class ReactorConsumerStreamObserver<TRequest, TResponse> extends Reactive
 
     @Override
     public Publisher<TResponse> getReactiveConsumerFromPublisher(ReactiveStreamObserverPublisher<TResponse> publisher) {
-        return Flux.from(publisher).publishOn(Schedulers.immediate());
+        return Flux.from(publisher).publishOn(Schedulers.immediate(), PRODUCER_STREAM_PREFETCH);
     }
 
 }

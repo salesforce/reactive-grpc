@@ -26,6 +26,8 @@ import io.reactivex.schedulers.Schedulers;
 import org.reactivestreams.Subscriber;
 import org.reactivestreams.Subscription;
 
+import static com.salesforce.reactivegrpc.common.ReactiveConstants.PRODUCER_STREAM_PREFETCH;
+
 /**
  * Utility functions for processing different server call idioms. We have one-to-one correspondence
  * between utilities in this class and the potential signatures in a generated server stub class so
@@ -100,7 +102,7 @@ public final class ServerCalls {
         try {
             Single<TResponse> rxResponse = Preconditions.checkNotNull(delegate.apply(
                     Flowable.unsafeCreate(streamObserverPublisher)
-                            .observeOn(Schedulers.from(MoreExecutors.directExecutor()))
+                            .observeOn(Schedulers.from(MoreExecutors.directExecutor()), false, PRODUCER_STREAM_PREFETCH)
                     ));
             rxResponse.subscribe(
                     new Consumer<TResponse>() {
@@ -144,7 +146,7 @@ public final class ServerCalls {
         try {
             Flowable<TResponse> rxResponse = Preconditions.checkNotNull(delegate.apply(
                     Flowable.unsafeCreate(streamObserverPublisher)
-                            .observeOn(Schedulers.from(MoreExecutors.directExecutor()))
+                            .observeOn(Schedulers.from(MoreExecutors.directExecutor()), false, PRODUCER_STREAM_PREFETCH)
                     ));
             final Subscriber<TResponse> subscriber = new ReactivePublisherBackpressureOnReadyHandler<TResponse>(
                     (ServerCallStreamObserver<TResponse>) responseObserver);
