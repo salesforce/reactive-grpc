@@ -8,7 +8,7 @@
 package com.salesforce.rxgrpc.stub;
 
 import com.salesforce.reactivegrpc.common.ReactiveBackpressureChunker;
-import com.salesforce.reactivegrpc.common.ReactiveBackpressureChunker2;
+//import com.salesforce.reactivegrpc.common.ReactiveBackpressureChunker2;
 import io.reactivex.FlowableOperator;
 
 /**
@@ -16,7 +16,7 @@ import io.reactivex.FlowableOperator;
  *
  * @param <T>
  */
-public class BackpressureChunkingOperator<T> extends ReactiveBackpressureChunker2<T> implements FlowableOperator<T, T> {
+public class BackpressureChunkingOperator<T> extends ReactiveBackpressureChunker<T> implements FlowableOperator<T, T> {
     public BackpressureChunkingOperator() {
         super(DEFAULT_CHUNK_SIZE);
     }

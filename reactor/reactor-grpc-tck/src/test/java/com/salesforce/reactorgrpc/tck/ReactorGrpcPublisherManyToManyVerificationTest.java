@@ -24,6 +24,7 @@ import reactor.core.publisher.Flux;
  * https://github.com/reactive-streams/reactive-streams-jvm/tree/master/tck
  */
 @SuppressWarnings("Duplicates")
+@Test(timeOut = 3000)
 public class ReactorGrpcPublisherManyToManyVerificationTest extends PublisherVerification<Message> {
     public static final long DEFAULT_TIMEOUT_MILLIS = 500L;
     public static final long PUBLISHER_REFERENCE_CLEANUP_TIMEOUT_MILLIS = 500L;
@@ -44,9 +45,8 @@ public class ReactorGrpcPublisherManyToManyVerificationTest extends PublisherVer
 
     @AfterClass
     public static void tearDown() throws Exception {
-        server.shutdown();
-        server.awaitTermination();
         channel.shutdown();
+        server.shutdownNow();
 
         server = null;
         channel = null;
