@@ -7,11 +7,13 @@
 
 package com.salesforce.rxgrpc.tck;
 
+import com.google.common.util.concurrent.MoreExecutors;
 import io.grpc.ManagedChannel;
 import io.grpc.Server;
 import io.grpc.inprocess.InProcessChannelBuilder;
 import io.grpc.inprocess.InProcessServerBuilder;
 import io.reactivex.Flowable;
+import io.reactivex.schedulers.Schedulers;
 import org.reactivestreams.Publisher;
 import org.reactivestreams.tck.PublisherVerification;
 import org.reactivestreams.tck.TestEnvironment;
@@ -56,7 +58,7 @@ public class RxGrpcPublisherManyToManyVerificationTest extends PublisherVerifica
     public Publisher<Message> createPublisher(long elements) {
         RxTckGrpc.RxTckStub stub = RxTckGrpc.newRxStub(channel);
         Flowable<Message> request = Flowable.range(0, (int)elements).map(this::toMessage);
-        Publisher<Message> publisher = request.compose(stub::manyToMany);
+        Publisher<Message> publisher = request.compose(stub::manyToMany).observeOn(Schedulers.from(MoreExecutors.directExecutor()));
 
         return publisher;
     }

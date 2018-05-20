@@ -18,6 +18,7 @@ import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 import reactor.core.publisher.Mono;
+import reactor.core.scheduler.Schedulers;
 
 /**
  * Publisher tests from the Reactive Streams Technology Compatibility Kit.
@@ -56,7 +57,7 @@ public class ReactorGrpcPublisherOneToManyVerificationTest extends PublisherVeri
     public Publisher<Message> createPublisher(long elements) {
         ReactorTckGrpc.ReactorTckStub stub = ReactorTckGrpc.newReactorStub(channel);
         Mono<Message> request = Mono.just(toMessage((int) elements));
-        Publisher<Message> publisher = stub.oneToMany(request);
+        Publisher<Message> publisher = stub.oneToMany(request).publishOn(Schedulers.immediate());
 
         return publisher;
     }
