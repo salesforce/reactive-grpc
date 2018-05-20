@@ -7,11 +7,9 @@
 
 package com.salesforce.rxgrpc.stub;
 
-import com.google.common.util.concurrent.MoreExecutors;
 import com.salesforce.reactivegrpc.common.ReactiveConsumerStreamObserver;
 import com.salesforce.reactivegrpc.common.ReactiveStreamObserverPublisher;
 import io.reactivex.Flowable;
-import io.reactivex.schedulers.Schedulers;
 import org.reactivestreams.Publisher;
 
 /**
@@ -24,6 +22,6 @@ public class RxConsumerStreamObserver<TRequest, TResponse> extends ReactiveConsu
 
     @Override
     public Publisher<TResponse>  getReactiveConsumerFromPublisher(ReactiveStreamObserverPublisher<TResponse>  publisher) {
-        return Flowable.unsafeCreate(publisher).observeOn(Schedulers.from(MoreExecutors.directExecutor()));
+        return Flowable.unsafeCreate(publisher).lift(new BackpressureChunkingOperator<TResponse>());
     }
 }

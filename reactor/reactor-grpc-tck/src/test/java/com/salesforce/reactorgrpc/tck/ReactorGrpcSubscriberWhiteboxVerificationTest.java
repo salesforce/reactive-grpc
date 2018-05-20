@@ -14,6 +14,7 @@ import org.reactivestreams.Subscription;
 import org.reactivestreams.tck.SubscriberWhiteboxVerification;
 import org.reactivestreams.tck.TestEnvironment;
 import org.testng.annotations.BeforeClass;
+import org.testng.annotations.Test;
 
 import javax.annotation.Nullable;
 
@@ -22,6 +23,7 @@ import javax.annotation.Nullable;
  * https://github.com/reactive-streams/reactive-streams-jvm/tree/master/tck
  */
 @SuppressWarnings("Duplicates")
+@Test(timeOut = 3000)
 public class ReactorGrpcSubscriberWhiteboxVerificationTest extends SubscriberWhiteboxVerification<Message> {
     public ReactorGrpcSubscriberWhiteboxVerificationTest() {
         super(new TestEnvironment());

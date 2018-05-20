@@ -7,11 +7,13 @@
 
 package com.salesforce.rxgrpc.tck;
 
+import com.google.common.util.concurrent.MoreExecutors;
 import io.grpc.ManagedChannel;
 import io.grpc.Server;
 import io.grpc.inprocess.InProcessChannelBuilder;
 import io.grpc.inprocess.InProcessServerBuilder;
 import io.reactivex.Flowable;
+import io.reactivex.schedulers.Schedulers;
 import org.reactivestreams.Publisher;
 import org.reactivestreams.tck.PublisherVerification;
 import org.reactivestreams.tck.TestEnvironment;
@@ -24,6 +26,7 @@ import org.testng.annotations.Test;
  * https://github.com/reactive-streams/reactive-streams-jvm/tree/master/tck
  */
 @SuppressWarnings("Duplicates")
+@Test(timeOut = 3000)
 public class RxGrpcPublisherManyToManyVerificationTest extends PublisherVerification<Message> {
     public static final long DEFAULT_TIMEOUT_MILLIS = 500L;
     public static final long PUBLISHER_REFERENCE_CLEANUP_TIMEOUT_MILLIS = 500L;
@@ -44,9 +47,8 @@ public class RxGrpcPublisherManyToManyVerificationTest extends PublisherVerifica
 
     @AfterClass
     public static void tearDown() throws Exception {
-        server.shutdown();
-        server.awaitTermination();
         channel.shutdown();
+        server.shutdown();
 
         server = null;
         channel = null;
@@ -56,7 +58,7 @@ public class RxGrpcPublisherManyToManyVerificationTest extends PublisherVerifica
     public Publisher<Message> createPublisher(long elements) {
         RxTckGrpc.RxTckStub stub = RxTckGrpc.newRxStub(channel);
         Flowable<Message> request = Flowable.range(0, (int)elements).map(this::toMessage);
-        Publisher<Message> publisher = request.compose(stub::manyToMany);
+        Publisher<Message> publisher = request.compose(stub::manyToMany).observeOn(Schedulers.from(MoreExecutors.directExecutor()));
 
         return publisher;
     }

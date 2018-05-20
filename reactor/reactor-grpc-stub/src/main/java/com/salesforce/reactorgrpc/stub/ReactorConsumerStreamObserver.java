@@ -11,7 +11,7 @@ import com.salesforce.reactivegrpc.common.ReactiveConsumerStreamObserver;
 import com.salesforce.reactivegrpc.common.ReactiveStreamObserverPublisher;
 import org.reactivestreams.Publisher;
 import reactor.core.publisher.Flux;
-import reactor.core.scheduler.Schedulers;
+import reactor.core.publisher.Operators;
 
 /**
  * ReactorConsumerStreamObserver configures client-side manual flow control for the consuming end of a message stream.
@@ -23,7 +23,7 @@ public class ReactorConsumerStreamObserver<TRequest, TResponse> extends Reactive
 
     @Override
     public Publisher<TResponse> getReactiveConsumerFromPublisher(ReactiveStreamObserverPublisher<TResponse> publisher) {
-        return Flux.from(publisher).publishOn(Schedulers.immediate());
+        return Flux.from(publisher).transform(Operators.lift(new BackpressureChunkingLifter<TResponse>()));
     }
 
 }
