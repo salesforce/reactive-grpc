@@ -69,9 +69,8 @@ public class ChainedCallIntegrationTest {
 
     @After
     public void stopServer() throws InterruptedException {
-        server.shutdown();
-        server.awaitTermination();
-        channel.shutdown();
+        server.shutdownNow();
+        channel.shutdownNow();
 
         server = null;
         channel = null;

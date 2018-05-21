@@ -53,7 +53,7 @@
 
     <properties>
         <!-- Dependency Versions -->
-        <grpc.version>1.9.0</grpc.version>
+        <grpc.version>1.12.0</grpc.version>
         <protoc.version>3.5.1</protoc.version> <!-- Same version as grpc-proto -->
         <grpc.contrib.version>0.8.0</grpc.contrib.version>
         <rxjava.version>2.1.10</rxjava.version>
