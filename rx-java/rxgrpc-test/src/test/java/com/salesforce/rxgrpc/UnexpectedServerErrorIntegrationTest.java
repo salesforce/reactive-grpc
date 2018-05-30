@@ -52,7 +52,7 @@ public class UnexpectedServerErrorIntegrationTest {
         };
 
         server = ServerBuilder.forPort(0).addService(svc).build().start();
-        channel = ManagedChannelBuilder.forAddress("localhost", server.getPort()).usePlaintext(true).build();
+        channel = ManagedChannelBuilder.forAddress("localhost", server.getPort()).usePlaintext().build();
     }
 
     @AfterClass

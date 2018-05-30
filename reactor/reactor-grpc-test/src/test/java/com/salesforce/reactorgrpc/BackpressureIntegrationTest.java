@@ -74,7 +74,7 @@ public class BackpressureIntegrationTest {
         };
 
         server = InProcessServerBuilder.forName("e2e").addService(svc).build().start();
-        channel = InProcessChannelBuilder.forName("e2e").usePlaintext(true).build();
+        channel = InProcessChannelBuilder.forName("e2e").usePlaintext().build();
     }
 
     @Before

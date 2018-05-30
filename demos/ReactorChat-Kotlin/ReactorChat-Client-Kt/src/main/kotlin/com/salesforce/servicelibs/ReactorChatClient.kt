@@ -22,7 +22,7 @@ class ReactorChatClient
 
 fun main(args: Array<String>) {
     // Connect to the sever
-    val channel = ManagedChannelBuilder.forAddress("localhost", 9999).usePlaintext(true).build()
+    val channel = ManagedChannelBuilder.forAddress("localhost", 9999).usePlaintext().build()
     val stub = ReactorChatGrpc.newReactorStub(channel)
 
     val done = CountDownLatch(1)

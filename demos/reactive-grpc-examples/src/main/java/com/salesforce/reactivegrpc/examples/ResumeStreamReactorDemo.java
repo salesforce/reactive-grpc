@@ -51,7 +51,7 @@ public final class ResumeStreamReactorDemo {
                 .start();
         ManagedChannel channel = InProcessChannelBuilder
                 .forName("ResumeStreamReactorDemo")
-                .usePlaintext(true)
+                .usePlaintext()
                 .build();
         ReactorNumbersGrpc.ReactorNumbersStub stub = ReactorNumbersGrpc.newReactorStub(channel);
 

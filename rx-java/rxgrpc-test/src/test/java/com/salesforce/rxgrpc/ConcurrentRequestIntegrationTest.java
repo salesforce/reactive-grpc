@@ -84,7 +84,7 @@ public class ConcurrentRequestIntegrationTest {
         };
 
         server = ServerBuilder.forPort(0).addService(svc).build().start();
-        channel = ManagedChannelBuilder.forAddress("localhost", server.getPort()).usePlaintext(true).build();
+        channel = ManagedChannelBuilder.forAddress("localhost", server.getPort()).usePlaintext().build();
     }
 
     @AfterClass
@@ -166,6 +166,7 @@ public class ConcurrentRequestIntegrationTest {
                 return true;
             });
 
+            @SuppressWarnings("unchecked")
             ListenableFuture<List<Boolean>> allFutures = Futures.allAsList(Lists.newArrayList(oneToOne, oneToMany, manyToOne, manyToMany));
             // Block for response
             List<Boolean> results = allFutures.get(3, TimeUnit.SECONDS);

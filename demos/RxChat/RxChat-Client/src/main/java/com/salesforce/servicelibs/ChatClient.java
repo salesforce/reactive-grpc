@@ -30,7 +30,7 @@ public final class ChatClient {
 
     public static void main(String[] args) throws Exception {
         // Connect to the sever
-        ManagedChannel channel = ManagedChannelBuilder.forAddress("localhost", PORT).usePlaintext(true).build();
+        ManagedChannel channel = ManagedChannelBuilder.forAddress("localhost", PORT).usePlaintext().build();
         RxChatGrpc.RxChatStub stub = RxChatGrpc.newRxStub(channel);
 
         CountDownLatch done = new CountDownLatch(1);
