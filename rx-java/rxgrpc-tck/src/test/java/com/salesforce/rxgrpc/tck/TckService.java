@@ -26,8 +26,7 @@ public class TckService extends RxTckGrpc.TckImplBase {
                 // send back no more than 10 responses
                 .flatMap(message -> Flowable.range(1, Math.min(message.getNumber(), 10))
                         ,false, 1, 1)
-                .map(this::toMessage)
-                .doOnRequest(r -> System.out.println("Request " + r));
+                .map(this::toMessage);
     }
 
     @Override
