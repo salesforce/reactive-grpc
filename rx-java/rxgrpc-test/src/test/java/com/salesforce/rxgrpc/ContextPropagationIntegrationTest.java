@@ -95,7 +95,7 @@ public class ContextPropagationIntegrationTest {
     @BeforeClass
     public static void setupServer() throws Exception {
         server = ServerBuilder.forPort(0).addService(ServerInterceptors.intercept(svc, serverInterceptor)).build().start();
-        channel = ManagedChannelBuilder.forAddress("localhost", server.getPort()).usePlaintext(true).intercept(clientInterceptor).build();
+        channel = ManagedChannelBuilder.forAddress("localhost", server.getPort()).usePlaintext().intercept(clientInterceptor).build();
     }
 
     @Before

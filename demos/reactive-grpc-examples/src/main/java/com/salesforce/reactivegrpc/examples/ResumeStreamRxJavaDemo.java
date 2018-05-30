@@ -51,7 +51,7 @@ public final class ResumeStreamRxJavaDemo {
                 .start();
         ManagedChannel channel = InProcessChannelBuilder
                 .forName("ResumeStreamReactorDemo")
-                .usePlaintext(true)
+                .usePlaintext()
                 .build();
         RxNumbersGrpc.RxNumbersStub stub = RxNumbersGrpc.newRxStub(channel);
 

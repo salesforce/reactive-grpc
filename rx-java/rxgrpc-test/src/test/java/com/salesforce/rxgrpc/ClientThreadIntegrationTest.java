@@ -73,7 +73,7 @@ public class ClientThreadIntegrationTest {
                 .start();
         channel = ManagedChannelBuilder
                 .forAddress("localhost", server.getPort())
-                .usePlaintext(true)
+                .usePlaintext()
                 .executor(Executors.newSingleThreadExecutor(
                         new ThreadFactoryBuilder().setNameFormat("TheGrpcClient").build()))
                 .build();

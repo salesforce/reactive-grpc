@@ -42,7 +42,7 @@ public class RxGrpcPublisherOneToManyVerificationTest extends PublisherVerificat
     public static void setup() throws Exception {
         System.out.println("RxGrpcPublisherOneToManyVerificationTest");
         server = InProcessServerBuilder.forName("RxGrpcPublisherOneToManyVerificationTest").addService(new TckService()).build().start();
-        channel = InProcessChannelBuilder.forName("RxGrpcPublisherOneToManyVerificationTest").usePlaintext(true).build();
+        channel = InProcessChannelBuilder.forName("RxGrpcPublisherOneToManyVerificationTest").usePlaintext().build();
     }
 
     @AfterClass

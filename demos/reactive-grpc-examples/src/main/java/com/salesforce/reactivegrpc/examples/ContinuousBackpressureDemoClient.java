@@ -30,7 +30,7 @@ public final class ContinuousBackpressureDemoClient {
     public static void main(String[] args) throws Exception {
         ManagedChannel channel = NettyChannelBuilder
                 .forAddress("localhost", ContinuousBackpressureDemoServer.PORT)
-                .usePlaintext(true)
+                .usePlaintext()
                 .flowControlWindow(NettyChannelBuilder.DEFAULT_FLOW_CONTROL_WINDOW)
                 .build();
         RxNumbersGrpc.RxNumbersStub stub = RxNumbersGrpc.newRxStub(channel);

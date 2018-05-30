@@ -41,7 +41,7 @@ public class ReactorGrpcPublisherOneToManyVerificationTest extends PublisherVeri
     public static void setup() throws Exception {
         System.out.println("ReactorGrpcPublisherOneToManyVerificationTest");
         server = InProcessServerBuilder.forName("ReactorGrpcPublisherOneToManyVerificationTest").addService(new TckService()).build().start();
-        channel = InProcessChannelBuilder.forName("ReactorGrpcPublisherOneToManyVerificationTest").usePlaintext(true).build();
+        channel = InProcessChannelBuilder.forName("ReactorGrpcPublisherOneToManyVerificationTest").usePlaintext().build();
     }
 
     @AfterClass

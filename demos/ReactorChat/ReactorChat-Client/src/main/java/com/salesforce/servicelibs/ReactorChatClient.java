@@ -30,7 +30,7 @@ public final class ReactorChatClient {
 
     public static void main(String[] args) throws Exception {
         // Connect to the sever
-        ManagedChannel channel = ManagedChannelBuilder.forAddress("localhost", PORT).usePlaintext(true).build();
+        ManagedChannel channel = ManagedChannelBuilder.forAddress("localhost", PORT).usePlaintext().build();
         ReactorChatGrpc.ReactorChatStub stub = ReactorChatGrpc.newReactorStub(channel);
 
         CountDownLatch done = new CountDownLatch(1);
