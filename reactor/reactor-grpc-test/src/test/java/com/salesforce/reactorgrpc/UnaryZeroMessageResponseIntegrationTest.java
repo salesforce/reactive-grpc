@@ -51,8 +51,7 @@ public class UnaryZeroMessageResponseIntegrationTest {
 
         StepVerifier.create(resp).verifyErrorMatches(t ->
                 t instanceof StatusRuntimeException &&
-                ((StatusRuntimeException) t).getStatus().getCode() == Status.Code.INTERNAL &&
-                ((StatusRuntimeException) t).getStatus().getDescription().equals("Completed without a response"));
+                ((StatusRuntimeException) t).getStatus().getCode() == Status.Code.CANCELLED);
     }
 
     @Test
@@ -69,7 +68,6 @@ public class UnaryZeroMessageResponseIntegrationTest {
 
         StepVerifier.create(resp).verifyErrorMatches(t ->
                 t instanceof StatusRuntimeException &&
-                ((StatusRuntimeException) t).getStatus().getCode() == Status.Code.INTERNAL &&
-                ((StatusRuntimeException) t).getStatus().getDescription().equals("Completed without a response"));
+                ((StatusRuntimeException) t).getStatus().getCode() == Status.Code.CANCELLED);
     }
 }

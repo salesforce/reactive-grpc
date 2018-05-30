@@ -64,8 +64,7 @@ public class UnaryZeroMessageResponseIntegrationTest {
         TestObserver<String> testObserver = resp.map(HelloResponse::getMessage).test();
         testObserver.awaitTerminalEvent(3, TimeUnit.SECONDS);
         testObserver.assertError(StatusRuntimeException.class);
-        testObserver.assertError(t -> ((StatusRuntimeException) t).getStatus().getCode() == Status.INTERNAL.getCode());
-        testObserver.assertError(t -> ((StatusRuntimeException) t).getStatus().getDescription().equals("Completed without a response"));
+        testObserver.assertError(t -> ((StatusRuntimeException) t).getStatus().getCode() == Status.CANCELLED.getCode());
     }
 
     @Test
@@ -83,7 +82,6 @@ public class UnaryZeroMessageResponseIntegrationTest {
         TestObserver<String> testObserver = resp.map(HelloResponse::getMessage).test();
         testObserver.awaitTerminalEvent(3, TimeUnit.SECONDS);
         testObserver.assertError(StatusRuntimeException.class);
-        testObserver.assertError(t -> ((StatusRuntimeException) t).getStatus().getCode() == Status.INTERNAL.getCode());
-        testObserver.assertError(t -> ((StatusRuntimeException) t).getStatus().getDescription().equals("Completed without a response"));
+        testObserver.assertError(t -> ((StatusRuntimeException) t).getStatus().getCode() == Status.CANCELLED.getCode());
     }
 }
