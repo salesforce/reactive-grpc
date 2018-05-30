@@ -55,6 +55,18 @@ public final class {{className}} {
         }
 
         {{/methods}}
+        {{#unaryRequestMethods}}
+           {{#javaDoc}}
+        {{{javaDoc}}}
+           {{/javaDoc}}
+           {{#deprecated}}
+        @java.lang.Deprecated
+           {{/deprecated}}
+        public {{#isManyOutput}}io.reactivex.Flowable{{/isManyOutput}}{{^isManyOutput}}io.reactivex.Single{{/isManyOutput}}<{{outputType}}> {{methodName}}({{inputType}} rxRequest) {
+           return com.salesforce.rxgrpc.stub.ClientCalls.{{reactiveCallsMethodName}}(io.reactivex.Single.just(rxRequest), delegateStub::{{methodNameCamelCase}});
+        }
+
+        {{/unaryRequestMethods}}
     }
 
     {{#javaDoc}}

@@ -55,6 +55,18 @@ public final class {{className}} {
         }
 
         {{/methods}}
+        {{#unaryRequestMethods}}
+            {{#javaDoc}}
+        {{{javaDoc}}}
+           {{/javaDoc}}
+           {{#deprecated}}
+        @java.lang.Deprecated
+           {{/deprecated}}
+        public {{#isManyOutput}}reactor.core.publisher.Flux{{/isManyOutput}}{{^isManyOutput}}reactor.core.publisher.Mono{{/isManyOutput}}<{{outputType}}> {{methodName}}({{inputType}} reactorRequest) {
+           return com.salesforce.reactorgrpc.stub.ClientCalls.{{reactiveCallsMethodName}}(reactor.core.publisher.Mono.just(reactorRequest), delegateStub::{{methodName}});
+        }
+
+        {{/unaryRequestMethods}}
     }
 
     {{#javaDoc}}

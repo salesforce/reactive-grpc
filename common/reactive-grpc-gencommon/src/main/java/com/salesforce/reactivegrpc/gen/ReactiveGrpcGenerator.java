@@ -195,6 +195,10 @@ public abstract class ReactiveGrpcGenerator extends Generator {
         public boolean deprecated;
         public String javaDoc;
         public List<MethodContext> methods = new ArrayList<>();
+
+        public List<MethodContext> unaryRequestMethods() {
+            return methods.stream().filter(m -> !m.isManyInput).collect(Collectors.toList());
+        }
     }
 
     /**
