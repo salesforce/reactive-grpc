@@ -10,17 +10,13 @@ package com.salesforce.rxgrpc;
 import com.google.protobuf.Empty;
 import com.salesforce.servicelibs.NumberProto;
 import com.salesforce.servicelibs.RxNumbersGrpc;
-import io.grpc.ManagedChannel;
-import io.grpc.Server;
-import io.grpc.inprocess.InProcessChannelBuilder;
-import io.grpc.inprocess.InProcessServerBuilder;
+import io.grpc.testing.GrpcServerRule;
 import io.reactivex.Flowable;
 import io.reactivex.Single;
 import io.reactivex.observers.TestObserver;
 import io.reactivex.subscribers.TestSubscriber;
-import org.junit.AfterClass;
 import org.junit.Before;
-import org.junit.BeforeClass;
+import org.junit.Rule;
 import org.junit.Test;
 
 import java.util.Arrays;
@@ -32,50 +28,44 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 @SuppressWarnings("Duplicates")
 public class BackpressureIntegrationTest {
+    @Rule
+    public GrpcServerRule serverRule = new GrpcServerRule();
+
     private static final int NUMBER_OF_STREAM_ELEMENTS = 140;
 
     private static AtomicLong lastValueTime;
     private static AtomicLong numberOfWaits;
 
-    private static Server server;
-    private static ManagedChannel channel;
+    private static class TestService extends RxNumbersGrpc.NumbersImplBase {
+        @Override
+        public Single<NumberProto.Number> requestPressure(Flowable<NumberProto.Number> request) {
+            return request
+                    .map(proto -> proto.getNumber(0))
+                    .doOnNext(i -> System.out.println("    --> " + i))
+                    .doOnNext(i -> waitIfValuesAreEqual(i, 3))
+                    .last(-1)
+                    .map(BackpressureIntegrationTest::protoNum);
+        }
 
-    @BeforeClass
-    public static void setupServer() throws Exception {
-        RxNumbersGrpc.NumbersImplBase svc = new RxNumbersGrpc.NumbersImplBase() {
-            @Override
-            public Single<NumberProto.Number> requestPressure(Flowable<NumberProto.Number> request) {
-                return request
-                        .map(proto -> proto.getNumber(0))
-                        .doOnNext(i -> System.out.println("    --> " + i))
-                        .doOnNext(i -> waitIfValuesAreEqual(i, 3))
-                        .last(-1)
-                        .map(BackpressureIntegrationTest::protoNum);
-            }
+        @Override
+        public Flowable<NumberProto.Number> responsePressure(Single<Empty> request) {
+            return Flowable
+                    .fromIterable(IntStream.range(0, NUMBER_OF_STREAM_ELEMENTS)::iterator)
+                    .doOnNext(i -> System.out.println("   <-- " + i))
+                    .doOnNext(i -> updateNumberOfWaits(lastValueTime, numberOfWaits))
+                    .map(BackpressureIntegrationTest::protoNum);
+        }
 
-            @Override
-            public Flowable<NumberProto.Number> responsePressure(Single<Empty> request) {
-                return Flowable
-                        .fromIterable(IntStream.range(0, NUMBER_OF_STREAM_ELEMENTS)::iterator)
-                        .doOnNext(i -> System.out.println("   <-- " + i))
-                        .doOnNext(i -> updateNumberOfWaits(lastValueTime, numberOfWaits))
-                        .map(BackpressureIntegrationTest::protoNum);
-            }
+        @Override
+        public Flowable<NumberProto.Number> twoWayRequestPressure(Flowable<NumberProto.Number> request) {
+            return requestPressure(request).toFlowable();
+        }
 
-            @Override
-            public Flowable<NumberProto.Number> twoWayRequestPressure(Flowable<NumberProto.Number> request) {
-                return requestPressure(request).toFlowable();
-            }
-
-            @Override
-            public Flowable<NumberProto.Number> twoWayResponsePressure(Flowable<NumberProto.Number> request) {
-                request.subscribe();
-                return responsePressure(null);
-            }
-        };
-
-        server = InProcessServerBuilder.forName("e2e").addService(svc).build().start();
-        channel = InProcessChannelBuilder.forName("e2e").usePlaintext().build();
+        @Override
+        public Flowable<NumberProto.Number> twoWayResponsePressure(Flowable<NumberProto.Number> request) {
+            request.subscribe();
+            return responsePressure(null);
+        }
     }
 
     @Before
@@ -84,19 +74,10 @@ public class BackpressureIntegrationTest {
         numberOfWaits = new AtomicLong(0);
     }
 
-    @AfterClass
-    public static void stopServer() throws InterruptedException {
-        server.shutdown();
-        server.awaitTermination();
-        channel.shutdown();
-
-        server = null;
-        channel = null;
-    }
-
     @Test
     public void clientToServerBackpressure() {
-        RxNumbersGrpc.RxNumbersStub stub = RxNumbersGrpc.newRxStub(channel);
+        serverRule.getServiceRegistry().addService(new TestService());
+        RxNumbersGrpc.RxNumbersStub stub = RxNumbersGrpc.newRxStub(serverRule.getChannel());
 
         Flowable<NumberProto.Number> rxRequest = Flowable
                 .fromIterable(IntStream.range(0, NUMBER_OF_STREAM_ELEMENTS)::iterator)
@@ -115,7 +96,8 @@ public class BackpressureIntegrationTest {
 
     @Test
     public void serverToClientBackpressure() {
-        RxNumbersGrpc.RxNumbersStub stub = RxNumbersGrpc.newRxStub(channel);
+        serverRule.getServiceRegistry().addService(new TestService());
+        RxNumbersGrpc.RxNumbersStub stub = RxNumbersGrpc.newRxStub(serverRule.getChannel());
 
         Single<Empty> rxRequest = Single.just(Empty.getDefaultInstance());
 
@@ -133,7 +115,8 @@ public class BackpressureIntegrationTest {
 
     @Test
     public void bidiResponseBackpressure() {
-        RxNumbersGrpc.RxNumbersStub stub = RxNumbersGrpc.newRxStub(channel);
+        serverRule.getServiceRegistry().addService(new TestService());
+        RxNumbersGrpc.RxNumbersStub stub = RxNumbersGrpc.newRxStub(serverRule.getChannel());
 
         TestSubscriber<NumberProto.Number> rxResponse = Flowable.<NumberProto.Number>empty()
                 .compose(stub::twoWayResponsePressure)
@@ -150,7 +133,8 @@ public class BackpressureIntegrationTest {
 
     @Test
     public void bidiRequestBackpressure() {
-        RxNumbersGrpc.RxNumbersStub stub = RxNumbersGrpc.newRxStub(channel);
+        serverRule.getServiceRegistry().addService(new TestService());
+        RxNumbersGrpc.RxNumbersStub stub = RxNumbersGrpc.newRxStub(serverRule.getChannel());
 
         Flowable<NumberProto.Number> rxRequest = Flowable
                 .fromIterable(IntStream.range(0, NUMBER_OF_STREAM_ELEMENTS)::iterator)

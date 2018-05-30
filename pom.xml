@@ -145,6 +145,12 @@
             </dependency>
             <!-- Test dependencies -->
             <dependency>
+                <groupId>io.grpc</groupId>
+                <artifactId>grpc-testing</artifactId>
+                <version>${grpc.version}</version>
+                <scope>test</scope>
+            </dependency>
+            <dependency>
                 <groupId>com.salesforce.servicelibs</groupId>
                 <artifactId>grpc-testing-contrib</artifactId>
                 <version>${grpc.contrib.version}</version>
