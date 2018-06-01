@@ -6,7 +6,7 @@
 
     <groupId>com.salesforce.servicelibs</groupId>
     <artifactId>reactive-grpc</artifactId>
-    <version>0.8.2</version>
+    <version>0.8.3-SNAPSHOT</version>
     <packaging>pom</packaging>
 
     <name>reactive-grpc</name>
