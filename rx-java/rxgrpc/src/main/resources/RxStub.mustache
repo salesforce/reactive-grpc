@@ -51,7 +51,23 @@ public final class {{className}} {
         @java.lang.Deprecated
             {{/deprecated}}
         public {{#isManyOutput}}io.reactivex.Flowable{{/isManyOutput}}{{^isManyOutput}}io.reactivex.Single{{/isManyOutput}}<{{outputType}}> {{methodName}}({{#isManyInput}}io.reactivex.Flowable{{/isManyInput}}{{^isManyInput}}io.reactivex.Single{{/isManyInput}}<{{inputType}}> rxRequest) {
-            return com.salesforce.rxgrpc.stub.ClientCalls.{{reactiveCallsMethodName}}(rxRequest, delegateStub::{{methodNameCamelCase}});
+            return com.salesforce.rxgrpc.stub.ClientCalls.{{reactiveCallsMethodName}}(rxRequest,
+            {{^isManyInput}}
+                new com.salesforce.reactivegrpc.common.BiConsumer<{{inputType}}, io.grpc.stub.StreamObserver<{{outputType}}>>() {
+                    @Override
+                    public void accept({{inputType}} request, io.grpc.stub.StreamObserver<{{outputType}}> observer) {
+                        delegateStub.{{methodNameCamelCase}}(request, observer);
+                    }
+                });
+            {{/isManyInput}}
+            {{#isManyInput}}
+                new com.salesforce.reactivegrpc.common.Function<io.grpc.stub.StreamObserver<{{outputType}}>, io.grpc.stub.StreamObserver<{{inputType}}>>() {
+                    @Override
+                    public io.grpc.stub.StreamObserver<{{inputType}}> apply(io.grpc.stub.StreamObserver<{{outputType}}> observer) {
+                        return delegateStub.{{methodNameCamelCase}}(observer);
+                    }
+                });
+            {{/isManyInput}}
         }
 
         {{/methods}}
@@ -63,7 +79,13 @@ public final class {{className}} {
         @java.lang.Deprecated
            {{/deprecated}}
         public {{#isManyOutput}}io.reactivex.Flowable{{/isManyOutput}}{{^isManyOutput}}io.reactivex.Single{{/isManyOutput}}<{{outputType}}> {{methodName}}({{inputType}} rxRequest) {
-           return com.salesforce.rxgrpc.stub.ClientCalls.{{reactiveCallsMethodName}}(io.reactivex.Single.just(rxRequest), delegateStub::{{methodNameCamelCase}});
+            return com.salesforce.rxgrpc.stub.ClientCalls.{{reactiveCallsMethodName}}(io.reactivex.Single.just(rxRequest),
+                new com.salesforce.reactivegrpc.common.BiConsumer<{{inputType}}, io.grpc.stub.StreamObserver<{{outputType}}>>() {
+                    @Override
+                    public void accept({{inputType}} request, io.grpc.stub.StreamObserver<{{outputType}}> observer) {
+                        delegateStub.{{methodNameCamelCase}}(request, observer);
+                    }
+                });
         }
 
         {{/unaryRequestMethods}}
@@ -127,7 +149,12 @@ public final class {{className}} {
                 case METHODID_{{methodNameUpperUnderscore}}:
                     com.salesforce.rxgrpc.stub.ServerCalls.{{reactiveCallsMethodName}}(({{inputType}}) request,
                             (io.grpc.stub.StreamObserver<{{outputType}}>) responseObserver,
-                            serviceImpl::{{methodNameCamelCase}});
+                            new com.salesforce.reactivegrpc.common.Function<{{#isManyInput}}io.reactivex.Flowable{{/isManyInput}}{{^isManyInput}}io.reactivex.Single{{/isManyInput}}<{{inputType}}>, {{#isManyOutput}}io.reactivex.Flowable{{/isManyOutput}}{{^isManyOutput}}io.reactivex.Single{{/isManyOutput}}<{{outputType}}>>() {
+                                @Override
+                                public {{#isManyOutput}}io.reactivex.Flowable{{/isManyOutput}}{{^isManyOutput}}io.reactivex.Single{{/isManyOutput}}<{{outputType}}> apply({{#isManyInput}}io.reactivex.Flowable{{/isManyInput}}{{^isManyInput}}io.reactivex.Single{{/isManyInput}}<{{inputType}}> single) {
+                                    return serviceImpl.{{methodNameCamelCase}}(single);
+                                }
+                            });
                     break;
                 {{/isManyInput}}
                 {{/methods}}
