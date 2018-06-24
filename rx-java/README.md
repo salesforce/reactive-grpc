@@ -109,7 +109,7 @@ switches threads. To solve this problem, you can add a hook that makes the Conte
 switch when RX switches threads:
 
 ```java
-RxJavaPlugins.setScheduleHandler(original -> Context.current().wrap(original))
+RxJavaPlugins.setScheduleHandler(new GrpcContextOnScheduleHook())
 ```    
     
 To make sure you only run this piece of code once, you can for example add a utiltily class 
@@ -122,7 +122,7 @@ public class RxContextPropagator {
 
 	public static void ensureInstalled() {
 		if (INSTALLED.compareAndSet(false, true)) {
-			RxJavaPlugins.setScheduleHandler(original -> Context.current().wrap(original));
+			RxJavaPlugins.setScheduleHandler(new GrpcContextOnScheduleHook());
 		}
 	}
 }
