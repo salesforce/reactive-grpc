@@ -2,20 +2,27 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0"
          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
-
-    <groupId>reactive-grpc-demo</groupId>
-    <artifactId>reactive-grpc-examples</artifactId>
-    <version>1.0-SNAPSHOT</version>
     <modelVersion>4.0.0</modelVersion>
 
+    <groupId>reactive-grpc-demo</groupId>
+    <artifactId>backpressure-demo</artifactId>
+    <version>1.0-SNAPSHOT</version>
 
     <properties>
+        <rxjava.version>2.1.10</rxjava.version>
         <reactive.grpc.version>0.8.2</reactive.grpc.version>
+        <grpc.contrib.version>0.8.0</grpc.contrib.version>
+        <rxjavafx.version>2.2.2</rxjavafx.version>
         <grpc.version>1.12.0</grpc.version>
         <protoc.version>3.5.1</protoc.version>
     </properties>
 
     <dependencies>
+        <dependency>
+            <groupId>io.reactivex.rxjava2</groupId>
+            <artifactId>rxjava</artifactId>
+            <version>${rxjava.version}</version>
+        </dependency>
         <dependency>
             <groupId>io.grpc</groupId>
             <artifactId>grpc-netty</artifactId>
@@ -32,9 +39,9 @@
             <version>${reactive.grpc.version}</version>
         </dependency>
         <dependency>
-            <groupId>com.salesforce.servicelibs</groupId>
-            <artifactId>reactor-grpc-stub</artifactId>
-            <version>${reactive.grpc.version}</version>
+            <groupId>io.reactivex.rxjava2</groupId>
+            <artifactId>rxjavafx</artifactId>
+            <version>${rxjavafx.version}</version>
         </dependency>
     </dependencies>
 
@@ -56,7 +63,6 @@
                     <target>1.8</target>
                 </configuration>
             </plugin>
-
             <plugin>
                 <groupId>org.xolstice.maven.plugins</groupId>
                 <artifactId>protobuf-maven-plugin</artifactId>
@@ -80,13 +86,6 @@
                                     <artifactId>rxgrpc</artifactId>
                                     <version>${reactive.grpc.version}</version>
                                     <mainClass>com.salesforce.rxgrpc.RxGrpcGenerator</mainClass>
-                                </protocPlugin>
-                                <protocPlugin>
-                                    <id>reactor-grpc</id>
-                                    <groupId>com.salesforce.servicelibs</groupId>
-                                    <artifactId>reactor-grpc</artifactId>
-                                    <version>${reactive.grpc.version}</version>
-                                    <mainClass>com.salesforce.reactorgrpc.ReactorGrpcGenerator</mainClass>
                                 </protocPlugin>
                             </protocPlugins>
                         </configuration>
