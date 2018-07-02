@@ -45,10 +45,6 @@
         <module>reactor/reactor-grpc-stub</module>
         <module>reactor/reactor-grpc-tck</module>
         <module>reactor/reactor-grpc-test</module>
-        <module>demos/RxChat</module>
-        <module>demos/ReactorChat</module>
-        <module>demos/ReactorChat-Kotlin</module>
-        <module>demos/reactive-grpc-examples</module>
     </modules>
 
     <properties>

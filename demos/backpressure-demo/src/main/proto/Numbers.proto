@@ -1,0 +1,20 @@
+syntax = "proto3";
+
+package demo.proto;
+
+option java_package = "numbers.proto";
+option java_outer_classname = "NumbersProto";
+
+import "google/protobuf/empty.proto";
+
+service BackpressureDemo {
+    rpc SendNumbers (HowMany) returns (stream Number) {}
+}
+
+message HowMany {
+    int32 number = 1;
+}
+
+message Number {
+    repeated int32 number = 1;
+}
