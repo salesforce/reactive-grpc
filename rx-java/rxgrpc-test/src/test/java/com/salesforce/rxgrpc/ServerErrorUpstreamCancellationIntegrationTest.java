@@ -24,6 +24,9 @@ public class ServerErrorUpstreamCancellationIntegrationTest {
     @Rule
     public NettyGrpcServerRule serverRule = new NettyGrpcServerRule();
 
+    @Rule
+    public UnhandledRxJavaErrorRule errorRule = new UnhandledRxJavaErrorRule().autoVerifyNoError();
+
     private static class ExplodeAfterFiveService extends RxNumbersGrpc.NumbersImplBase {
         @Override
         public Flowable<NumberProto.Number> twoWayPressure(Flowable<NumberProto.Number> request) {

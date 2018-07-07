@@ -16,12 +16,16 @@ import io.reactivex.Single;
 import io.reactivex.observers.TestObserver;
 import org.junit.After;
 import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
 
 import java.util.concurrent.TimeUnit;
 
 @SuppressWarnings("Duplicates")
 public class ChainedCallIntegrationTest {
+    @Rule
+    public UnhandledRxJavaErrorRule errorRule = new UnhandledRxJavaErrorRule().autoVerifyNoError();
+
     private Server server;
     private ManagedChannel channel;
 

@@ -14,12 +14,16 @@ import io.reactivex.observers.TestObserver;
 import io.reactivex.subscribers.TestSubscriber;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
+import org.junit.Rule;
 import org.junit.Test;
 
 import java.util.concurrent.TimeUnit;
 
 @SuppressWarnings("unchecked")
 public class UnexpectedServerErrorIntegrationTest {
+    @Rule
+    public UnhandledRxJavaErrorRule errorRule = new UnhandledRxJavaErrorRule().autoVerifyNoError();
+
     private static Server server;
     private static ManagedChannel channel;
 

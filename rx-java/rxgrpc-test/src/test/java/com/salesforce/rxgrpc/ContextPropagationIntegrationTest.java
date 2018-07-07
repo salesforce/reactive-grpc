@@ -10,10 +10,7 @@ package com.salesforce.rxgrpc;
 import io.grpc.*;
 import io.reactivex.Single;
 import io.reactivex.observers.TestObserver;
-import org.junit.AfterClass;
-import org.junit.Before;
-import org.junit.BeforeClass;
-import org.junit.Test;
+import org.junit.*;
 
 import java.util.concurrent.TimeUnit;
 
@@ -21,6 +18,9 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 @SuppressWarnings("Duplicates")
 public class ContextPropagationIntegrationTest {
+    @Rule
+    public UnhandledRxJavaErrorRule errorRule = new UnhandledRxJavaErrorRule().autoVerifyNoError();
+
     private static Server server;
     private static ManagedChannel channel;
 

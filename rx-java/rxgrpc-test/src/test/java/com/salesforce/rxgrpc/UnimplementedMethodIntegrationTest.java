@@ -10,12 +10,16 @@ package com.salesforce.rxgrpc;
 import io.grpc.*;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
+import org.junit.Rule;
 import org.junit.Test;
 
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 @SuppressWarnings("Duplicates")
 public class UnimplementedMethodIntegrationTest {
+    @Rule
+    public UnhandledRxJavaErrorRule errorRule = new UnhandledRxJavaErrorRule().autoVerifyNoError();
+
     private static Server server;
     private static ManagedChannel channel;
 

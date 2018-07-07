@@ -6,8 +6,12 @@ import io.reactivex.plugins.RxJavaPlugins;
 
 import java.util.function.Predicate;
 
+/**
+ * {@code UnhandledRxJavaErrorRule} is a JUnit rule that captures unhandled RxJava exceptions.`
+ */
 public class UnhandledRxJavaErrorRule extends ExternalResource {
     private Throwable unhandledThrowable;
+    private boolean autoverify;
 
     @Override
     protected void before() throws Throwable {
@@ -17,6 +21,14 @@ public class UnhandledRxJavaErrorRule extends ExternalResource {
     @Override
     protected void after() {
         RxJavaPlugins.setErrorHandler(null);
+        if (autoverify) {
+            verifyNoError();
+        }
+    }
+
+    public UnhandledRxJavaErrorRule autoVerifyNoError() {
+        autoverify = true;
+        return this;
     }
 
     public void verifyNoError() {
