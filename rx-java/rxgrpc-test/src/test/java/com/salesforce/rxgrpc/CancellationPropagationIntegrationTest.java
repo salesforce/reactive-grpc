@@ -36,6 +36,9 @@ public class CancellationPropagationIntegrationTest {
     @Rule
     public NettyGrpcServerRule serverRule = new NettyGrpcServerRule();
 
+    @Rule
+    public UnhandledRxJavaErrorRule errorRule = new UnhandledRxJavaErrorRule();
+
     private static class TestService extends RxNumbersGrpc.NumbersImplBase {
         private AtomicInteger lastNumberProduced = new AtomicInteger(Integer.MIN_VALUE);
         private AtomicBoolean wasCanceled = new AtomicBoolean(false);
@@ -115,6 +118,8 @@ public class CancellationPropagationIntegrationTest {
         // Cancellation may or may not deliver the last generated message due to delays in the gRPC processing thread
         assertThat(Math.abs(subscription.valueCount() - svc.getLastNumberProduced())).isLessThanOrEqualTo(3);
         assertThat(svc.wasCanceled()).isTrue();
+
+        errorRule.verifyNoError();
     }
 
     @Test
@@ -140,6 +145,8 @@ public class CancellationPropagationIntegrationTest {
         subscription.assertValueCount(10);
         subscription.assertTerminated();
         assertThat(svc.wasCanceled()).isTrue();
+
+        errorRule.verifyNoError();
     }
 
     @Test
@@ -181,6 +188,8 @@ public class CancellationPropagationIntegrationTest {
 
         assertThat(requestWasCanceled.get()).isTrue();
         assertThat(requestDidProduce.get()).isTrue();
+
+        errorRule.verifyNoError();
     }
 
     @Test
@@ -222,6 +231,8 @@ public class CancellationPropagationIntegrationTest {
 
         assertThat(requestWasCanceled.get()).isTrue();
         assertThat(requestDidProduce.get()).isTrue();
+
+        errorRule.verifyNoError();
     }
 
     @Test
@@ -259,6 +270,8 @@ public class CancellationPropagationIntegrationTest {
         observer.assertTerminated();
         assertThat(requestWasCanceled.get()).isTrue();
         assertThat(requestDidProduce.get()).isTrue();
+
+        errorRule.verifyNoError();
     }
 
     @Test
@@ -296,6 +309,26 @@ public class CancellationPropagationIntegrationTest {
         observer.assertTerminated();
         assertThat(requestWasCanceled.get()).isTrue();
         assertThat(requestDidProduce.get()).isTrue();
+
+        errorRule.verifyNoError();
+    }
+
+    @Test
+    public void prematureResponseStreamDisposalShouldNotThrowUnhandledException() throws Exception {
+        TestService svc = new TestService();
+        serverRule.getServiceRegistry().addService(svc);
+
+        RxNumbersGrpc.RxNumbersStub stub = RxNumbersGrpc.newRxStub(serverRule.getChannel());
+
+        // slowly process the response stream
+        Disposable subscription = stub.responsePressure(Empty.getDefaultInstance()).subscribe(n -> {
+            Thread.sleep(1000);
+        });
+
+        subscription.dispose();
+
+        Thread.sleep(200);
+        errorRule.verifyNoError();
     }
 
     private static NumberProto.Number protoNum(int i) {
