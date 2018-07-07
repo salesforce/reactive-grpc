@@ -93,6 +93,10 @@ public class ReactiveStreamObserverPublisher<T> implements Publisher<T>, StreamO
                 if (callStreamObserver instanceof ClientCallStreamObserver) {
                     isCanceled = true;
                     ((ClientCallStreamObserver) callStreamObserver).cancel("Client canceled request", null);
+
+                    // Release the subscriber, we don't need a reference to it anymore
+                    ReactiveStreamObserverPublisher.this.subscriber = null;
+                    callStreamObserver = null;
                 } else { // ServerCallStreamObserver
                     new Thread() {
                         private final int WAIT_FOR_ERROR_DELAY_MILLS = 100;
@@ -104,6 +108,10 @@ public class ReactiveStreamObserverPublisher<T> implements Publisher<T>, StreamO
                                 if (!abandonDelayedCancel) {
                                     isCanceled = true;
                                     callStreamObserver.onError(Status.CANCELLED.withDescription("Server canceled request").asRuntimeException());
+
+                                    // Release the subscriber, we don't need a reference to it anymore
+                                    ReactiveStreamObserverPublisher.this.subscriber = null;
+                                    callStreamObserver = null;
                                 }
                             } catch (Throwable ex) {
 
@@ -120,36 +128,44 @@ public class ReactiveStreamObserverPublisher<T> implements Publisher<T>, StreamO
 
     @Override
     public void onNext(T value) {
-        try {
-            subscribed.await();
-        } catch (InterruptedException e) {
+        if (!isCanceled()) {
+            try {
+                subscribed.await();
+            } catch (InterruptedException e) {
 
+            }
+            subscriber.onNext(Preconditions.checkNotNull(value));
         }
-        subscriber.onNext(Preconditions.checkNotNull(value));
     }
 
     @Override
     public void onError(Throwable t) {
-        try {
-            subscribed.await();
-        } catch (InterruptedException e) {
+        if (!isCanceled()) {
+            try {
+                subscribed.await();
+            } catch (InterruptedException e) {
 
+            }
+            subscriber.onError(Preconditions.checkNotNull(t));
+            // Release the subscriber, we don't need a reference to it anymore
+            subscriber = null;
+            callStreamObserver = null;
         }
-        subscriber.onError(Preconditions.checkNotNull(t));
-        // Release the subscriber, we don't need a reference to it anymore
-        subscriber = null;
     }
 
     @Override
     public void onCompleted() {
-        try {
-            subscribed.await();
-        } catch (InterruptedException e) {
+        if (!isCanceled()) {
+            try {
+                subscribed.await();
+            } catch (InterruptedException e) {
 
+            }
+            subscriber.onComplete();
+            // Release the subscriber, we don't need a reference to it anymore
+            subscriber = null;
+            callStreamObserver = null;
         }
-        subscriber.onComplete();
-        // Release the subscriber, we don't need a reference to it anymore
-        subscriber = null;
     }
 
     public boolean isCanceled() {

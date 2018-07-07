@@ -36,6 +36,20 @@ public abstract class ReactiveProducerConsumerStreamObserver<TRequest, TResponse
         rxProducer.subscribe(onReadyHandler);
     }
 
+    @Override
+    public void onError(Throwable throwable) {
+        super.onError(throwable);
+        // Free references for GC
+        rxProducer = null;
+    }
+
+    @Override
+    public void onCompleted() {
+        super.onCompleted();
+        // Free references for GC
+        rxProducer = null;
+    }
+
     public void cancel() {
         onReadyHandler.cancel();
     }

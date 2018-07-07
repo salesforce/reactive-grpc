@@ -20,7 +20,7 @@ import org.reactivestreams.Publisher;
  * @param <TResponse>
  */
 public class ReactiveProducerStreamObserver<TRequest, TResponse> implements StreamObserver<TResponse>, ClientResponseObserver<TRequest, TResponse> {
-    private final Publisher<TRequest> rxProducer;
+    private Publisher<TRequest> rxProducer;
     private final Consumer<TResponse> onNext;
     private final Consumer<Throwable> onError;
     private final Runnable onCompleted;
@@ -57,10 +57,16 @@ public class ReactiveProducerStreamObserver<TRequest, TResponse> implements Stre
     @Override
     public void onError(Throwable throwable) {
         onError.accept(throwable);
+        // Free references for GC
+        rxProducer = null;
+        onReadyHandler = null;
     }
 
     @Override
     public void onCompleted() {
         onCompleted.run();
+        // Free references for GC
+        rxProducer = null;
+        onReadyHandler = null;
     }
 }
