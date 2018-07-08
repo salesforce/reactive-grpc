@@ -14,6 +14,9 @@ public class AbstractStubTest {
     @Rule
     public GrpcServerRule serverRule = new GrpcServerRule();
 
+    @Rule
+    public UnhandledRxJavaErrorRule errorRule = new UnhandledRxJavaErrorRule().autoVerifyNoError();
+
     @Test
     public void getChannelWorks() {
         ManagedChannel channel = serverRule.getChannel();

@@ -17,6 +17,7 @@ import io.reactivex.Flowable;
 import io.reactivex.Single;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
+import org.junit.Rule;
 import org.junit.Test;
 
 import java.util.concurrent.TimeUnit;
@@ -29,6 +30,9 @@ import static org.hamcrest.core.IsEqual.equalTo;
 
 @SuppressWarnings("Duplicates")
 public class StandardClientReactiveServerInteropTest {
+    @Rule
+    public UnhandledRxJavaErrorRule errorRule = new UnhandledRxJavaErrorRule().autoVerifyNoError();
+
     private static Server server;
     private static ManagedChannel channel;
 

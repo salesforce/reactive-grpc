@@ -31,6 +31,9 @@ public class BackpressureIntegrationTest {
     @Rule
     public GrpcServerRule serverRule = new GrpcServerRule();
 
+    @Rule
+    public UnhandledRxJavaErrorRule errorRule = new UnhandledRxJavaErrorRule().autoVerifyNoError();
+
     private static final int NUMBER_OF_STREAM_ELEMENTS = 140;
 
     private static AtomicLong lastValueTime;

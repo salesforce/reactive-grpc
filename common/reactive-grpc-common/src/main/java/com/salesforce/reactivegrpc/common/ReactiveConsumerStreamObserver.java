@@ -48,18 +48,30 @@ public abstract class ReactiveConsumerStreamObserver<TRequest, TResponse> implem
     @Override
     public void onNext(TResponse value) {
         Preconditions.checkState(publisher != null, "beforeStart() not yet called");
-        publisher.onNext(Preconditions.checkNotNull(value));
+        if (!publisher.isCanceled()) {
+            publisher.onNext(Preconditions.checkNotNull(value));
+        }
     }
 
     @Override
     public void onError(Throwable throwable) {
         Preconditions.checkState(publisher != null, "beforeStart() not yet called");
-        publisher.onError(Preconditions.checkNotNull(throwable));
+        if (!publisher.isCanceled()) {
+            publisher.onError(Preconditions.checkNotNull(throwable));
+            // Free references for GC
+            publisher = null;
+            rxConsumer = null;
+        }
     }
 
     @Override
     public void onCompleted() {
         Preconditions.checkState(publisher != null, "beforeStart() not yet called");
-        publisher.onCompleted();
+        if (!publisher.isCanceled()) {
+            publisher.onCompleted();
+            // Free references for GC
+            publisher = null;
+            rxConsumer = null;
+        }
     }
 }

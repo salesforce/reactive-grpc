@@ -18,6 +18,7 @@ import io.reactivex.observers.TestObserver;
 import io.reactivex.subscribers.TestSubscriber;
 import org.junit.After;
 import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
 
 import java.util.concurrent.Executors;
@@ -31,6 +32,9 @@ import static org.assertj.core.api.Assertions.assertThat;
  */
 @SuppressWarnings("Duplicates")
 public class ClientThreadIntegrationTest {
+    @Rule
+    public UnhandledRxJavaErrorRule errorRule = new UnhandledRxJavaErrorRule().autoVerifyNoError();
+
     private Server server;
     private ManagedChannel channel;
 

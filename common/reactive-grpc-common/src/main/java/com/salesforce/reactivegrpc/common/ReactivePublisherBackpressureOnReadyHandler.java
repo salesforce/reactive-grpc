@@ -140,18 +140,20 @@ public class ReactivePublisherBackpressureOnReadyHandler<T> implements Subscribe
                 }
             } catch (Throwable throwable) {
                 cancel();
-                onError(throwable);
+                requestStream.onError(prepareError(throwable));
             }
         }
     }
 
     @Override
     public void onError(Throwable throwable) {
-        checkNotNull(throwable);
-        try {
-            requestStream.onError(prepareError(throwable));
-        } catch (Throwable ignore) {
-            cancel();
+        if (!isCanceled()) {
+            checkNotNull(throwable);
+            try {
+                requestStream.onError(prepareError(throwable));
+            } catch (Throwable ignore) {
+                cancel();
+            }
         }
     }
 
@@ -162,7 +164,7 @@ public class ReactivePublisherBackpressureOnReadyHandler<T> implements Subscribe
                 requestStream.onCompleted();
             } catch (Throwable throwable) {
                 cancel();
-                onError(throwable);
+                requestStream.onError(prepareError(throwable));
             }
         }
     }

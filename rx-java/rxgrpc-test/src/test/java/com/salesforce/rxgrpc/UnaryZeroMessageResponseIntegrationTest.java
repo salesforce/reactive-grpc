@@ -26,6 +26,9 @@ public class UnaryZeroMessageResponseIntegrationTest {
     @Rule
     public NettyGrpcServerRule serverRule = new NettyGrpcServerRule();
 
+    @Rule
+    public UnhandledRxJavaErrorRule errorRule = new UnhandledRxJavaErrorRule().autoVerifyNoError();
+
     private static class MissingUnaryResponseService extends GreeterGrpc.GreeterImplBase {
         @Override
         public void sayHello(HelloRequest request, StreamObserver<HelloResponse> responseObserver) {

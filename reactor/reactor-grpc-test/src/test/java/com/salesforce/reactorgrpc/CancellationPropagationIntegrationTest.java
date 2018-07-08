@@ -8,12 +8,10 @@
 package com.salesforce.reactorgrpc;
 
 import com.google.protobuf.Empty;
+import com.salesforce.grpc.testing.contrib.NettyGrpcServerRule;
 import com.salesforce.servicelibs.NumberProto;
 import com.salesforce.servicelibs.ReactorNumbersGrpc;
-import io.grpc.*;
-import org.junit.AfterClass;
-import org.junit.Before;
-import org.junit.BeforeClass;
+import org.junit.Rule;
 import org.junit.Test;
 import reactor.core.Disposable;
 import reactor.core.publisher.Flux;
@@ -34,20 +32,13 @@ public class CancellationPropagationIntegrationTest {
     private static final int NUMBER_OF_STREAM_ELEMENTS = 10000;
     private static final int SEQUENCE_DELAY_MILLIS = 10;
 
-    private static Server server;
-    private static ManagedChannel channel;
-    private static TestService svc = new TestService();
+    @Rule
+    public NettyGrpcServerRule serverRule = new NettyGrpcServerRule();
 
     private static class TestService extends ReactorNumbersGrpc.NumbersImplBase {
         private AtomicInteger lastNumberProduced = new AtomicInteger(Integer.MIN_VALUE);
         private AtomicBoolean wasCanceled = new AtomicBoolean(false);
         private AtomicBoolean explicitCancel = new AtomicBoolean(false);
-
-        public void reset() {
-            lastNumberProduced.set(Integer.MIN_VALUE);
-            wasCanceled.set(false);
-            explicitCancel.set(false);
-        }
 
         public int getLastNumberProduced() {
             return lastNumberProduced.get();
@@ -101,32 +92,13 @@ public class CancellationPropagationIntegrationTest {
         }
     }
 
-    @BeforeClass
-    public static void setupServer() throws Exception {
-        server = ServerBuilder.forPort(0).addService(svc).build().start();
-        channel = ManagedChannelBuilder.forAddress("localhost", server.getPort()).usePlaintext().build();
-    }
-
-    @Before
-    public void init() {
-        StepVerifier.setDefaultTimeout(Duration.ofSeconds(3));
-        svc.reset();
-    }
-
-    @AfterClass
-    public static void stopServer() throws InterruptedException {
-        channel.shutdown();
-        server.shutdown();
-        server.awaitTermination();
-
-        server = null;
-        channel = null;
-    }
-
     @Test
     public void clientCanCancelServerStreamExplicitly() throws InterruptedException {
+        TestService svc = new TestService();
+        serverRule.getServiceRegistry().addService(svc);
+
         AtomicInteger lastNumberConsumed = new AtomicInteger(Integer.MAX_VALUE);
-        ReactorNumbersGrpc.ReactorNumbersStub stub = ReactorNumbersGrpc.newReactorStub(channel);
+        ReactorNumbersGrpc.ReactorNumbersStub stub = ReactorNumbersGrpc.newReactorStub(serverRule.getChannel());
         Flux<NumberProto.Number> test = stub
                 .responsePressure(Mono.just(Empty.getDefaultInstance()))
                 .doOnNext(number -> {lastNumberConsumed.set(number.getNumber(0)); System.out.println("C: " + number.getNumber(0));})
@@ -147,7 +119,10 @@ public class CancellationPropagationIntegrationTest {
 
     @Test
     public void clientCanCancelServerStreamImplicitly() throws InterruptedException {
-        ReactorNumbersGrpc.ReactorNumbersStub stub = ReactorNumbersGrpc.newReactorStub(channel);
+        TestService svc = new TestService();
+        serverRule.getServiceRegistry().addService(svc);
+
+        ReactorNumbersGrpc.ReactorNumbersStub stub = ReactorNumbersGrpc.newReactorStub(serverRule.getChannel());
         Flux<NumberProto.Number> test = stub
                 .responsePressure(Mono.just(Empty.getDefaultInstance()))
                 .doOnNext(number -> System.out.println(number.getNumber(0)))
@@ -165,7 +140,10 @@ public class CancellationPropagationIntegrationTest {
 
     @Test
     public void serverCanCancelClientStreamImplicitly() {
-        ReactorNumbersGrpc.ReactorNumbersStub stub = ReactorNumbersGrpc.newReactorStub(channel);
+        TestService svc = new TestService();
+        serverRule.getServiceRegistry().addService(svc);
+
+        ReactorNumbersGrpc.ReactorNumbersStub stub = ReactorNumbersGrpc.newReactorStub(serverRule.getChannel());
 
         svc.setExplicitCancel(false);
 
@@ -202,7 +180,10 @@ public class CancellationPropagationIntegrationTest {
 
     @Test
     public void serverCanCancelClientStreamExplicitly() {
-        ReactorNumbersGrpc.ReactorNumbersStub stub = ReactorNumbersGrpc.newReactorStub(channel);
+        TestService svc = new TestService();
+        serverRule.getServiceRegistry().addService(svc);
+
+        ReactorNumbersGrpc.ReactorNumbersStub stub = ReactorNumbersGrpc.newReactorStub(serverRule.getChannel());
 
         svc.setExplicitCancel(true);
 
@@ -239,7 +220,10 @@ public class CancellationPropagationIntegrationTest {
 
     @Test
     public void serverCanCancelClientStreamImplicitlyBidi() {
-        ReactorNumbersGrpc.ReactorNumbersStub stub = ReactorNumbersGrpc.newReactorStub(channel);
+        TestService svc = new TestService();
+        serverRule.getServiceRegistry().addService(svc);
+
+        ReactorNumbersGrpc.ReactorNumbersStub stub = ReactorNumbersGrpc.newReactorStub(serverRule.getChannel());
 
         svc.setExplicitCancel(false);
 
@@ -276,7 +260,10 @@ public class CancellationPropagationIntegrationTest {
 
     @Test
     public void serverCanCancelClientStreamExplicitlyBidi() {
-        ReactorNumbersGrpc.ReactorNumbersStub stub = ReactorNumbersGrpc.newReactorStub(channel);
+        TestService svc = new TestService();
+        serverRule.getServiceRegistry().addService(svc);
+
+        ReactorNumbersGrpc.ReactorNumbersStub stub = ReactorNumbersGrpc.newReactorStub(serverRule.getChannel());
 
         svc.setExplicitCancel(true);
 
