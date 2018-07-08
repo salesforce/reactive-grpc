@@ -8,7 +8,9 @@
 package com.salesforce.reactivegrpc.common;
 
 import io.grpc.Status;
+import io.grpc.StatusRuntimeException;
 import io.grpc.stub.ServerCallStreamObserver;
+import org.reactivestreams.Subscriber;
 import org.reactivestreams.Subscription;
 
 /**
@@ -26,7 +28,7 @@ public class ReactiveStreamObserverPublisherServer<T> extends ReactiveStreamObse
     }
 
     @Override
-    protected Subscription createSubscription() {
+    protected ReactiveStreamObserverPublisherSubscriptionBase createSubscription() {
         return new ReactiveStreamObserverPublisherSubscriptionBase() {
             @Override
             public void cancel() {
@@ -57,6 +59,36 @@ public class ReactiveStreamObserverPublisherServer<T> extends ReactiveStreamObse
                 }.start();
             }
         };
+    }
+
+    // These methods are overridden to give more descriptive stack traces
+    @Override
+    public void subscribe(Subscriber<? super T> subscriber) {
+        super.subscribe(subscriber);
+    }
+
+    @Override
+    public void onNext(T value) {
+        super.onNext(value);
+    }
+
+    @Override
+    public void onError(Throwable throwable) {
+        // This condition is not an error and is safe to ignore. If the client dies unexpectedly, the server calls cancel.
+        //
+        // If the cancel happens before a half-close, the ServerCallStreamObserver's cancellation handler
+        // is run, and then a CANCELLED StatusRuntimeException is sent. The StatusRuntimeException can be ignored
+        // because the upstream reactive stream has already been cancelled.
+        if (throwable instanceof StatusRuntimeException && throwable.getMessage().contains("cancelled before receiving half close")) {
+            return;
+        }
+
+        super.onError(throwable);
+    }
+
+    @Override
+    public void onCompleted() {
+        super.onCompleted();
     }
 
     public void abortPendingCancel() {

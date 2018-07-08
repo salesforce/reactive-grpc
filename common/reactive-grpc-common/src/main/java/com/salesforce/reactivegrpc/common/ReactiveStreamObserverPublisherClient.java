@@ -8,6 +8,7 @@
 package com.salesforce.reactivegrpc.common;
 
 import io.grpc.stub.ClientCallStreamObserver;
+import org.reactivestreams.Subscriber;
 import org.reactivestreams.Subscription;
 
 /**
@@ -24,7 +25,7 @@ public class ReactiveStreamObserverPublisherClient<T> extends ReactiveStreamObse
     }
 
     @Override
-    protected Subscription createSubscription() {
+    protected ReactiveStreamObserverPublisherSubscriptionBase createSubscription() {
         return new ReactiveStreamObserverPublisherSubscriptionBase() {
             @Override
             public void cancel() {
@@ -38,5 +39,26 @@ public class ReactiveStreamObserverPublisherClient<T> extends ReactiveStreamObse
                 }
             }
         };
+    }
+
+    // These methods are overridden to give more descriptive stack traces
+    @Override
+    public void subscribe(Subscriber<? super T> subscriber) {
+        super.subscribe(subscriber);
+    }
+
+    @Override
+    public void onNext(T value) {
+        super.onNext(value);
+    }
+
+    @Override
+    public void onError(Throwable t) {
+        super.onError(t);
+    }
+
+    @Override
+    public void onCompleted() {
+        super.onCompleted();
     }
 }

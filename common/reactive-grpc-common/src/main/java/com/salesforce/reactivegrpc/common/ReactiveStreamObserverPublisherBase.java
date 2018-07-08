@@ -59,12 +59,13 @@ public abstract class ReactiveStreamObserverPublisherBase<T> implements Publishe
     }
 
     /**
-     * Todo.
+     * Overridden by client and server implementations to define cancellation.
      */
-    protected abstract Subscription createSubscription();
+    protected abstract ReactiveStreamObserverPublisherSubscriptionBase createSubscription();
 
     /**
-     * Todo.
+     * Base class for client and server subscription implementations. Client and server implementations must provide
+     * their own implementations of cancel().
      */
     protected abstract class ReactiveStreamObserverPublisherSubscriptionBase implements Subscription {
         private static final int MAX_REQUEST_RETRIES = 20;

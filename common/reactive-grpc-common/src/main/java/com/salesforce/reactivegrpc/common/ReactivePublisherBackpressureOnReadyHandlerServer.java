@@ -8,6 +8,7 @@
 package com.salesforce.reactivegrpc.common;
 
 import io.grpc.stub.ServerCallStreamObserver;
+import org.reactivestreams.Subscription;
 
 /**
  * The gRPC server-side implementation of {@link ReactivePublisherBackpressureOnReadyHandlerBase}.
@@ -23,5 +24,26 @@ public class ReactivePublisherBackpressureOnReadyHandlerServer<T> extends Reacti
                 ReactivePublisherBackpressureOnReadyHandlerServer.super.cancelSubscription();
             }
         });
+    }
+
+    // These methods are overridden to give more descriptive stack traces
+    @Override
+    public void onSubscribe(Subscription subscription) {
+        super.onSubscribe(subscription);
+    }
+
+    @Override
+    public void onNext(T t) {
+        super.onNext(t);
+    }
+
+    @Override
+    public void onError(Throwable throwable) {
+        super.onError(throwable);
+    }
+
+    @Override
+    public void onComplete() {
+        super.onComplete();
     }
 }
