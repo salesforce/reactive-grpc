@@ -12,7 +12,7 @@ import io.grpc.stub.ServerCallStreamObserver;
 import org.reactivestreams.Subscription;
 
 /**
- * Todo.
+ * The gRPC server-side implementation of {@link ReactiveStreamObserverPublisherBase}.
  *
  * @param <T>
  */

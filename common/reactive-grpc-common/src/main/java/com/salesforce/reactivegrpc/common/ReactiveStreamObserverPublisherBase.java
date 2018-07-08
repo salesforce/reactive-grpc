@@ -19,7 +19,7 @@ import java.util.concurrent.CountDownLatch;
 /**
  * ReactiveStreamObserverPublisher bridges the manual flow control idioms of gRPC and Reactive Streams. This class takes
  * messages off of a {@link StreamObserver} and feeds them into a {@link Publisher} while respecting backpressure. This
- * class is the inverse of {@link ReactivePublisherBackpressureOnReadyHandler}.
+ * class is the inverse of {@link ReactivePublisherBackpressureOnReadyHandlerBase}.
  * <p>
  * When a {@link Publisher} is subscribed to by a {@link Subscriber}, the {@code Publisher} hands the {@code Subscriber}
  * a {@link Subscription}. When the {@code Subscriber} wants more messages from the {@code Publisher}, the

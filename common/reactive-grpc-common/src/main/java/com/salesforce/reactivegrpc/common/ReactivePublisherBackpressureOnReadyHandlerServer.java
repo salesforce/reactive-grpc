@@ -10,7 +10,7 @@ package com.salesforce.reactivegrpc.common;
 import io.grpc.stub.ServerCallStreamObserver;
 
 /**
- * TODO.
+ * The gRPC server-side implementation of {@link ReactivePublisherBackpressureOnReadyHandlerBase}.
  *
  * @param <T>
  */

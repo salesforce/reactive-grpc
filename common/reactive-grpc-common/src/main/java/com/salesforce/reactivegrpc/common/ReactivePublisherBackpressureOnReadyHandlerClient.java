@@ -11,7 +11,7 @@ import io.grpc.Status;
 import io.grpc.stub.ClientCallStreamObserver;
 
 /**
- * TODO.
+ * The gRPC client-side implementation of {@link ReactivePublisherBackpressureOnReadyHandlerBase}.
  *
  * @param <T>
  */

@@ -11,7 +11,7 @@ import io.grpc.stub.ClientCallStreamObserver;
 import org.reactivestreams.Subscription;
 
 /**
- * Todo.
+ * The gRPC client-side implementation of {@link ReactiveStreamObserverPublisherBase}.
  *
  * @param <T>
  */
