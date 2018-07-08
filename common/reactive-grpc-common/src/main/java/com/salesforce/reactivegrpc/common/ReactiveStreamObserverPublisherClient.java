@@ -9,7 +9,6 @@ package com.salesforce.reactivegrpc.common;
 
 import io.grpc.stub.ClientCallStreamObserver;
 import org.reactivestreams.Subscriber;
-import org.reactivestreams.Subscription;
 
 /**
  * The gRPC client-side implementation of {@link ReactiveStreamObserverPublisherBase}.

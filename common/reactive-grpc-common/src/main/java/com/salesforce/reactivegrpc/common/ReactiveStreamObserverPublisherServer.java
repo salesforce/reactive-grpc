@@ -11,7 +11,6 @@ import io.grpc.Status;
 import io.grpc.StatusRuntimeException;
 import io.grpc.stub.ServerCallStreamObserver;
 import org.reactivestreams.Subscriber;
-import org.reactivestreams.Subscription;
 
 /**
  * The gRPC server-side implementation of {@link ReactiveStreamObserverPublisherBase}.
