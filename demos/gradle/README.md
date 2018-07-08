@@ -1,0 +1,1 @@
+This demo shows how to use the Reactive-gRPC generators from Gradle. The important bits are in build.gradle.
