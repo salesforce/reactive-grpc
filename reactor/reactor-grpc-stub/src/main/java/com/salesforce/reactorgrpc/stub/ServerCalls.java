@@ -8,7 +8,7 @@
 package com.salesforce.reactorgrpc.stub;
 
 import com.google.common.base.Preconditions;
-import com.salesforce.reactivegrpc.common.ReactivePublisherBackpressureOnReadyHandler;
+import com.salesforce.reactivegrpc.common.ReactivePublisherBackpressureOnReadyHandlerServer;
 import com.salesforce.reactivegrpc.common.ReactiveStreamObserverPublisherServer;
 import io.grpc.Status;
 import io.grpc.StatusException;
@@ -68,7 +68,7 @@ public final class ServerCalls {
             Mono<TRequest> rxRequest = Mono.just(request);
 
             Flux<TResponse> rxResponse = Preconditions.checkNotNull(delegate.apply(rxRequest));
-            rxResponse.subscribe(new ReactivePublisherBackpressureOnReadyHandler<>(
+            rxResponse.subscribe(new ReactivePublisherBackpressureOnReadyHandlerServer<>(
                     (ServerCallStreamObserver<TResponse>) responseObserver));
         } catch (Throwable throwable) {
             responseObserver.onError(prepareError(throwable));
@@ -126,7 +126,7 @@ public final class ServerCalls {
             Flux<TResponse> rxResponse = Preconditions.checkNotNull(delegate.apply(
                     Flux.from(streamObserverPublisher)
                             .transform(Operators.<TRequest, TRequest>lift(new BackpressureChunkingLifter<TRequest>()))));
-            Subscriber<TResponse> subscriber = new ReactivePublisherBackpressureOnReadyHandler<>(
+            Subscriber<TResponse> subscriber = new ReactivePublisherBackpressureOnReadyHandlerServer<>(
                     (ServerCallStreamObserver<TResponse>) responseObserver);
             // Don't try to respond if the server has already canceled the request
             rxResponse.subscribe(

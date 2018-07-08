@@ -20,7 +20,7 @@ import org.reactivestreams.Publisher;
  */
 public abstract class ReactiveProducerConsumerStreamObserver<TRequest, TResponse> extends ReactiveConsumerStreamObserver<TRequest, TResponse> {
     private Publisher<TRequest> rxProducer;
-    private ReactivePublisherBackpressureOnReadyHandler<TRequest> onReadyHandler;
+    private ReactivePublisherBackpressureOnReadyHandlerClient<TRequest> onReadyHandler;
 
     public ReactiveProducerConsumerStreamObserver(Publisher<TRequest> rxProducer) {
         this.rxProducer = rxProducer;
@@ -29,7 +29,7 @@ public abstract class ReactiveProducerConsumerStreamObserver<TRequest, TResponse
     @Override
     public void beforeStart(ClientCallStreamObserver<TRequest> requestStream) {
         super.beforeStart(Preconditions.checkNotNull(requestStream));
-        onReadyHandler = new ReactivePublisherBackpressureOnReadyHandler<TRequest>(requestStream);
+        onReadyHandler = new ReactivePublisherBackpressureOnReadyHandlerClient<TRequest>(requestStream);
     }
 
     public void rxSubscribe() {

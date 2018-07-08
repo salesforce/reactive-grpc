@@ -9,7 +9,7 @@ package com.salesforce.rxgrpc.stub;
 
 import com.google.common.base.Preconditions;
 import com.salesforce.reactivegrpc.common.Function;
-import com.salesforce.reactivegrpc.common.ReactivePublisherBackpressureOnReadyHandler;
+import com.salesforce.reactivegrpc.common.ReactivePublisherBackpressureOnReadyHandlerServer;
 import com.salesforce.reactivegrpc.common.ReactiveStreamObserverPublisherServer;
 import io.grpc.Status;
 import io.grpc.StatusException;
@@ -77,7 +77,7 @@ public final class ServerCalls {
             Single<TRequest> rxRequest = Single.just(request);
 
             Flowable<TResponse> rxResponse = Preconditions.checkNotNull(delegate.apply(rxRequest));
-            rxResponse.subscribe(new ReactivePublisherBackpressureOnReadyHandler<TResponse>(
+            rxResponse.subscribe(new ReactivePublisherBackpressureOnReadyHandlerServer<TResponse>(
                     (ServerCallStreamObserver<TResponse>) responseObserver));
         } catch (Throwable throwable) {
             responseObserver.onError(prepareError(throwable));
@@ -143,7 +143,7 @@ public final class ServerCalls {
                     Flowable.unsafeCreate(streamObserverPublisher)
                             .lift(new BackpressureChunkingOperator<TRequest>())
                     ));
-            final Subscriber<TResponse> subscriber = new ReactivePublisherBackpressureOnReadyHandler<TResponse>(
+            final Subscriber<TResponse> subscriber = new ReactivePublisherBackpressureOnReadyHandlerServer<TResponse>(
                     (ServerCallStreamObserver<TResponse>) responseObserver);
             // Don't try to respond if the server has already canceled the request
             rxResponse.subscribe(
