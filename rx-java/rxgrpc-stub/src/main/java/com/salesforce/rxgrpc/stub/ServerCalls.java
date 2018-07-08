@@ -10,11 +10,10 @@ package com.salesforce.rxgrpc.stub;
 import com.google.common.base.Preconditions;
 import com.salesforce.reactivegrpc.common.Function;
 import com.salesforce.reactivegrpc.common.ReactivePublisherBackpressureOnReadyHandler;
-import com.salesforce.reactivegrpc.common.ReactiveStreamObserverPublisher;
+import com.salesforce.reactivegrpc.common.ReactiveStreamObserverPublisherServer;
 import io.grpc.Status;
 import io.grpc.StatusException;
 import io.grpc.StatusRuntimeException;
-import io.grpc.stub.CallStreamObserver;
 import io.grpc.stub.ServerCallStreamObserver;
 import io.grpc.stub.StreamObserver;
 import io.reactivex.Flowable;
@@ -92,8 +91,8 @@ public final class ServerCalls {
     public static <TRequest, TResponse> StreamObserver<TRequest> manyToOne(
             final StreamObserver<TResponse> responseObserver,
             Function<Flowable<TRequest>, Single<TResponse>> delegate) {
-        final ReactiveStreamObserverPublisher<TRequest> streamObserverPublisher =
-                new ReactiveStreamObserverPublisher<TRequest>((CallStreamObserver<TResponse>) responseObserver);
+        final ReactiveStreamObserverPublisherServer<TRequest> streamObserverPublisher =
+                new ReactiveStreamObserverPublisherServer<TRequest>((ServerCallStreamObserver<TResponse>) responseObserver);
 
         try {
             Single<TResponse> rxResponse = Preconditions.checkNotNull(delegate.apply(
@@ -136,8 +135,8 @@ public final class ServerCalls {
     public static <TRequest, TResponse> StreamObserver<TRequest> manyToMany(
             StreamObserver<TResponse> responseObserver,
             Function<Flowable<TRequest>, Flowable<TResponse>> delegate) {
-        final ReactiveStreamObserverPublisher<TRequest> streamObserverPublisher =
-                new ReactiveStreamObserverPublisher<TRequest>((CallStreamObserver<TResponse>) responseObserver);
+        final ReactiveStreamObserverPublisherServer<TRequest> streamObserverPublisher =
+                new ReactiveStreamObserverPublisherServer<TRequest>((ServerCallStreamObserver<TResponse>) responseObserver);
 
         try {
             Flowable<TResponse> rxResponse = Preconditions.checkNotNull(delegate.apply(

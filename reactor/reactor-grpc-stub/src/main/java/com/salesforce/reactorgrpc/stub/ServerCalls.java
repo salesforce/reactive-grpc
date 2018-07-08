@@ -9,11 +9,10 @@ package com.salesforce.reactorgrpc.stub;
 
 import com.google.common.base.Preconditions;
 import com.salesforce.reactivegrpc.common.ReactivePublisherBackpressureOnReadyHandler;
-import com.salesforce.reactivegrpc.common.ReactiveStreamObserverPublisher;
+import com.salesforce.reactivegrpc.common.ReactiveStreamObserverPublisherServer;
 import io.grpc.Status;
 import io.grpc.StatusException;
 import io.grpc.StatusRuntimeException;
-import io.grpc.stub.CallStreamObserver;
 import io.grpc.stub.ServerCallStreamObserver;
 import io.grpc.stub.StreamObserver;
 import org.reactivestreams.Subscriber;
@@ -83,8 +82,8 @@ public final class ServerCalls {
     public static <TRequest, TResponse> StreamObserver<TRequest> manyToOne(
             StreamObserver<TResponse> responseObserver,
             Function<Flux<TRequest>, Mono<TResponse>> delegate) {
-        ReactiveStreamObserverPublisher<TRequest> streamObserverPublisher =
-                new ReactiveStreamObserverPublisher<>((CallStreamObserver<TResponse>) responseObserver);
+        ReactiveStreamObserverPublisherServer<TRequest> streamObserverPublisher =
+                new ReactiveStreamObserverPublisherServer<>((ServerCallStreamObserver<TResponse>) responseObserver);
 
         try {
             Mono<TResponse> rxResponse = Preconditions.checkNotNull(delegate.apply(
@@ -120,8 +119,8 @@ public final class ServerCalls {
     public static <TRequest, TResponse> StreamObserver<TRequest> manyToMany(
             StreamObserver<TResponse> responseObserver,
             Function<Flux<TRequest>, Flux<TResponse>> delegate) {
-        ReactiveStreamObserverPublisher<TRequest> streamObserverPublisher =
-                new ReactiveStreamObserverPublisher<>((CallStreamObserver<TResponse>) responseObserver);
+        ReactiveStreamObserverPublisherServer<TRequest> streamObserverPublisher =
+                new ReactiveStreamObserverPublisherServer<>((ServerCallStreamObserver<TResponse>) responseObserver);
 
         try {
             Flux<TResponse> rxResponse = Preconditions.checkNotNull(delegate.apply(
