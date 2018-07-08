@@ -8,7 +8,7 @@
 package com.salesforce.reactorgrpc.stub;
 
 import com.salesforce.reactivegrpc.common.ReactiveConsumerStreamObserver;
-import com.salesforce.reactivegrpc.common.ReactiveStreamObserverPublisher;
+import com.salesforce.reactivegrpc.common.ReactiveStreamObserverPublisherClient;
 import org.reactivestreams.Publisher;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Operators;
@@ -22,7 +22,7 @@ import reactor.core.publisher.Operators;
 public class ReactorConsumerStreamObserver<TRequest, TResponse> extends ReactiveConsumerStreamObserver<TRequest, TResponse> {
 
     @Override
-    public Publisher<TResponse> getReactiveConsumerFromPublisher(ReactiveStreamObserverPublisher<TResponse> publisher) {
+    public Publisher<TResponse> getReactiveConsumerFromPublisher(ReactiveStreamObserverPublisherClient<TResponse> publisher) {
         return Flux.from(publisher).transform(Operators.lift(new BackpressureChunkingLifter<TResponse>()));
     }
 

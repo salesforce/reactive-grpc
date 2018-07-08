@@ -24,7 +24,7 @@ public class ReactiveProducerStreamObserver<TRequest, TResponse> implements Stre
     private final Consumer<TResponse> onNext;
     private final Consumer<Throwable> onError;
     private final Runnable onCompleted;
-    private ReactivePublisherBackpressureOnReadyHandler<TRequest> onReadyHandler;
+    private ReactivePublisherBackpressureOnReadyHandlerClient<TRequest> onReadyHandler;
 
     public ReactiveProducerStreamObserver(Publisher<TRequest> rxProducer, Consumer<TResponse> onNext, Consumer<Throwable> onError, Runnable onCompleted) {
         this.onNext = Preconditions.checkNotNull(onNext);
@@ -38,7 +38,7 @@ public class ReactiveProducerStreamObserver<TRequest, TResponse> implements Stre
         Preconditions.checkNotNull(producerStream);
         // Subscribe to the rxProducer with an adapter to a gRPC StreamObserver that respects backpressure
         // signals from the underlying gRPC client transport.
-        onReadyHandler = new ReactivePublisherBackpressureOnReadyHandler<TRequest>(producerStream);
+        onReadyHandler = new ReactivePublisherBackpressureOnReadyHandlerClient<TRequest>(producerStream);
     }
 
     public void rxSubscribe() {

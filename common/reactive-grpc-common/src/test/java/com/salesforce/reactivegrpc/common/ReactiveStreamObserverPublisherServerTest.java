@@ -7,7 +7,7 @@
 
 package com.salesforce.reactivegrpc.common;
 
-import io.grpc.stub.CallStreamObserver;
+import io.grpc.stub.ServerCallStreamObserver;
 import org.junit.Test;
 import org.mockito.invocation.InvocationOnMock;
 import org.mockito.stubbing.Answer;
@@ -20,13 +20,13 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.*;
 
 @SuppressWarnings("unchecked")
-public class ReactiveStreamObserverPublisherTest {
+public class ReactiveStreamObserverPublisherServerTest {
     @Test
     public void onNextDelegates() {
-        CallStreamObserver<Object> obs = mock(CallStreamObserver.class);
+        ServerCallStreamObserver<Object> obs = mock(ServerCallStreamObserver.class);
         Subscriber<Object> sub = mock(Subscriber.class);
 
-        ReactiveStreamObserverPublisher<Object> pub = new ReactiveStreamObserverPublisher<Object>(obs);
+        ReactiveStreamObserverPublisherServer<Object> pub = new ReactiveStreamObserverPublisherServer<Object>(obs);
         pub.subscribe(sub);
 
         Object obj = new Object();
@@ -37,10 +37,10 @@ public class ReactiveStreamObserverPublisherTest {
 
     @Test
     public void onErrorDelegates() {
-        CallStreamObserver<Object> obs = mock(CallStreamObserver.class);
+        ServerCallStreamObserver<Object> obs = mock(ServerCallStreamObserver.class);
         Subscriber<Object> sub = mock(Subscriber.class);
 
-        ReactiveStreamObserverPublisher<Object> pub = new ReactiveStreamObserverPublisher<Object>(obs);
+        ReactiveStreamObserverPublisherServer<Object> pub = new ReactiveStreamObserverPublisherServer<Object>(obs);
         pub.subscribe(sub);
 
         Throwable obj = new Exception();
@@ -51,10 +51,10 @@ public class ReactiveStreamObserverPublisherTest {
 
     @Test
     public void onCompletedDelegates() {
-        CallStreamObserver<Object> obs = mock(CallStreamObserver.class);
+        ServerCallStreamObserver<Object> obs = mock(ServerCallStreamObserver.class);
         Subscriber<Object> sub = mock(Subscriber.class);
 
-        ReactiveStreamObserverPublisher<Object> pub = new ReactiveStreamObserverPublisher<Object>(obs);
+        ReactiveStreamObserverPublisherServer<Object> pub = new ReactiveStreamObserverPublisherServer<Object>(obs);
         pub.subscribe(sub);
 
         pub.onCompleted();
@@ -63,7 +63,7 @@ public class ReactiveStreamObserverPublisherTest {
 
     @Test
     public void requestDelegates() {
-        CallStreamObserver<Object> obs = mock(CallStreamObserver.class);
+        ServerCallStreamObserver<Object> obs = mock(ServerCallStreamObserver.class);
         Subscriber<Object> sub = mock(Subscriber.class);
 
         final AtomicReference<Subscription> subscription = new AtomicReference<Subscription>();
@@ -75,7 +75,7 @@ public class ReactiveStreamObserverPublisherTest {
             }
         }).when(sub).onSubscribe(any(Subscription.class));
 
-        ReactiveStreamObserverPublisher<Object> pub = new ReactiveStreamObserverPublisher<Object>(obs);
+        ReactiveStreamObserverPublisherServer<Object> pub = new ReactiveStreamObserverPublisherServer<Object>(obs);
         pub.subscribe(sub);
 
         assertThat(subscription.get()).isNotNull();

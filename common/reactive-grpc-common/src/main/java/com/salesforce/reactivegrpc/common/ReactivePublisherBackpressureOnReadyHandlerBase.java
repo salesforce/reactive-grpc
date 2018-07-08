@@ -8,13 +8,10 @@
 package com.salesforce.reactivegrpc.common;
 
 import com.google.common.base.Preconditions;
-import com.google.common.util.concurrent.Runnables;
 import io.grpc.Status;
 import io.grpc.StatusException;
 import io.grpc.StatusRuntimeException;
 import io.grpc.stub.CallStreamObserver;
-import io.grpc.stub.ClientCallStreamObserver;
-import io.grpc.stub.ServerCallStreamObserver;
 import org.reactivestreams.Subscriber;
 import org.reactivestreams.Subscription;
 
@@ -26,7 +23,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
 /**
  * ReactivePublisherBackpressureOnReadyHandler bridges the manual flow control idioms of Reactive Streams and gRPC. This
  * class takes messages off of a {@link org.reactivestreams.Publisher} and feeds them into a {@link CallStreamObserver}
- * while respecting backpressure. This class is the inverse of {@link ReactiveStreamObserverPublisher}.
+ * while respecting backpressure. This class is the inverse of {@link ReactiveStreamObserverPublisherBase}.
  * <p>
  * When a gRPC publisher's transport wants more data to transmit, the {@link CallStreamObserver}'s onReady handler is
  * signaled. This handler must keep transmitting messages until {@link CallStreamObserver#isReady()} ceases to be true.
@@ -45,12 +42,11 @@ import static com.google.common.base.Preconditions.checkNotNull;
  *
  * @param <T>
  */
-public class ReactivePublisherBackpressureOnReadyHandler<T> implements Subscriber<T>, Runnable {
+public abstract class ReactivePublisherBackpressureOnReadyHandlerBase<T> implements Subscriber<T>, Runnable {
     private CallStreamObserver<T> requestStream;
     private Subscription subscription;
     private AtomicBoolean canceled = new AtomicBoolean(false);
     private CountDownLatch subscribed = new CountDownLatch(1);
-    private Runnable cancelRequestStream = Runnables.doNothing();
 
     // Guard against spurious onReady() calls caused by a race between onNext() and onReady(). If the transport
     // toggles isReady() from false to true while onNext() is executing, but before onNext() checks isReady(),
@@ -58,26 +54,9 @@ public class ReactivePublisherBackpressureOnReadyHandler<T> implements Subscribe
     // execution.
     private final AtomicBoolean wasReady = new AtomicBoolean(false);
 
-    public ReactivePublisherBackpressureOnReadyHandler(final ClientCallStreamObserver<T> requestStream) {
+    public ReactivePublisherBackpressureOnReadyHandlerBase(final CallStreamObserver<T> requestStream) {
         this.requestStream = checkNotNull(requestStream);
         requestStream.setOnReadyHandler(this);
-        cancelRequestStream = new Runnable() {
-            @Override
-            public void run() {
-                requestStream.cancel("Cancelled", Status.CANCELLED.asException());
-            }
-        };
-    }
-
-    public ReactivePublisherBackpressureOnReadyHandler(ServerCallStreamObserver<T> requestStream) {
-        this.requestStream = checkNotNull(requestStream);
-        requestStream.setOnReadyHandler(this);
-        requestStream.setOnCancelHandler(new Runnable() {
-            @Override
-            public void run() {
-                subscription.cancel();
-            }
-        });
     }
 
     @Override
@@ -100,7 +79,6 @@ public class ReactivePublisherBackpressureOnReadyHandler<T> implements Subscribe
             subscription.cancel();
             subscription = null;
         }
-        cancelRequestStream.run();
     }
 
     public boolean isCanceled() {
@@ -167,6 +145,10 @@ public class ReactivePublisherBackpressureOnReadyHandler<T> implements Subscribe
                 requestStream.onError(prepareError(throwable));
             }
         }
+    }
+
+    protected void cancelSubscription() {
+        subscription.cancel();
     }
 
     private static Throwable prepareError(Throwable throwable) {

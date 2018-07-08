@@ -8,7 +8,7 @@
 package com.salesforce.rxgrpc.stub;
 
 import com.salesforce.reactivegrpc.common.ReactiveConsumerStreamObserver;
-import com.salesforce.reactivegrpc.common.ReactiveStreamObserverPublisher;
+import com.salesforce.reactivegrpc.common.ReactiveStreamObserverPublisherClient;
 import io.reactivex.Flowable;
 import org.reactivestreams.Publisher;
 
@@ -21,7 +21,7 @@ import org.reactivestreams.Publisher;
 public class RxConsumerStreamObserver<TRequest, TResponse> extends ReactiveConsumerStreamObserver<TRequest, TResponse> {
 
     @Override
-    public Publisher<TResponse>  getReactiveConsumerFromPublisher(ReactiveStreamObserverPublisher<TResponse>  publisher) {
+    public Publisher<TResponse>  getReactiveConsumerFromPublisher(ReactiveStreamObserverPublisherClient<TResponse> publisher) {
         return Flowable.unsafeCreate(publisher).lift(new BackpressureChunkingOperator<TResponse>());
     }
 }

@@ -22,11 +22,11 @@ import java.util.concurrent.CountDownLatch;
  * @param <TResponse>
  */
 public abstract class ReactiveConsumerStreamObserver<TRequest, TResponse> implements ClientResponseObserver<TRequest, TResponse> {
-    private ReactiveStreamObserverPublisher<TResponse> publisher;
+    private ReactiveStreamObserverPublisherClient<TResponse> publisher;
     private Publisher<TResponse> rxConsumer;
     private CountDownLatch beforeStartCalled = new CountDownLatch(1);
 
-    public abstract Publisher<TResponse> getReactiveConsumerFromPublisher(ReactiveStreamObserverPublisher<TResponse> publisher);
+    public abstract Publisher<TResponse> getReactiveConsumerFromPublisher(ReactiveStreamObserverPublisherClient<TResponse> publisher);
 
     public Publisher<TResponse> getRxConsumer() {
         try {
@@ -40,7 +40,7 @@ public abstract class ReactiveConsumerStreamObserver<TRequest, TResponse> implem
 
     @Override
     public void beforeStart(ClientCallStreamObserver<TRequest> requestStream) {
-        publisher = new ReactiveStreamObserverPublisher<TResponse>(Preconditions.checkNotNull(requestStream));
+        publisher = new ReactiveStreamObserverPublisherClient<TResponse>(Preconditions.checkNotNull(requestStream));
         rxConsumer = getReactiveConsumerFromPublisher(publisher);
         beforeStartCalled.countDown();
     }

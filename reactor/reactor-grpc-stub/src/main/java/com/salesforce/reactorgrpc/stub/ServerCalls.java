@@ -8,12 +8,11 @@
 package com.salesforce.reactorgrpc.stub;
 
 import com.google.common.base.Preconditions;
-import com.salesforce.reactivegrpc.common.ReactivePublisherBackpressureOnReadyHandler;
-import com.salesforce.reactivegrpc.common.ReactiveStreamObserverPublisher;
+import com.salesforce.reactivegrpc.common.ReactivePublisherBackpressureOnReadyHandlerServer;
+import com.salesforce.reactivegrpc.common.ReactiveStreamObserverPublisherServer;
 import io.grpc.Status;
 import io.grpc.StatusException;
 import io.grpc.StatusRuntimeException;
-import io.grpc.stub.CallStreamObserver;
 import io.grpc.stub.ServerCallStreamObserver;
 import io.grpc.stub.StreamObserver;
 import org.reactivestreams.Subscriber;
@@ -69,7 +68,7 @@ public final class ServerCalls {
             Mono<TRequest> rxRequest = Mono.just(request);
 
             Flux<TResponse> rxResponse = Preconditions.checkNotNull(delegate.apply(rxRequest));
-            rxResponse.subscribe(new ReactivePublisherBackpressureOnReadyHandler<>(
+            rxResponse.subscribe(new ReactivePublisherBackpressureOnReadyHandlerServer<>(
                     (ServerCallStreamObserver<TResponse>) responseObserver));
         } catch (Throwable throwable) {
             responseObserver.onError(prepareError(throwable));
@@ -83,8 +82,8 @@ public final class ServerCalls {
     public static <TRequest, TResponse> StreamObserver<TRequest> manyToOne(
             StreamObserver<TResponse> responseObserver,
             Function<Flux<TRequest>, Mono<TResponse>> delegate) {
-        ReactiveStreamObserverPublisher<TRequest> streamObserverPublisher =
-                new ReactiveStreamObserverPublisher<>((CallStreamObserver<TResponse>) responseObserver);
+        ReactiveStreamObserverPublisherServer<TRequest> streamObserverPublisher =
+                new ReactiveStreamObserverPublisherServer<>((ServerCallStreamObserver<TResponse>) responseObserver);
 
         try {
             Mono<TResponse> rxResponse = Preconditions.checkNotNull(delegate.apply(
@@ -120,14 +119,14 @@ public final class ServerCalls {
     public static <TRequest, TResponse> StreamObserver<TRequest> manyToMany(
             StreamObserver<TResponse> responseObserver,
             Function<Flux<TRequest>, Flux<TResponse>> delegate) {
-        ReactiveStreamObserverPublisher<TRequest> streamObserverPublisher =
-                new ReactiveStreamObserverPublisher<>((CallStreamObserver<TResponse>) responseObserver);
+        ReactiveStreamObserverPublisherServer<TRequest> streamObserverPublisher =
+                new ReactiveStreamObserverPublisherServer<>((ServerCallStreamObserver<TResponse>) responseObserver);
 
         try {
             Flux<TResponse> rxResponse = Preconditions.checkNotNull(delegate.apply(
                     Flux.from(streamObserverPublisher)
                             .transform(Operators.<TRequest, TRequest>lift(new BackpressureChunkingLifter<TRequest>()))));
-            Subscriber<TResponse> subscriber = new ReactivePublisherBackpressureOnReadyHandler<>(
+            Subscriber<TResponse> subscriber = new ReactivePublisherBackpressureOnReadyHandlerServer<>(
                     (ServerCallStreamObserver<TResponse>) responseObserver);
             // Don't try to respond if the server has already canceled the request
             rxResponse.subscribe(

@@ -7,7 +7,7 @@
 
 package com.salesforce.reactorgrpc.tck;
 
-import com.salesforce.reactivegrpc.common.ReactivePublisherBackpressureOnReadyHandler;
+import com.salesforce.reactivegrpc.common.ReactivePublisherBackpressureOnReadyHandlerClient;
 import io.grpc.stub.ClientCallStreamObserver;
 import org.reactivestreams.Subscriber;
 import org.reactivestreams.Subscription;
@@ -30,13 +30,13 @@ public class ReactorGrpcSubscriberWhiteboxVerificationTest extends SubscriberWhi
     }
 
     @BeforeClass
-    public static void setup() throws Exception {
+    public static void setup() {
         System.out.println("ReactorGrpcSubscriberWhiteboxVerificationTest");
     }
 
     @Override
     public Subscriber<Message> createSubscriber(WhiteboxSubscriberProbe<Message> probe) {
-        return new ReactivePublisherBackpressureOnReadyHandler<Message>(new StubServerCallStreamObserver()) {
+        return new ReactivePublisherBackpressureOnReadyHandlerClient<Message>(new StubServerCallStreamObserver()) {
             @Override
             public void onSubscribe(final Subscription s) {
                 super.onSubscribe(s);

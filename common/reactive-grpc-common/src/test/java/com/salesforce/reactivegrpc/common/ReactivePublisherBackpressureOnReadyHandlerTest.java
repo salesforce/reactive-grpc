@@ -19,7 +19,7 @@ public class ReactivePublisherBackpressureOnReadyHandlerTest {
     public void runPrimesThePump() {
         ClientCallStreamObserver<Object> obs = mock(ClientCallStreamObserver.class);
         when(obs.isReady()).thenReturn(true);
-        ReactivePublisherBackpressureOnReadyHandler<Object> handler = new ReactivePublisherBackpressureOnReadyHandler<Object>(obs);
+        ReactivePublisherBackpressureOnReadyHandlerClient<Object> handler = new ReactivePublisherBackpressureOnReadyHandlerClient<Object>(obs);
         Subscription sub = mock(Subscription.class);
 
         handler.onSubscribe(sub);
@@ -33,7 +33,7 @@ public class ReactivePublisherBackpressureOnReadyHandlerTest {
         ClientCallStreamObserver<Object> obs = mock(ClientCallStreamObserver.class);
         when(obs.isReady()).thenReturn(true);
 
-        ReactivePublisherBackpressureOnReadyHandler<Object> handler = new ReactivePublisherBackpressureOnReadyHandler<Object>(obs);
+        ReactivePublisherBackpressureOnReadyHandlerClient<Object> handler = new ReactivePublisherBackpressureOnReadyHandlerClient<Object>(obs);
         Subscription sub = mock(Subscription.class);
 
         handler.onSubscribe(sub);
@@ -50,7 +50,7 @@ public class ReactivePublisherBackpressureOnReadyHandlerTest {
         ClientCallStreamObserver<Object> obs = mock(ClientCallStreamObserver.class);
         when(obs.isReady()).thenReturn(false);
 
-        ReactivePublisherBackpressureOnReadyHandler<Object> handler = new ReactivePublisherBackpressureOnReadyHandler<Object>(obs);
+        ReactivePublisherBackpressureOnReadyHandlerClient<Object> handler = new ReactivePublisherBackpressureOnReadyHandlerClient<Object>(obs);
         Subscription sub = mock(Subscription.class);
 
         handler.onSubscribe(sub);
@@ -66,7 +66,7 @@ public class ReactivePublisherBackpressureOnReadyHandlerTest {
     public void exceptionInOnNextCancelsUpstreamSubscription() {
         ClientCallStreamObserver<Object> obs = mock(ClientCallStreamObserver.class);
         doThrow(new IllegalStateException("won't be propagated to handler caller")).when(obs).onNext(any());
-        ReactivePublisherBackpressureOnReadyHandler<Object> handler = new ReactivePublisherBackpressureOnReadyHandler<Object>(obs);
+        ReactivePublisherBackpressureOnReadyHandlerClient<Object> handler = new ReactivePublisherBackpressureOnReadyHandlerClient<Object>(obs);
         Subscription sub = mock(Subscription.class);
         handler.onSubscribe(sub);
         
@@ -79,7 +79,7 @@ public class ReactivePublisherBackpressureOnReadyHandlerTest {
     public void exceptionInOnOnErrorCancelsUpstreamSubscription() {
         ClientCallStreamObserver<Object> obs = mock(ClientCallStreamObserver.class);
         doThrow(new IllegalStateException("won't be propagated to handler caller")).when(obs).onError(any(Throwable.class));
-        ReactivePublisherBackpressureOnReadyHandler<Object> handler = new ReactivePublisherBackpressureOnReadyHandler<Object>(obs);
+        ReactivePublisherBackpressureOnReadyHandlerClient<Object> handler = new ReactivePublisherBackpressureOnReadyHandlerClient<Object>(obs);
         Subscription sub = mock(Subscription.class);
         handler.onSubscribe(sub);
         
@@ -91,7 +91,7 @@ public class ReactivePublisherBackpressureOnReadyHandlerTest {
     public void exceptionInOnCompleteCancelsUpstreamSubscription() {
         ClientCallStreamObserver<Object> obs = mock(ClientCallStreamObserver.class);
         doThrow(new IllegalStateException("won't be propagated to handler caller")).when(obs).onCompleted();
-        ReactivePublisherBackpressureOnReadyHandler<Object> handler = new ReactivePublisherBackpressureOnReadyHandler<Object>(obs);
+        ReactivePublisherBackpressureOnReadyHandlerClient<Object> handler = new ReactivePublisherBackpressureOnReadyHandlerClient<Object>(obs);
         Subscription sub = mock(Subscription.class);
         handler.onSubscribe(sub);
         
@@ -103,7 +103,7 @@ public class ReactivePublisherBackpressureOnReadyHandlerTest {
     @Test
     public void onSubscribeCancelsSecondSubscription() {
         ClientCallStreamObserver<Object> obs = mock(ClientCallStreamObserver.class);
-        ReactivePublisherBackpressureOnReadyHandler<Object> handler = new ReactivePublisherBackpressureOnReadyHandler<Object>(obs);
+        ReactivePublisherBackpressureOnReadyHandlerClient<Object> handler = new ReactivePublisherBackpressureOnReadyHandlerClient<Object>(obs);
         Subscription sub1 = mock(Subscription.class);
         Subscription sub2 = mock(Subscription.class);
 
