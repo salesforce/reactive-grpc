@@ -102,6 +102,17 @@ Single<HelloResponse> singleResponse = flowableRequest.as(stub::sayHelloRequestS
 Flowable<HelloResponse> flowableResponse = singleRequest.as(stub::sayHelloResponseStream);
 ```
   
+## Retrying streaming requests
+`GrpcRetry` is used to transparently re-establish a streaming gRPC request in the event of a server error. During a 
+retry, the upstream rx pipeline is re-subscribed to acquire a request message and the RPC call re-issued. The downstream
+rx pipeline never sees the error.
+
+```java
+Flowable<HelloResponse> flowableResponse = flowableRequest.compose(GrpcRetry.ManyToMany.retry(stub::sayHelloBothStream));
+```
+
+For complex retry scenarios, use the `RetryWhen` builder from <a href="https://davidmoten.github.io/rxjava2-extras/apidocs/com/github/davidmoten/rx2/RetryWhen.html">RxJava2 Extras</a>.
+  
 ## gRPC Context propagation
 Because the non-blocking nature of RX, RX-Java tends to switch between threads a lot. 
 GRPC stores its context in the Thread context and is therefore often lost when RX 
