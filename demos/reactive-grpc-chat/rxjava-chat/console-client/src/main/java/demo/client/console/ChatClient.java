@@ -7,6 +7,7 @@ import io.grpc.ManagedChannel;
 import io.grpc.ManagedChannelBuilder;
 import io.reactivex.Observable;
 import io.reactivex.Single;
+import io.reactivex.disposables.CompositeDisposable;
 import io.reactivex.disposables.Disposable;
 import jline.console.ConsoleReader;
 
@@ -20,6 +21,7 @@ import static demo.client.console.ConsoleUtil.*;
  */
 public final class ChatClient {
     private static final int PORT = 9999;
+    private static final CompositeDisposable disposables = new CompositeDisposable();
 
     private ChatClient() { }
 
@@ -35,13 +37,13 @@ public final class ChatClient {
         console.println("Type /quit to exit");
 
         // Subscribe to incoming messages
-        Disposable chatSubscription = Single.just(Empty.getDefaultInstance())
+        disposables.add(Single.just(Empty.getDefaultInstance())
                 .as(stub::getMessages)
                 .filter(message -> !message.getAuthor().equals(author))
-                .subscribe(message -> printLine(console, message.getAuthor(), message.getMessage()));
+                .subscribe(message -> printLine(console, message.getAuthor(), message.getMessage())));
 
         // Publish outgoing messages
-        Observable
+        disposables.add(Observable
                 // Send connection message
                 .just(author + " joined.")
                 // Send user input
@@ -54,11 +56,11 @@ public final class ChatClient {
                     ChatClient::doNothing,
                     throwable -> printLine(console, "ERROR", throwable.getMessage()),
                     done::countDown
-                );
+                ));
 
         // Wait for a signal to exit, then clean up
         done.await();
-        chatSubscription.dispose();
+        disposables.dispose();
         channel.shutdown();
         channel.awaitTermination(1, TimeUnit.SECONDS);
         console.getTerminal().restore();

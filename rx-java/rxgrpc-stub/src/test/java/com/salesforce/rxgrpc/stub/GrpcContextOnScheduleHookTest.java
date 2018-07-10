@@ -7,6 +7,7 @@
 
 package com.salesforce.rxgrpc.stub;
 
+import com.salesforce.rxgrpc.GrpcContextOnScheduleHook;
 import io.grpc.Context;
 import io.reactivex.Observable;
 import io.reactivex.functions.Action;
