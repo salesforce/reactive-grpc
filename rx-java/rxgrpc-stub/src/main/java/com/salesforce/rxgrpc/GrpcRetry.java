@@ -15,17 +15,33 @@ import java.util.concurrent.Callable;
 import java.util.concurrent.TimeUnit;
 
 /**
- * TODO.
+ * {@code GrpcRetry} is used to transparently re-establish a streaming gRPC request in the event of a server error.
+ * <p>
+ * During a retry, the upstream rx pipeline is re-subscribed to acquire a request message and the RPC call re-issued.
+ * The downstream rx pipeline never sees the error.
  */
 public final class GrpcRetry {
     private GrpcRetry() { }
 
     /**
-     * TODO.
+     * {@link GrpcRetry} functions for streaming response gRPC operations.
      */
     public static final class OneToMany {
         private OneToMany() { }
 
+        /**
+         * Retries a streaming gRPC call, using the same semantics as {@link Flowable#retryWhen(Function)}.
+         *
+         * For easier use, use the RetryWhen builder from
+         * <a href="https://davidmoten.github.io/rxjava2-extras/apidocs/com/github/davidmoten/rx2/RetryWhen.html">RxJava2 Extras</a>.
+         *
+         * @param operation the gRPC operation to retry, typically from a generated reactive-grpc stub class
+         * @param handler receives a Publisher of notifications with which a user can complete or error, aborting the retry
+         * @param <I>
+         * @param <O>
+         *
+         * @see Flowable#retryWhen(Function)
+         */
         public static <I, O> SingleConverter<I, Flowable<O>> retryWhen(final Function<Single<I>, Flowable<O>> operation, final Function<? super Flowable<Throwable>, ? extends Publisher<?>> handler) {
             return new SingleConverter<I, Flowable<O>>() {
                 @Override
@@ -40,6 +56,15 @@ public final class GrpcRetry {
             };
         }
 
+        /**
+         * Retries a streaming gRPC call with a fixed delay between retries.
+         *
+         * @param operation the gRPC operation to retry, typically from a generated reactive-grpc stub class
+         * @param delay the delay between retries
+         * @param unit the units to use for {@code delay}
+         * @param <I>
+         * @param <O>
+         */
         public static <I, O> SingleConverter<I, Flowable<O>> retryAfter(final Function<Single<I>, Flowable<O>> operation, final int delay, final TimeUnit unit) {
             return retryWhen(operation, new Function<Flowable<Throwable>, Publisher<?>>() {
                 @Override
@@ -54,6 +79,13 @@ public final class GrpcRetry {
             });
         }
 
+        /**
+         * Retries a streaming gRPC call immediately.
+         *
+         * @param operation the gRPC operation to retry, typically from a generated reactive-grpc stub class
+         * @param <I>
+         * @param <O>
+         */
         public static <I, O> SingleConverter<I, Flowable<O>> retryImmediately(final Function<Single<I>, Flowable<O>> operation) {
             return retryWhen(operation, new Function<Flowable<Throwable>, Publisher<?>>() {
                 @Override
@@ -65,11 +97,24 @@ public final class GrpcRetry {
     }
 
     /**
-     * TODO.
+     * {@link GrpcRetry} functions for bi-directional streaming gRPC operations.
      */
     public static final class ManyToMany {
         private ManyToMany() { }
 
+        /**
+         * Retries a streaming gRPC call, using the same semantics as {@link Flowable#retryWhen(Function)}.
+         *
+         * For easier use, use the RetryWhen builder from
+         * <a href="https://davidmoten.github.io/rxjava2-extras/apidocs/com/github/davidmoten/rx2/RetryWhen.html">RxJava2 Extras</a>.
+         *
+         * @param operation the gRPC operation to retry, typically from a generated reactive-grpc stub class
+         * @param handler receives a Publisher of notifications with which a user can complete or error, aborting the retry
+         * @param <I>
+         * @param <O>
+         *
+         * @see Flowable#retryWhen(Function)
+         */
         public static <I, O> FlowableConverter<I, Flowable<O>> retryWhen(final Function<Flowable<I>, Flowable<O>> operation, final Function<? super Flowable<Throwable>, ? extends Publisher<?>> handler) {
             return new FlowableConverter<I, Flowable<O>>() {
                 @Override
@@ -84,6 +129,15 @@ public final class GrpcRetry {
             };
         }
 
+        /**
+         * Retries a streaming gRPC call with a fixed delay between retries.
+         *
+         * @param operation the gRPC operation to retry, typically from a generated reactive-grpc stub class
+         * @param delay the delay between retries
+         * @param unit the units to use for {@code delay}
+         * @param <I>
+         * @param <O>
+         */
         public static <I, O> FlowableConverter<I, Flowable<O>> retryAfter(final Function<Flowable<I>, Flowable<O>> operation, final int delay, final TimeUnit unit) {
             return retryWhen(operation, new Function<Flowable<Throwable>, Publisher<?>>() {
                 @Override
@@ -98,6 +152,13 @@ public final class GrpcRetry {
             });
         }
 
+        /**
+         * Retries a streaming gRPC call immediately.
+         *
+         * @param operation the gRPC operation to retry, typically from a generated reactive-grpc stub class
+         * @param <I>
+         * @param <O>
+         */
         public static <I, O> FlowableConverter<I, Flowable<O>> retryImmediately(final Function<Flowable<I>, Flowable<O>> operation) {
             return retryWhen(operation, new Function<Flowable<Throwable>, Publisher<?>>() {
                 @Override
@@ -109,11 +170,24 @@ public final class GrpcRetry {
     }
 
     /**
-     * TODO.
+     * {@link GrpcRetry} functions for streaming request gRPC operations.
      */
     public static final class ManyToOne {
         private ManyToOne() { }
 
+        /**
+         * Retries a streaming gRPC call, using the same semantics as {@link Flowable#retryWhen(Function)}.
+         *
+         * For easier use, use the RetryWhen builder from
+         * <a href="https://davidmoten.github.io/rxjava2-extras/apidocs/com/github/davidmoten/rx2/RetryWhen.html">RxJava2 Extras</a>.
+         *
+         * @param operation the gRPC operation to retry, typically from a generated reactive-grpc stub class
+         * @param handler receives a Publisher of notifications with which a user can complete or error, aborting the retry
+         * @param <I>
+         * @param <O>
+         *
+         * @see Flowable#retryWhen(Function)
+         */
         public static <I, O> FlowableConverter<I, Single<O>> retryWhen(final Function<Flowable<I>, Single<O>> operation, final Function<? super Flowable<Throwable>, ? extends Publisher<?>> handler) {
             return new FlowableConverter<I, Single<O>>() {
                 @Override
@@ -128,6 +202,15 @@ public final class GrpcRetry {
             };
         }
 
+        /**
+         * Retries a streaming gRPC call with a fixed delay between retries.
+         *
+         * @param operation the gRPC operation to retry, typically from a generated reactive-grpc stub class
+         * @param delay the delay between retries
+         * @param unit the units to use for {@code delay}
+         * @param <I>
+         * @param <O>
+         */
         public static <I, O> FlowableConverter<I, Single<O>> retryAfter(final Function<Flowable<I>, Single<O>> operation, final int delay, final TimeUnit unit) {
             return retryWhen(operation, new Function<Flowable<Throwable>, Publisher<?>>() {
                 @Override
@@ -142,6 +225,13 @@ public final class GrpcRetry {
             });
         }
 
+        /**
+         * Retries a streaming gRPC call immediately.
+         *
+         * @param operation the gRPC operation to retry, typically from a generated reactive-grpc stub class
+         * @param <I>
+         * @param <O>
+         */
         public static <I, O> FlowableConverter<I, Single<O>> retryImmediately(final Function<Flowable<I>, Single<O>> operation) {
             return retryWhen(operation, new Function<Flowable<Throwable>, Publisher<?>>() {
                 @Override
