@@ -102,7 +102,7 @@ public class GrpcRetryTest {
     @Test
     public void manyToManyRetryWhen() {
         Flux<Integer> test = newThreeErrorFlux()
-                .<Flux<Integer>>as(GrpcRetry.ManyToMany.retryWhen(Function.identity(), Retry.any().retryMax(4)));
+                .<Integer>compose(GrpcRetry.ManyToMany.retryWhen(Function.identity(), Retry.any().retryMax(4)));
 
         StepVerifier.create(test)
                 .expectNext(0)
@@ -113,7 +113,7 @@ public class GrpcRetryTest {
     @Test
     public void manyToManyRetryImmediately() {
         Flux<Integer> test = newThreeErrorFlux()
-                .<Flux<Integer>>as(GrpcRetry.ManyToMany.retryImmediately(Function.identity()));
+                .<Integer>compose(GrpcRetry.ManyToMany.retryImmediately(Function.identity()));
 
         StepVerifier.create(test)
                 .expectNext(0)
@@ -124,7 +124,7 @@ public class GrpcRetryTest {
     @Test
     public void manyToManyRetryAfter() {
         Flux<Integer> test = newThreeErrorFlux()
-                .<Flux<Integer>>as(GrpcRetry.ManyToMany.retryAfter(Function.identity(), Duration.ofMillis(10)));
+                .<Integer>compose(GrpcRetry.ManyToMany.retryAfter(Function.identity(), Duration.ofMillis(10)));
 
         StepVerifier.create(test)
                 .expectNext(0)

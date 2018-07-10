@@ -115,8 +115,8 @@ public final class GrpcRetry {
          *
          * @see Flowable#retryWhen(Function)
          */
-        public static <I, O> FlowableConverter<I, Flowable<O>> retryWhen(final Function<Flowable<I>, Flowable<O>> operation, final Function<? super Flowable<Throwable>, ? extends Publisher<?>> handler) {
-            return new FlowableConverter<I, Flowable<O>>() {
+        public static <I, O> FlowableTransformer<I, O> retryWhen(final Function<Flowable<I>, Flowable<O>> operation, final Function<? super Flowable<Throwable>, ? extends Publisher<?>> handler) {
+            return new FlowableTransformer<I, O>() {
                 @Override
                 public Flowable<O> apply(final Flowable<I> request) {
                     return Flowable.defer(new Callable<Publisher<O>>() {
@@ -138,7 +138,7 @@ public final class GrpcRetry {
          * @param <I>
          * @param <O>
          */
-        public static <I, O> FlowableConverter<I, Flowable<O>> retryAfter(final Function<Flowable<I>, Flowable<O>> operation, final int delay, final TimeUnit unit) {
+        public static <I, O> FlowableTransformer<I, O> retryAfter(final Function<Flowable<I>, Flowable<O>> operation, final int delay, final TimeUnit unit) {
             return retryWhen(operation, new Function<Flowable<Throwable>, Publisher<?>>() {
                 @Override
                 public Publisher<?> apply(Flowable<Throwable> errors) {
@@ -159,7 +159,7 @@ public final class GrpcRetry {
          * @param <I>
          * @param <O>
          */
-        public static <I, O> FlowableConverter<I, Flowable<O>> retryImmediately(final Function<Flowable<I>, Flowable<O>> operation) {
+        public static <I, O> FlowableTransformer<I, O> retryImmediately(final Function<Flowable<I>, Flowable<O>> operation) {
             return retryWhen(operation, new Function<Flowable<Throwable>, Publisher<?>>() {
                 @Override
                 public Publisher<?> apply(Flowable<Throwable> errors) {

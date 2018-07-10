@@ -91,7 +91,7 @@ public final class GrpcRetry {
          *
          * @see Flux#retryWhen(Function)
          */
-        public static <I, O> Function<? super Flux<I>, Flux<O>> retryWhen(final Function<Flux<I>, Flux<O>> operation, final Function<Flux<Throwable>, ? extends Publisher<?>> whenFactory) {
+        public static <I, O> Function<? super Flux<I>, ? extends Publisher<O>> retryWhen(final Function<Flux<I>, Flux<O>> operation, final Function<Flux<Throwable>, ? extends Publisher<?>> whenFactory) {
             return request -> Flux.defer(() -> operation.apply(request)).retryWhen(whenFactory);
         }
 
@@ -103,7 +103,7 @@ public final class GrpcRetry {
          * @param <I>
          * @param <O>
          */
-        public static <I, O> Function<? super Flux<I>, Flux<O>> retryAfter(final Function<Flux<I>, Flux<O>> operation, final Duration delay) {
+        public static <I, O> Function<? super Flux<I>, ? extends Publisher<O>> retryAfter(final Function<Flux<I>, Flux<O>> operation, final Duration delay) {
             return retryWhen(operation, errors -> errors.delayElements(delay));
         }
 
@@ -114,7 +114,7 @@ public final class GrpcRetry {
          * @param <I>
          * @param <O>
          */
-        public static <I, O> Function<? super Flux<I>, Flux<O>> retryImmediately(final Function<Flux<I>, Flux<O>> operation) {
+        public static <I, O> Function<? super Flux<I>, ? extends Publisher<O>> retryImmediately(final Function<Flux<I>, Flux<O>> operation) {
             return retryWhen(operation, errors -> errors);
         }
     }

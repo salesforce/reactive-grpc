@@ -127,7 +127,7 @@ public class GrpcRetryTest {
     @Test
     public void manyToManyRetryWhen() {
         TestSubscriber<Integer> test = newThreeErrorFlowable()
-                .as(GrpcRetry.ManyToMany.retryWhen(new Function<Flowable<Integer>, Flowable<Integer>>() {
+                .compose(GrpcRetry.ManyToMany.retryWhen(new Function<Flowable<Integer>, Flowable<Integer>>() {
                     @Override
                     public Flowable<Integer> apply(Flowable<Integer> flowable) {
                         return flowable;
@@ -144,7 +144,7 @@ public class GrpcRetryTest {
     @Test
     public void manyToManyRetryImmediately() {
         TestSubscriber<Integer> test = newThreeErrorFlowable()
-                .as(GrpcRetry.ManyToMany.retryImmediately(new Function<Flowable<Integer>, Flowable<Integer>>() {
+                .compose(GrpcRetry.ManyToMany.retryImmediately(new Function<Flowable<Integer>, Flowable<Integer>>() {
                     @Override
                     public Flowable<Integer> apply(Flowable<Integer> flowable) {
                         return flowable;
@@ -161,7 +161,7 @@ public class GrpcRetryTest {
     @Test
     public void manyToManyRetryAfter() {
         TestSubscriber<Integer> test = newThreeErrorFlowable()
-                .as(GrpcRetry.ManyToMany.retryAfter(new Function<Flowable<Integer>, Flowable<Integer>>() {
+                .compose(GrpcRetry.ManyToMany.retryAfter(new Function<Flowable<Integer>, Flowable<Integer>>() {
                     @Override
                     public Flowable<Integer> apply(Flowable<Integer> flowable) {
                         return flowable;
