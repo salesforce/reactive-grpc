@@ -80,24 +80,30 @@ public class ChainedCallIntegrationTest {
     public void servicesCanCallOtherServices() throws InterruptedException {
         ReactorGreeterGrpc.ReactorGreeterStub stub = ReactorGreeterGrpc.newReactorStub(channel);
 
-        Mono<HelloRequest> input = Mono.just(request("X"));
-        Mono<HelloRequest> one = stub.sayHello(input)
+        Mono<String> chain = Mono.just(request("X"))
+                // one -> one
+                .compose(stub::sayHello)
                 .map(ChainedCallIntegrationTest::bridge)
-                .doOnSuccess(System.out::println);
-        Flux<HelloRequest> two = stub.sayHelloRespStream(one)
+                .doOnSuccess(System.out::println)
+                // one -> many
+                .as(stub::sayHelloRespStream)
                 .map(ChainedCallIntegrationTest::bridge)
-                .doOnNext(System.out::println);
-        Flux<HelloRequest> three = stub.sayHelloBothStream(two)
+                .doOnNext(System.out::println)
+                // many -> many
+                .compose(stub::sayHelloBothStream)
                 .map(ChainedCallIntegrationTest::bridge)
-                .doOnNext(System.out::println);
-        Mono<HelloRequest> four = stub.sayHelloReqStream(three)
+                .doOnNext(System.out::println)
+                // many -> one
+                .as(stub::sayHelloReqStream)
                 .map(ChainedCallIntegrationTest::bridge)
-                .doOnSuccess(System.out::println);
-        Mono<String> five = stub.sayHello(four)
+                .doOnSuccess(System.out::println)
+                // one -> one
+                .compose(stub::sayHello)
                 .map(HelloResponse::getMessage)
                 .doOnSuccess(System.out::println);
 
-        StepVerifier.create(five)
+
+        StepVerifier.create(chain)
                 .expectNext("[<{[X]}> :: </[X]/> :: <\\[X]\\> :: <([X])>]")
                 .expectComplete()
                 .verify(Duration.ofSeconds(2));
