@@ -37,6 +37,12 @@
             <version>${rxjava.version}</version>
         </dependency>
         <dependency>
+            <groupId>com.github.davidmoten</groupId>
+            <artifactId>rxjava2-extras</artifactId>
+            <version>0.1.26</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
             <groupId>junit</groupId>
             <artifactId>junit</artifactId>
             <scope>test</scope>
