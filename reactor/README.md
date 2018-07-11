@@ -3,8 +3,8 @@ Overview
 Reactor-gRPC is a set of gRPC bindings for reactive programming with [Reactor](http://projectreactor.io/).
 
 ### Android support
-Reactive gRPC supports Android to the same level of the underlying reactive technologies. Spring Reactor 
-does [not officially support Android](http://projectreactor.io/docs/core/release/reference/docs/index.html#prerequisites), 
+Reactive gRPC supports Android to the same level of the underlying reactive technologies. Spring Reactor
+does [not officially support Android](http://projectreactor.io/docs/core/release/reference/docs/index.html#prerequisites),
 however, "it should work fine with Android SDK 26 (Android O) and above."
 
 Installation
@@ -52,10 +52,10 @@ protobuf {
 Usage
 =====
 After installing the plugin, Reactor-gRPC service stubs will be generated along with your gRPC service stubs.
-  
+
 * To implement a service using an Reactor-gRPC service, subclass `Reactor[Name]Grpc.[Name]ImplBase` and override the Reactor-based
   methods.
-  
+
   ```java
   ReactorGreeterGrpc.GreeterImplBase svc = new ReactorGreeterGrpc.GreeterImplBase() {
       @Override
@@ -85,10 +85,10 @@ After installing the plugin, Reactor-gRPC service stubs will be generated along 
   Flux<HelloResponse> resp = stub.sayHelloBothStream(req);
   resp.subscribe(...);
   ```
-  
+
 ## Don't break the chain
 Used on their own, the generated RxGrpc stub methods do not cleanly chain with other RxJava operators.
-Using the `compose()` and `as()` methods of `Mono` and `Fluz` are preferred over direct invocation.
+Using the `compose()` and `as()` methods of `Mono` and `Flux` are preferred over direct invocation.
 
 #### One→One, Many→Many
 ```java
@@ -101,9 +101,9 @@ Flux<HelloResponse> fluxResponse = fluxRequest.compose(stub::sayHelloBothStream)
 Mono<HelloResponse> monoResponse = fluxRequest.as(stub::sayHelloRequestStream);
 Flux<HelloResponse> fluxResponse = monoRequest.as(stub::sayHelloResponseStream);
 ```
-  
+
 ## Retrying streaming requests
-`GrpcRetry` is used to transparently re-establish a streaming gRPC request in the event of a server error. During a 
+`GrpcRetry` is used to transparently re-establish a streaming gRPC request in the event of a server error. During a
 retry, the upstream rx pipeline is re-subscribed to acquire a request message and the RPC call re-issued. The downstream
 rx pipeline never sees the error.
 
@@ -112,7 +112,7 @@ Flux<HelloResponse> fluxResponse = fluxRequest.compose(GrpcRetry.ManyToMany.retr
 ```
 
 For complex retry scenarios, use the `Retry` builder from <a href="https://github.com/reactor/reactor-addons/blob/master/reactor-extra/src/main/java/reactor/retry/Retry.java">Reactor Extras</a>.
-  
+
 Modules
 =======
 

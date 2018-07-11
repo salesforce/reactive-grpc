@@ -106,11 +106,11 @@ public class ConcurrentRequestIntegrationTest {
         // == MAKE REQUESTS ==
         // One to One
         Mono<HelloRequest> req1 = Mono.just(HelloRequest.newBuilder().setName("reactorjava").build());
-        Mono<HelloResponse> resp1 = stub.sayHello(req1);
+        Mono<HelloResponse> resp1 = req1.compose(stub::sayHello);
 
         // One to Many
         Mono<HelloRequest> req2 = Mono.just(HelloRequest.newBuilder().setName("reactorjava").build());
-        Flux<HelloResponse> resp2 = stub.sayHelloRespStream(req2);
+        Flux<HelloResponse> resp2 = req2.as(stub::sayHelloRespStream);
 
         // Many to One
         Flux<HelloRequest> req3 = Flux.just(
@@ -118,7 +118,7 @@ public class ConcurrentRequestIntegrationTest {
                 HelloRequest.newBuilder().setName("b").build(),
                 HelloRequest.newBuilder().setName("c").build());
 
-        Mono<HelloResponse> resp3 = stub.sayHelloReqStream(req3);
+        Mono<HelloResponse> resp3 = req3.as(stub::sayHelloReqStream);
 
         // Many to Many
         Flux<HelloRequest> req4 = Flux.just(
@@ -128,7 +128,7 @@ public class ConcurrentRequestIntegrationTest {
                 HelloRequest.newBuilder().setName("d").build(),
                 HelloRequest.newBuilder().setName("e").build());
 
-        Flux<HelloResponse> resp4 = stub.sayHelloBothStream(req4);
+        Flux<HelloResponse> resp4 = req4.compose(stub::sayHelloBothStream);
 
         // == VERIFY RESPONSES ==
         ListeningExecutorService executorService = MoreExecutors.listeningDecorator(Executors.newCachedThreadPool());

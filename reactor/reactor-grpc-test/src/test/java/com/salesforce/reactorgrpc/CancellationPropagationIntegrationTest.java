@@ -99,8 +99,7 @@ public class CancellationPropagationIntegrationTest {
 
         AtomicInteger lastNumberConsumed = new AtomicInteger(Integer.MAX_VALUE);
         ReactorNumbersGrpc.ReactorNumbersStub stub = ReactorNumbersGrpc.newReactorStub(serverRule.getChannel());
-        Flux<NumberProto.Number> test = stub
-                .responsePressure(Mono.just(Empty.getDefaultInstance()))
+        Flux<NumberProto.Number> test = Mono.just(Empty.getDefaultInstance()).as(stub::responsePressure)
                 .doOnNext(number -> {lastNumberConsumed.set(number.getNumber(0)); System.out.println("C: " + number.getNumber(0));})
                 .doOnError(throwable -> System.out.println(throwable.getMessage()))
                 .doOnComplete(() -> System.out.println("Completed"))
@@ -123,8 +122,7 @@ public class CancellationPropagationIntegrationTest {
         serverRule.getServiceRegistry().addService(svc);
 
         ReactorNumbersGrpc.ReactorNumbersStub stub = ReactorNumbersGrpc.newReactorStub(serverRule.getChannel());
-        Flux<NumberProto.Number> test = stub
-                .responsePressure(Mono.just(Empty.getDefaultInstance()))
+        Flux<NumberProto.Number> test = Mono.just(Empty.getDefaultInstance()).as(stub::responsePressure)
                 .doOnNext(number -> System.out.println(number.getNumber(0)))
                 .doOnError(throwable -> System.out.println(throwable.getMessage()))
                 .doOnComplete(() -> System.out.println("Completed"))
@@ -163,8 +161,7 @@ public class CancellationPropagationIntegrationTest {
                     System.out.println("Client canceled");
                 });
 
-        Mono<NumberProto.Number> observer = stub
-                .requestPressure(request)
+        Mono<NumberProto.Number> observer = request.as(stub::requestPressure)
                 .doOnSuccess(number -> System.out.println(number.getNumber(0)))
                 .doOnError(throwable -> System.out.println(throwable.getMessage()));
 
@@ -203,8 +200,7 @@ public class CancellationPropagationIntegrationTest {
                     System.out.println("Client canceled");
                 });
 
-        Mono<NumberProto.Number> observer = stub
-                .requestPressure(request)
+        Mono<NumberProto.Number> observer = request.as(stub::requestPressure)
                 .doOnSuccess(number -> System.out.println(number.getNumber(0)))
                 .doOnError(throwable -> System.out.println(throwable.getMessage()));
 
@@ -243,8 +239,7 @@ public class CancellationPropagationIntegrationTest {
                     System.out.println("Client canceled");
                 });
 
-        Flux<NumberProto.Number> observer = stub
-                .twoWayPressure(request)
+        Flux<NumberProto.Number> observer = request.compose(stub::twoWayPressure)
                 .doOnNext(number -> System.out.println(number.getNumber(0)))
                 .doOnError(throwable -> System.out.println(throwable.getMessage()));
 
@@ -283,8 +278,7 @@ public class CancellationPropagationIntegrationTest {
                     System.out.println("Client canceled");
                 });
 
-        Flux<NumberProto.Number> observer = stub
-                .twoWayPressure(request)
+        Flux<NumberProto.Number> observer = request.compose(stub::twoWayPressure)
                 .doOnNext(number -> System.out.println(number.getNumber(0)))
                 .doOnError(throwable -> System.out.println(throwable.getMessage()));
 
