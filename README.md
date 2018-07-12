@@ -23,9 +23,7 @@ See the readme in each technology-specific sub-directory for usage details.
 
 # Demos
 
-* [RxChat](https://github.com/salesforce/reactive-grpc/tree/master/demos/RxChat) - An IRC-like chat system built using RxJava and RxGrpc.
-* [ReactorChat](https://github.com/salesforce/reactive-grpc/tree/master/demos/ReactorChat) - An IRC-like chat system using Spring Reactor and ReactorGrpc.
-* [ReactorChat-Kotlin](https://github.com/salesforce/reactive-grpc/tree/master/demos/ReactorChat-Kotlin) - ReactorChat, but showing Kotlin integration.
+* Lots of demos in the [demos directory](https://github.com/salesforce/reactive-grpc/tree/master/demos)
 
 # Android support
 Reactive gRPC supports Android to the same level of the underlying reactive technologies.
