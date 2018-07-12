@@ -1,7 +1,7 @@
 package demo.client.javafx;
 
 import com.google.protobuf.Empty;
-import com.salesforce.rxgrpc.stub.GrpcRetry;
+import com.salesforce.rxgrpc.GrpcRetry;
 import demo.proto.ChatProto;
 import demo.proto.RxChatGrpc;
 import io.grpc.ManagedChannel;
