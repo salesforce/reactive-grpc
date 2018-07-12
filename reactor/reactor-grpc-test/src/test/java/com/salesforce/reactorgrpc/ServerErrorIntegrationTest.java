@@ -68,7 +68,7 @@ public class ServerErrorIntegrationTest {
     @Test
     public void oneToOne() {
         ReactorGreeterGrpc.ReactorGreeterStub stub = ReactorGreeterGrpc.newReactorStub(channel);
-        Mono<HelloResponse> resp = stub.sayHello(Mono.just(HelloRequest.getDefaultInstance()));
+        Mono<HelloResponse> resp = Mono.just(HelloRequest.getDefaultInstance()).compose(stub::sayHello);
 
         StepVerifier.create(resp)
                 .verifyErrorMatches(t -> t instanceof StatusRuntimeException && ((StatusRuntimeException)t).getStatus() == Status.INTERNAL);
@@ -77,7 +77,7 @@ public class ServerErrorIntegrationTest {
     @Test
     public void oneToMany() {
         ReactorGreeterGrpc.ReactorGreeterStub stub = ReactorGreeterGrpc.newReactorStub(channel);
-        Flux<HelloResponse> resp = stub.sayHelloRespStream(Mono.just(HelloRequest.getDefaultInstance()));
+        Flux<HelloResponse> resp = Mono.just(HelloRequest.getDefaultInstance()).as(stub::sayHelloRespStream);
         Flux<HelloResponse> test = resp
                 .doOnNext(System.out::println)
                 .doOnError(throwable -> System.out.println(throwable.getMessage()))
@@ -91,7 +91,7 @@ public class ServerErrorIntegrationTest {
     @Test
     public void manyToOne() {
         ReactorGreeterGrpc.ReactorGreeterStub stub = ReactorGreeterGrpc.newReactorStub(channel);
-        Mono<HelloResponse> resp = stub.sayHelloReqStream(Flux.just(HelloRequest.getDefaultInstance()));
+        Mono<HelloResponse> resp = Flux.just(HelloRequest.getDefaultInstance()).as(stub::sayHelloReqStream);
         StepVerifier.create(resp)
                 .verifyErrorMatches(t -> t instanceof StatusRuntimeException && ((StatusRuntimeException)t).getStatus() == Status.INTERNAL);
     }
@@ -99,7 +99,7 @@ public class ServerErrorIntegrationTest {
     @Test
     public void manyToMany() {
         ReactorGreeterGrpc.ReactorGreeterStub stub = ReactorGreeterGrpc.newReactorStub(channel);
-        Flux<HelloResponse> resp = stub.sayHelloBothStream(Flux.just(HelloRequest.getDefaultInstance()));
+        Flux<HelloResponse> resp = Flux.just(HelloRequest.getDefaultInstance()).compose(stub::sayHelloBothStream);
         StepVerifier.create(resp)
                 .verifyErrorMatches(t -> t instanceof StatusRuntimeException && ((StatusRuntimeException)t).getStatus() == Status.INTERNAL);
     }

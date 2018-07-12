@@ -119,7 +119,7 @@ public class ReactiveClientStandardServerInteropTest {
     public void oneToOne() {
         ReactorGreeterGrpc.ReactorGreeterStub stub = ReactorGreeterGrpc.newReactorStub(channel);
         Mono<String> reactorRequest = Mono.just("World");
-        Mono<String> reactorResponse = stub.sayHello(reactorRequest.map(this::toRequest)).map(this::fromResponse);
+        Mono<String> reactorResponse = reactorRequest.map(this::toRequest).compose(stub::sayHello).map(this::fromResponse);
 
         StepVerifier.create(reactorResponse)
                 .expectNext("Hello World")
@@ -130,7 +130,7 @@ public class ReactiveClientStandardServerInteropTest {
     public void oneToMany() {
         ReactorGreeterGrpc.ReactorGreeterStub stub = ReactorGreeterGrpc.newReactorStub(channel);
         Mono<String> reactorRequest = Mono.just("World");
-        Flux<String> reactorResponse = stub.sayHelloRespStream(reactorRequest.map(this::toRequest)).map(this::fromResponse);
+        Flux<String> reactorResponse = reactorRequest.map(this::toRequest).as(stub::sayHelloRespStream).map(this::fromResponse);
 
         StepVerifier.create(reactorResponse)
                 .expectNext("Hello World", "Hi World", "Greetings World")
@@ -141,7 +141,7 @@ public class ReactiveClientStandardServerInteropTest {
     public void manyToOne() {
         ReactorGreeterGrpc.ReactorGreeterStub stub = ReactorGreeterGrpc.newReactorStub(channel);
         Flux<String> reactorRequest = Flux.just("A", "B", "C");
-        Mono<String> reactorResponse = stub.sayHelloReqStream(reactorRequest.map(this::toRequest)).map(this::fromResponse);
+        Mono<String> reactorResponse = reactorRequest.map(this::toRequest).as(stub::sayHelloReqStream).map(this::fromResponse);
 
         StepVerifier.create(reactorResponse)
                 .expectNext("Hello A and B and C")
@@ -152,7 +152,7 @@ public class ReactiveClientStandardServerInteropTest {
     public void manyToMany() {
         ReactorGreeterGrpc.ReactorGreeterStub stub = ReactorGreeterGrpc.newReactorStub(channel);
         Flux<String> reactorRequest = Flux.just("A", "B", "C", "D");
-        Flux<String> reactorResponse = stub.sayHelloBothStream(reactorRequest.map(this::toRequest)).map(this::fromResponse);
+        Flux<String> reactorResponse = reactorRequest.map(this::toRequest).compose(stub::sayHelloBothStream).map(this::fromResponse);
 
         StepVerifier.create(reactorResponse)
                 .expectNext("Hello A and B", "Hello C and D")

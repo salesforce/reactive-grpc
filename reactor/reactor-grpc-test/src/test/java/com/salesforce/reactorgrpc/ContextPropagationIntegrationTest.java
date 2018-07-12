@@ -120,7 +120,7 @@ public class ContextPropagationIntegrationTest {
         ReactorGreeterGrpc.ReactorGreeterStub stub = ReactorGreeterGrpc.newReactorStub(channel);
         Context.current()
                 .withValue(ctxKey, "ClientSendsContext")
-                .run(() -> StepVerifier.create(stub.sayHello(worldReq).map(HelloResponse::getMessage))
+                .run(() -> StepVerifier.create(worldReq.compose(stub::sayHello).map(HelloResponse::getMessage))
                         .expectNext("Hello World")
                         .verifyComplete());
 
@@ -131,7 +131,7 @@ public class ContextPropagationIntegrationTest {
     public void ClientGetsContext() {
         ReactorGreeterGrpc.ReactorGreeterStub stub = ReactorGreeterGrpc.newReactorStub(channel);
 
-        Mono<HelloResponse> test = stub.sayHello(worldReq)
+        Mono<HelloResponse> test = worldReq.compose(stub::sayHello)
                 .doOnSuccess(resp -> {
                     Context ctx = Context.current();
                     assertThat(ctxKey.get(ctx)).isEqualTo("ClientGetsContext");
@@ -146,7 +146,7 @@ public class ContextPropagationIntegrationTest {
     public void ServerAcceptsContext() {
         ReactorGreeterGrpc.ReactorGreeterStub stub = ReactorGreeterGrpc.newReactorStub(channel);
 
-        StepVerifier.create(stub.sayHello(worldReq).map(HelloResponse::getMessage))
+        StepVerifier.create(worldReq.compose(stub::sayHello).map(HelloResponse::getMessage))
                 .expectNext("Hello World")
                 .verifyComplete();
         assertThat(svc.getReceivedCtxValue()).isEqualTo("ServerAcceptsContext");

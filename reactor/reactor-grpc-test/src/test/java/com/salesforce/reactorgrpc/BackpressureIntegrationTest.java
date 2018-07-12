@@ -85,7 +85,7 @@ public class BackpressureIntegrationTest {
                 .doOnNext(i -> updateNumberOfWaits(lastValueTime, numberOfWaits))
                 .map(BackpressureIntegrationTest::protoNum);
 
-        Mono<NumberProto.Number> reactorResponse = stub.requestPressure(reactorRequest);
+        Mono<NumberProto.Number> reactorResponse = reactorRequest.as(stub::requestPressure);
 
         StepVerifier.create(reactorResponse)
                 .expectNextMatches(v -> v.getNumber(0) == NUMBER_OF_STREAM_ELEMENTS - 1)
@@ -103,7 +103,7 @@ public class BackpressureIntegrationTest {
 
         Mono<Empty> reactorRequest = Mono.just(Empty.getDefaultInstance());
 
-        Flux<NumberProto.Number> reactorResponse = stub.responsePressure(reactorRequest)
+        Flux<NumberProto.Number> reactorResponse = reactorRequest.as(stub::responsePressure)
                 .doOnNext(n -> System.out.println(n.getNumber(0) + "  <--"))
                 .doOnNext(n -> waitIfValuesAreEqual(n.getNumber(0), 3));
 
@@ -121,7 +121,9 @@ public class BackpressureIntegrationTest {
 
         ReactorNumbersGrpc.ReactorNumbersStub stub = ReactorNumbersGrpc.newReactorStub(serverRule.getChannel());
 
-        Flux<NumberProto.Number> reactorResponse = stub.twoWayResponsePressure(Flux.empty())
+        Flux<NumberProto.Number> reactorRequest = Flux.empty();
+
+        Flux<NumberProto.Number> reactorResponse = reactorRequest.compose(stub::twoWayResponsePressure)
                 .doOnNext(n -> System.out.println(n.getNumber(0) + "  <--"))
                 .doOnNext(n -> waitIfValuesAreEqual(n.getNumber(0), 3));
 
@@ -145,7 +147,7 @@ public class BackpressureIntegrationTest {
                 .doOnNext(i -> updateNumberOfWaits(lastValueTime, numberOfWaits))
                 .map(BackpressureIntegrationTest::protoNum);
 
-        Flux<NumberProto.Number> reactorResponse = stub.twoWayRequestPressure(reactorRequest);
+        Flux<NumberProto.Number> reactorResponse = reactorRequest.compose(stub::twoWayRequestPressure);
 
         StepVerifier.create(reactorResponse)
                 .expectNextMatches(v -> v.getNumber(0) == NUMBER_OF_STREAM_ELEMENTS - 1)

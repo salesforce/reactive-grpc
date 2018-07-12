@@ -94,7 +94,7 @@ public class ClientThreadIntegrationTest {
     public void oneToOne() {
         ReactorGreeterGrpc.ReactorGreeterStub stub = ReactorGreeterGrpc.newReactorStub(channel);
         Mono<HelloRequest> req = Mono.just(HelloRequest.newBuilder().setName("reactorjava").build());
-        Mono<HelloResponse> resp = stub.sayHello(req);
+        Mono<HelloResponse> resp = req.compose(stub::sayHello);
 
         AtomicReference<String> clientThreadName = new AtomicReference<>();
 
@@ -119,7 +119,7 @@ public class ClientThreadIntegrationTest {
                 HelloRequest.newBuilder().setName("d").build(),
                 HelloRequest.newBuilder().setName("e").build());
 
-        Flux<HelloResponse> resp = stub.sayHelloBothStream(req);
+        Flux<HelloResponse> resp = req.compose(stub::sayHelloBothStream);
 
         AtomicReference<String> clientThreadName = new AtomicReference<>();
 

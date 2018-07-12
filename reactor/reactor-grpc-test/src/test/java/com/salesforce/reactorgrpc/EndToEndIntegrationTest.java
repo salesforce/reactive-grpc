@@ -92,7 +92,7 @@ public class EndToEndIntegrationTest {
     public void oneToOne() throws IOException {
         ReactorGreeterGrpc.ReactorGreeterStub stub = ReactorGreeterGrpc.newReactorStub(channel);
         Mono<HelloRequest> req = Mono.just(HelloRequest.newBuilder().setName("reactorjava").build());
-        Mono<HelloResponse> resp = stub.sayHello(req);
+        Mono<HelloResponse> resp = req.compose(stub::sayHello);
 
         StepVerifier.create(resp.map(HelloResponse::getMessage))
                 .expectNext("Hello reactorjava")
@@ -103,7 +103,7 @@ public class EndToEndIntegrationTest {
     public void oneToMany() throws IOException {
         ReactorGreeterGrpc.ReactorGreeterStub stub = ReactorGreeterGrpc.newReactorStub(channel);
         Mono<HelloRequest> req = Mono.just(HelloRequest.newBuilder().setName("reactorjava").build());
-        Flux<HelloResponse> resp = stub.sayHelloRespStream(req);
+        Flux<HelloResponse> resp = req.as(stub::sayHelloRespStream);
 
         StepVerifier.create(resp.map(HelloResponse::getMessage))
                 .expectNext("Hello reactorjava", "Hi reactorjava", "Greetings reactorjava")
@@ -118,7 +118,7 @@ public class EndToEndIntegrationTest {
                 HelloRequest.newBuilder().setName("b").build(),
                 HelloRequest.newBuilder().setName("c").build());
 
-        Mono<HelloResponse> resp = stub.sayHelloReqStream(req);
+        Mono<HelloResponse> resp = req.as(stub::sayHelloReqStream);
 
         StepVerifier.create(resp.map(HelloResponse::getMessage))
                 .expectNext("Hello a and b and c")
@@ -135,7 +135,7 @@ public class EndToEndIntegrationTest {
                 HelloRequest.newBuilder().setName("d").build(),
                 HelloRequest.newBuilder().setName("e").build());
 
-        Flux<HelloResponse> resp = stub.sayHelloBothStream(req);
+        Flux<HelloResponse> resp = req.compose(stub::sayHelloBothStream);
 
         StepVerifier.create(resp.map(HelloResponse::getMessage))
                 .expectNext("Hello a and b", "Hello c and d", "Hello e")

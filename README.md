@@ -107,8 +107,7 @@ Found a bug? Think you've got an awesome feature you want to add?  We welcome co
 it if master changes after you open your pull request.*
 
 ## Acceptance Criteria
-We love contributions, but it's important that your pull request adhere to the standards that we maintain in this r
-epository.
+We love contributions, but it's important that your pull request adhere to the standards that we maintain in this repository.
 
 - All tests must be passing
 - All code changes require tests
