@@ -1,7 +1,6 @@
 package demo.client.javafx;
 
 import com.google.protobuf.Empty;
-import com.salesforce.rxgrpc.GrpcRetry;
 import demo.proto.ChatProto;
 import demo.proto.RxChatGrpc;
 import io.grpc.ManagedChannel;
@@ -9,6 +8,7 @@ import io.grpc.ManagedChannelBuilder;
 import io.reactivex.Single;
 import io.reactivex.disposables.CompositeDisposable;
 import io.reactivex.rxjavafx.observables.JavaFxObservable;
+import io.reactivex.rxjavafx.schedulers.JavaFxScheduler;
 import io.reactivex.rxjavafx.sources.WindowEventSource;
 import javafx.application.Application;
 import javafx.geometry.Insets;
@@ -40,6 +40,9 @@ public class ChatClient extends Application {
         launch(args);
     }
 
+    /**
+     * Start the application and connect to gRPC
+     */
     @Override
     public void init() {
         author = getParameters().getRaw().isEmpty() ? "Random_Stranger" : getParameters().getRaw().get(0);
@@ -49,38 +52,34 @@ public class ChatClient extends Application {
         stub = RxChatGrpc.newRxStub(channel);
     }
 
+    /**
+     * Build the UI and wire up event handlers
+     */
     @Override
     public void start(Stage primaryStage) {
         primaryStage.setTitle("Reactive Chat - " + author);
         Scene scene = buildScene();
 
-        // Subscribe to incoming messages
+
+
+        /* ******************************
+         * Subscribe to incoming messages
+         * ******************************/
         disposables.add(Single
                 // Trigger
                 .just(Empty.getDefaultInstance())
-                // Invoke and Error handle
-                .as(GrpcRetry.OneToMany.retryAfter(stub::getMessages, 1, TimeUnit.SECONDS))
+                // Invoke
+                .as(stub::getMessages)
                 .map(this::fromMessage)
                 // Execute
+                .observeOn(JavaFxScheduler.platform())
                 .subscribe(messages::appendText));
 
-        // Publish arrival/departure message
-        disposables.add(WindowEventSource
-                // Trigger
-                .fromWindowEvents(primaryStage, WindowEvent.ANY)
-                .filter(event -> event.getEventType().equals(WindowEvent.WINDOW_SHOWING) |
-                                 event.getEventType().equals(WindowEvent.WINDOW_HIDING))
-                // Invoke
-                .map(event -> event.getEventType().equals(WindowEvent.WINDOW_SHOWING) ? "joined" : "left")
-                .map(this::toMessage)
-                .flatMapSingle(stub::postMessage)
-                // Error handle
-                .onErrorReturnItem(Empty.getDefaultInstance())
-                .repeat()
-                // Execute
-                .subscribe());
 
-        // Publish outgoing messages
+
+        /* *************************
+         * Publish outgoing messages
+         * *************************/
         disposables.add(JavaFxObservable
                 // Trigger
                 .actionEventsOf(send)
@@ -88,16 +87,38 @@ public class ChatClient extends Application {
                 .map(x -> message.getText())
                 .map(this::toMessage)
                 .flatMapSingle(stub::postMessage)
-                // Error handle
-                .onErrorReturnItem(Empty.getDefaultInstance())
-                .repeat()
                 // Execute
+                .observeOn(JavaFxScheduler.platform())
                 .subscribe(ignore -> message.clear()));
+
+
+
+        /* *********************************
+         * Publish arrival/departure message
+         * *********************************/
+        disposables.add(WindowEventSource
+                // Trigger
+                .fromWindowEvents(primaryStage, WindowEvent.ANY)
+                .filter(event -> event.getEventType().equals(WindowEvent.WINDOW_SHOWING) |
+                        event.getEventType().equals(WindowEvent.WINDOW_HIDING))
+                // Invoke
+                .map(event -> event.getEventType().equals(WindowEvent.WINDOW_SHOWING) ? "joined" : "left")
+                .map(this::toMessage)
+                .flatMapSingle(stub::postMessage)
+                // Execute
+                .subscribe());
+
+
 
         primaryStage.setScene(scene);
         primaryStage.show();
     }
 
+
+
+    /**
+     * Close down event listeners and disconnect from gRPC
+     */
     @Override
     public void stop() throws Exception {
         disposables.dispose();

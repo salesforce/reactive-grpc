@@ -6,12 +6,18 @@ option java_multiple_files = true;
 option java_package = "demo.proto";
 option java_outer_classname = "HelloWorldProto";
 
+/*
+ * Define the service's operations
+ */
 service Greeter {
     rpc Greet (HelloRequest) returns (HelloResponse) {}
     rpc MultiGreet (HelloRequest) returns (stream HelloResponse) {}
     rpc StreamGreet (stream HelloRequest) returns (stream HelloResponse) {}
 }
 
+/*
+ * Define the service's data structures
+ */
 message HelloRequest {
     string name = 1;
 }
