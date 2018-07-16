@@ -8,39 +8,65 @@
 <?import javafx.scene.layout.AnchorPane?>
 <?import javafx.scene.layout.BorderPane?>
 <?import javafx.scene.layout.HBox?>
+<?import javafx.scene.text.Font?>
 
 <AnchorPane prefHeight="400.0" prefWidth="600.0" xmlns="http://javafx.com/javafx/8.0.121" xmlns:fx="http://javafx.com/fxml/1" fx:controller="demo.backpressure.BackpressureController">
    <children>
       <BorderPane prefHeight="407.0" prefWidth="611.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
-         <top>
+         <bottom>
+            <HBox alignment="CENTER" prefHeight="100.0" prefWidth="200.0" spacing="50.0" BorderPane.alignment="CENTER">
+               <children>
+                  <HBox alignment="CENTER_RIGHT" prefHeight="100.0" prefWidth="200.0" spacing="10.0">
+                     <children>
+                        <Label text="Produced">
+                           <font>
+                              <Font name="System Bold" size="24.0" />
+                           </font>
+                        </Label>
+                        <Label id="ProducedLabel" fx:id="producedLabel" text="0">
+                           <font>
+                              <Font name="System Bold" size="24.0" />
+                           </font>
+                        </Label>
+                     </children>
+                  </HBox>
+                  <Button fx:id="startButton" mnemonicParsing="false" onAction="#startBackpressure" text="Go!">
+                     <font>
+                        <Font size="24.0" />
+                     </font>
+                  </Button>
+                  <HBox alignment="CENTER_LEFT" prefHeight="100.0" prefWidth="200.0" spacing="10.0">
+                     <children>
+                        <Label text="Consumed">
+                           <font>
+                              <Font size="24.0" />
+                           </font>
+                        </Label>
+                        <Label id="Consumed" fx:id="consumedLabel" text="0">
+                           <font>
+                              <Font size="24.0" />
+                           </font>
+                        </Label>
+                     </children>
+                  </HBox>
+               </children></HBox>
+         </bottom>
+         <center>
             <LineChart id="LineChart" fx:id="lineChart" animated="false" createSymbols="false" BorderPane.alignment="CENTER">
               <xAxis>
-                <NumberAxis fx:id="timeDimension" animated="false" forceZeroInRange="false" label="Time" minorTickVisible="false" side="BOTTOM" tickLabelsVisible="false" />
+                <NumberAxis fx:id="timeDimension" animated="false" forceZeroInRange="false" label="Time" minorTickVisible="false" side="BOTTOM" tickLabelsVisible="false">
+                     <tickLabelFont>
+                        <Font size="18.0" />
+                     </tickLabelFont></NumberAxis>
               </xAxis>
               <yAxis>
-                <NumberAxis animated="false" side="LEFT" />
+                <NumberAxis animated="false" side="LEFT">
+                     <tickLabelFont>
+                        <Font size="18.0" />
+                     </tickLabelFont></NumberAxis>
               </yAxis>
             </LineChart>
-         </top>
-         <center>
-            <Button mnemonicParsing="false" fx:id="startButton" onAction="#startBackpressure" text="Go!" BorderPane.alignment="CENTER" />
          </center>
-         <left>
-            <HBox alignment="CENTER_RIGHT" prefHeight="100.0" prefWidth="200.0" spacing="10.0" BorderPane.alignment="CENTER">
-               <children>
-                  <Label text="Produced" />
-                  <Label id="ProducedLabel" fx:id="producedLabel" text="0" />
-               </children>
-            </HBox>
-         </left>
-         <right>
-            <HBox alignment="CENTER_LEFT" prefHeight="100.0" prefWidth="200.0" spacing="10.0" BorderPane.alignment="CENTER">
-               <children>
-                  <Label text="Consumed" />
-                  <Label id="Consumed" fx:id="consumedLabel" text="0" />
-               </children>
-            </HBox>
-         </right>
       </BorderPane>
    </children>
    <padding>

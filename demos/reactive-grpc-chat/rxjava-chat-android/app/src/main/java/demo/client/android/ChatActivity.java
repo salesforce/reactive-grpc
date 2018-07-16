@@ -19,11 +19,12 @@ import io.grpc.ManagedChannel;
 import io.grpc.ManagedChannelBuilder;
 import io.reactivex.Single;
 import io.reactivex.android.schedulers.AndroidSchedulers;
+import io.reactivex.disposables.CompositeDisposable;
 import io.reactivex.disposables.Disposable;
 import io.reactivex.schedulers.Schedulers;
 
 public class ChatActivity extends AppCompatActivity {
-    private String author = "Android_Stranger";
+    private final String AUTHOR = "Android_Stranger";
 
     private ManagedChannel channel;
     private RxChatGrpc.RxChatStub stub;
@@ -33,8 +34,7 @@ public class ChatActivity extends AppCompatActivity {
     private EditText message;
     private Button send;
 
-    private Disposable sendSubscription;
-    private Disposable receiveSubscription;
+    private CompositeDisposable disposables = new CompositeDisposable();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -54,40 +54,64 @@ public class ChatActivity extends AppCompatActivity {
         channel = ManagedChannelBuilder.forAddress("10.0.2.2", 9999).usePlaintext().build();
         stub = RxChatGrpc.newRxStub(channel);
 
-        // Subscribe to incoming messages
-        receiveSubscription = Single
+
+
+        /* ******************************
+         * Subscribe to incoming messages
+         * ******************************/
+        disposables.add(Single
+                // Trigger
                 .just(Empty.getDefaultInstance())
                 .subscribeOn(Schedulers.io())
+                // Invoke
                 .as(stub::getMessages)
                 .map(this::fromMessage)
+                // Execute
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(message -> {
                     messageList.add(message);
                     messages.setAdapter(new ArrayAdapter<>(ChatActivity.this, R.layout.string_list_item, messageList.toArray(new String[]{})));
-                });
+                }));
 
-        // Announce arrival
-        stub.postMessage(toMessage("joined.")).subscribe();
 
-        // Publish outgoing messages
-        sendSubscription = RxView.clicks(send)
+
+        /* *************************
+         * Publish outgoing messages
+         * *************************/
+        disposables.add(RxView
+                // Trigger
+                .clicks(send)
+                // Invoke
                 .map(x -> message.getText().toString())
                 .map(this::toMessage)
                 .flatMapSingle(stub::postMessage)
-                .subscribe(x -> message.setText(""));
+                // Execute
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(x -> message.setText("")));
+
+
+
+        /* ***********************
+         * Publish arrival message
+         * ***********************/
+        stub.postMessage(toMessage("joined.")).subscribe();
     }
 
     @Override
     protected void onPause() {
         super.onPause();
 
-        // Announce departure
+
+
+        /* ***********************
+         * Publish arrival message
+         * ***********************/
         stub.postMessage(toMessage("left.")).subscribe();
 
-        sendSubscription.dispose();
-        receiveSubscription.dispose();
 
-        // Disconnect from gRPC
+
+        // Close down event listeners and disconnect from gRPC
+        disposables.dispose();
         channel.shutdown();
     }
 
@@ -97,7 +121,7 @@ public class ChatActivity extends AppCompatActivity {
 
     private ChatProto.ChatMessage toMessage(String message) {
         return ChatProto.ChatMessage.newBuilder()
-                .setAuthor(author)
+                .setAuthor(AUTHOR)
                 .setMessage(message)
                 .build();
     }

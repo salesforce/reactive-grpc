@@ -36,13 +36,21 @@ public final class ChatClient {
         ConsoleReader console = new ConsoleReader();
         console.println("Type /quit to exit");
 
-        // Subscribe to incoming messages
+
+
+        /* ******************************
+         * Subscribe to incoming messages
+         * ******************************/
         disposables.add(Single.just(Empty.getDefaultInstance())
                 .as(stub::getMessages)
                 .filter(message -> !message.getAuthor().equals(author))
                 .subscribe(message -> printLine(console, message.getAuthor(), message.getMessage())));
 
-        // Publish outgoing messages
+
+
+        /* *************************
+         * Publish outgoing messages
+         * *************************/
         disposables.add(Observable
                 // Send connection message
                 .just(author + " joined.")
@@ -57,6 +65,8 @@ public final class ChatClient {
                     throwable -> printLine(console, "ERROR", throwable.getMessage()),
                     done::countDown
                 ));
+
+
 
         // Wait for a signal to exit, then clean up
         done.await();

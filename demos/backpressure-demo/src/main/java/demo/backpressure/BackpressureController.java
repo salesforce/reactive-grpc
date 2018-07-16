@@ -37,10 +37,15 @@ public class BackpressureController extends RxBackpressureDemoGrpc.BackpressureD
 
     private RxBackpressureDemoGrpc.RxBackpressureDemoStub stub;
 
+
+
+
+    /**
+     * Slowly request numbers
+     */
     @FXML
     public void startBackpressure(ActionEvent actionEvent) {
         resetGraph();
-
         Single.just(5000)
                 // Construct request
                 .map(i -> NumbersProto.HowMany.newBuilder().setNumber(i).build())
@@ -63,6 +68,12 @@ public class BackpressureController extends RxBackpressureDemoGrpc.BackpressureD
                 );
     }
 
+
+
+
+    /**
+     * Quickly produce numbers
+     */
     @Override
     public Flowable<NumbersProto.Number> sendNumbers(Single<NumbersProto.HowMany> request) {
         // Fork the response flowable using share()
@@ -83,6 +94,9 @@ public class BackpressureController extends RxBackpressureDemoGrpc.BackpressureD
         // Other fork returns the number stream
         return numbers.map(BackpressureController::protoNum);
     }
+
+
+
 
     @FXML
     public void initialize() throws Exception {
