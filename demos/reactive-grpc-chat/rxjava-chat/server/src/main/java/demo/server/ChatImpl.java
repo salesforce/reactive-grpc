@@ -25,6 +25,9 @@ public class ChatImpl extends RxChatGrpc.ChatImplBase {
      */
     private final Subject<ChatProto.ChatMessage> broadcast = PublishSubject.create();
 
+
+
+
     /**
      * Accept and broadcast ChatMessages.
      */
@@ -38,6 +41,9 @@ public class ChatImpl extends RxChatGrpc.ChatImplBase {
                 // Return empty
                 .map(x -> Empty.getDefaultInstance());
     }
+
+
+
 
     /**
      * This service operation returns an infinite stream of ChatMessages.
