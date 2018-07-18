@@ -19,14 +19,17 @@ public class RxgrpcAsyncChainClient {
                 .map(RxgrpcAsyncChainClient::request)
                 .as(stub::greet)
                 .map(HelloResponse::getMessage)
+
                 // Call STREAMING RESPONSE service asynchronously
                 .map(RxgrpcAsyncChainClient::request)
                 .as(stub::multiGreet)
                 .map(HelloResponse::getMessage)
+
                 // Call BI-DIRECTIONAL STREAMING service asynchronously
                 .map(RxgrpcAsyncChainClient::request)
                 .as(stub::streamGreet)
                 .map(HelloResponse::getMessage)
+
                 // Final processing
                 .subscribe(
                         System.out::println,
