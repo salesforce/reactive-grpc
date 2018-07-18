@@ -37,8 +37,8 @@ public class RxGrpcServer extends RxGreeterGrpc.GreeterImplBase {
     @Override
     public Flowable<HelloResponse> multiGreet(Single<HelloRequest> request) {
         return request
-                .toFlowable()
                 .map(HelloRequest::getName)
+                .toFlowable()
                 .flatMap(
                         x -> Flowable.just("Welcome", "Hola", "Bonjour"),
                         (name, salutation) -> salutation + " " + name)

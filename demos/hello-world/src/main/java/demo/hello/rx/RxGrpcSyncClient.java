@@ -26,7 +26,9 @@ public class RxGrpcSyncClient {
          * Call an async UNARY operation
          */
         System.out.println(request
+                // Call service
                 .as(stub::greet)
+                // Map response
                 .map(HelloResponse::getMessage)
                 .blockingGet());
 
@@ -36,7 +38,9 @@ public class RxGrpcSyncClient {
          * Call an async STREAMING RESPONSE operation
          */
         request
+                // Call service
                 .as(stub::multiGreet)
+                // Map response
                 .map(HelloResponse::getMessage)
                 .blockingSubscribe(System.out::println);
 
@@ -46,9 +50,11 @@ public class RxGrpcSyncClient {
          * Call an async BI-DIRECTIONAL STREAMING operation
          */
         Flowable
+                // Call service
                 .just("Alpha", "Beta", "Gamma")
                 .map(name -> HelloRequest.newBuilder().setName(name).build())
                 .as(stub::streamGreet)
+                // Map response
                 .map(HelloResponse::getMessage)
                 .blockingSubscribe(System.out::println);
     }
