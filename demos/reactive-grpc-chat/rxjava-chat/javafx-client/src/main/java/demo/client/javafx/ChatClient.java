@@ -10,6 +10,7 @@ import io.reactivex.disposables.CompositeDisposable;
 import io.reactivex.rxjavafx.observables.JavaFxObservable;
 import io.reactivex.rxjavafx.schedulers.JavaFxScheduler;
 import io.reactivex.rxjavafx.sources.WindowEventSource;
+import io.reactivex.schedulers.Schedulers;
 import javafx.application.Application;
 import javafx.geometry.Insets;
 import javafx.scene.Scene;
@@ -68,6 +69,7 @@ public class ChatClient extends Application {
         disposables.add(Single
                 // Trigger
                 .just(Empty.getDefaultInstance())
+                .subscribeOn(Schedulers.io())
                 // Invoke
                 .as(stub::getMessages)
                 .map(this::fromMessage)
@@ -83,6 +85,7 @@ public class ChatClient extends Application {
         disposables.add(JavaFxObservable
                 // Trigger
                 .actionEventsOf(send)
+                .subscribeOn(Schedulers.io())
                 // Invoke
                 .map(x -> message.getText())
                 .map(this::toMessage)
@@ -99,6 +102,7 @@ public class ChatClient extends Application {
         disposables.add(WindowEventSource
                 // Trigger
                 .fromWindowEvents(primaryStage, WindowEvent.ANY)
+                .subscribeOn(Schedulers.io())
                 .filter(event -> event.getEventType().equals(WindowEvent.WINDOW_SHOWING) |
                         event.getEventType().equals(WindowEvent.WINDOW_HIDING))
                 // Invoke
