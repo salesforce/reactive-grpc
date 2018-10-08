@@ -43,7 +43,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
  * @param <T>
  */
 public abstract class ReactivePublisherBackpressureOnReadyHandlerBase<T> implements Subscriber<T>, Runnable {
-    private CallStreamObserver<T> requestStream;
+    private final CallStreamObserver<T> requestStream;
     private Subscription subscription;
     private AtomicBoolean canceled = new AtomicBoolean(false);
     private CountDownLatch subscribed = new CountDownLatch(1);
@@ -103,22 +103,34 @@ public abstract class ReactivePublisherBackpressureOnReadyHandlerBase<T> impleme
     // raise this error condition in a fashion that is adequate for the runtime environment.
     // https://github.com/reactive-streams/reactive-streams-jvm/blob/v1.0.2/README.md#user-content-2.13
 
+    // Implementations of StreamObserver are not required to be thread-safe (but should be
+    // thread-compatible http://www.ibm.com/developerworks/library/j-jtp09263/).
+    // Separate StreamObservers do not need to be synchronized together; incoming and outgoing directions are
+    // independent. Since individual {@code StreamObserver}s are not thread-safe, if multiple threads will be
+    // writing to a StreamObserver concurrently, the application must synchronize calls.
+    // https://github.com/grpc/grpc-java/blob/master/stub/src/main/java/io/grpc/stub/StreamObserver.java#L28-L33
+    //
+    // We defensively synchronize calls from reactive publishers to gRPC, just in case multiple publishers somehow
+    // break this rule.
+
     @Override
     public void onNext(T t) {
         checkNotNull(t);
         if (!isCanceled()) {
-            try {
-                requestStream.onNext(t);
-                if (requestStream.isReady()) {
-                    // keep the pump going
-                    subscription.request(1);
-                } else {
-                    // note that back-pressure has begun
-                    wasReady.set(false);
+            synchronized (requestStream) {
+                try {
+                    requestStream.onNext(t);
+                    if (requestStream.isReady()) {
+                        // keep the pump going
+                        subscription.request(1);
+                    } else {
+                        // note that back-pressure has begun
+                        wasReady.set(false);
+                    }
+                } catch (Throwable throwable) {
+                    cancel();
+                    requestStream.onError(prepareError(throwable));
                 }
-            } catch (Throwable throwable) {
-                cancel();
-                requestStream.onError(prepareError(throwable));
             }
         }
     }
@@ -126,11 +138,13 @@ public abstract class ReactivePublisherBackpressureOnReadyHandlerBase<T> impleme
     @Override
     public void onError(Throwable throwable) {
         if (!isCanceled()) {
-            checkNotNull(throwable);
-            try {
-                requestStream.onError(prepareError(throwable));
-            } catch (Throwable ignore) {
-                cancel();
+            synchronized (requestStream) {
+                checkNotNull(throwable);
+                try {
+                    requestStream.onError(prepareError(throwable));
+                } catch (Throwable ignore) {
+                    cancel();
+                }
             }
         }
     }
@@ -138,11 +152,13 @@ public abstract class ReactivePublisherBackpressureOnReadyHandlerBase<T> impleme
     @Override
     public void onComplete() {
         if (!isCanceled()) {
-            try {
-                requestStream.onCompleted();
-            } catch (Throwable throwable) {
-                cancel();
-                requestStream.onError(prepareError(throwable));
+            synchronized (requestStream) {
+                try {
+                    requestStream.onCompleted();
+                } catch (Throwable throwable) {
+                    cancel();
+                    requestStream.onError(prepareError(throwable));
+                }
             }
         }
     }

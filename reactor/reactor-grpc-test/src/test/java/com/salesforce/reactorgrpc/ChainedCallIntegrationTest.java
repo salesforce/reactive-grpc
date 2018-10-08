@@ -13,6 +13,7 @@ import io.grpc.Server;
 import io.grpc.ServerBuilder;
 import org.junit.After;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
@@ -77,6 +78,7 @@ public class ChainedCallIntegrationTest {
     }
 
     @Test
+    @Ignore("Flaky test: https://github.com/salesforce/reactive-grpc/issues/107")
     public void servicesCanCallOtherServices() throws InterruptedException {
         ReactorGreeterGrpc.ReactorGreeterStub stub = ReactorGreeterGrpc.newReactorStub(channel);
 
