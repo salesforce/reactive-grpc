@@ -22,7 +22,7 @@ public class ReactiveBackpressureChunkerTest {
     }
 
     @Test
-    public void requestOneGetsAChunk() {
+    public void requestOneGetsOne() {
         int chunkSize = 16;
         ReactiveBackpressureChunker<Object> chunker = new ReactiveBackpressureChunker<Object>(chunkSize);
         UpstreamSubscription upstreamSubscription = new UpstreamSubscription();
@@ -32,6 +32,20 @@ public class ReactiveBackpressureChunkerTest {
         chunkSubscriber.onSubscribe(upstreamSubscription);
 
         downstreamSubscriber.upstreamSubscription.request(1);
+        assertThat(upstreamSubscription.lastRequested).isEqualTo(1);
+    }
+
+    @Test
+    public void requestManyGetsChunk() {
+        int chunkSize = 16;
+        ReactiveBackpressureChunker<Object> chunker = new ReactiveBackpressureChunker<Object>(chunkSize);
+        UpstreamSubscription upstreamSubscription = new UpstreamSubscription();
+        DownstreamSubscriber downstreamSubscriber = new DownstreamSubscriber();
+
+        Subscriber<Object> chunkSubscriber = chunker.apply(downstreamSubscriber);
+        chunkSubscriber.onSubscribe(upstreamSubscription);
+
+        downstreamSubscriber.upstreamSubscription.request(18);
         assertThat(upstreamSubscription.lastRequested).isEqualTo(chunkSize);
     }
 
@@ -47,7 +61,7 @@ public class ReactiveBackpressureChunkerTest {
 
         downstreamSubscriber.upstreamSubscription.request(1);
         send(chunkSubscriber, 1);
-        assertThat(upstreamSubscription.totalRequested).isEqualTo(chunkSize);
+        assertThat(upstreamSubscription.totalRequested).isEqualTo(1);
     }
 
     @Test
