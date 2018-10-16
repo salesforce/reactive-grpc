@@ -87,8 +87,9 @@ public class ReactiveBackpressureChunker<T> {
             private void maybeRequestMore() {
                 if (have < want) {
                     if (have >= outstanding) {
-                        outstanding += chunkSize;
-                        subscription.request(chunkSize);
+                        long toRequest = have + chunkSize < want ? chunkSize : want - have;
+                        outstanding += toRequest;
+                        subscription.request(toRequest);
                     }
                 }
             }
