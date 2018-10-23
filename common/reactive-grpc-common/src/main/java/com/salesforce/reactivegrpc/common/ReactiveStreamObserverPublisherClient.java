@@ -16,7 +16,7 @@ import org.reactivestreams.Subscriber;
  * @param <T>
  */
 public class ReactiveStreamObserverPublisherClient<T> extends ReactiveStreamObserverPublisherBase<T> {
-    private ClientCallStreamObserver callStreamObserver;
+    private final ClientCallStreamObserver callStreamObserver;
 
     public ReactiveStreamObserverPublisherClient(ClientCallStreamObserver callStreamObserver) {
         super(callStreamObserver);
@@ -34,7 +34,6 @@ public class ReactiveStreamObserverPublisherClient<T> extends ReactiveStreamObse
 
                     // Release the subscriber, we don't need a reference to it anymore
                     ReactiveStreamObserverPublisherClient.super.freeSubscriber();
-                    callStreamObserver = null;
                 }
             }
         };
