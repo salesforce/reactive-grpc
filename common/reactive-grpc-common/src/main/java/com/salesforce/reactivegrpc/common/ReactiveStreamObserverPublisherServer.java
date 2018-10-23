@@ -18,7 +18,7 @@ import org.reactivestreams.Subscriber;
  * @param <T>
  */
 public class ReactiveStreamObserverPublisherServer<T> extends ReactiveStreamObserverPublisherBase<T> {
-    private ServerCallStreamObserver callStreamObserver;
+    private final ServerCallStreamObserver callStreamObserver;
     private volatile boolean abandonDelayedCancel;
 
     public ReactiveStreamObserverPublisherServer(ServerCallStreamObserver callStreamObserver) {
@@ -49,7 +49,6 @@ public class ReactiveStreamObserverPublisherServer<T> extends ReactiveStreamObse
 
                                 // Release the subscriber, we don't need a reference to it anymore
                                 ReactiveStreamObserverPublisherServer.super.freeSubscriber();
-                                callStreamObserver = null;
                             }
                         } catch (Throwable ex) {
 

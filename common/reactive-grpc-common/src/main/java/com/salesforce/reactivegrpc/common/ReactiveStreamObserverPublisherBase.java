@@ -34,7 +34,7 @@ import java.util.concurrent.CountDownLatch;
  * @param <T>
  */
 public abstract class ReactiveStreamObserverPublisherBase<T> implements Publisher<T>, StreamObserver<T> {
-    private CallStreamObserver callStreamObserver;
+    private final CallStreamObserver callStreamObserver;
     private Subscriber<? super T> subscriber;
     private volatile boolean isCanceled;
 
@@ -118,7 +118,6 @@ public abstract class ReactiveStreamObserverPublisherBase<T> implements Publishe
             subscriber.onError(Preconditions.checkNotNull(t));
             // Release the subscriber, we don't need a reference to it anymore
             subscriber = null;
-            callStreamObserver = null;
         }
     }
 
@@ -133,7 +132,6 @@ public abstract class ReactiveStreamObserverPublisherBase<T> implements Publishe
             subscriber.onComplete();
             // Release the subscriber, we don't need a reference to it anymore
             subscriber = null;
-            callStreamObserver = null;
         }
     }
 
