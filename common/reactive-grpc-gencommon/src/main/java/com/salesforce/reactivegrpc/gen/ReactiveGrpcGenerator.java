@@ -23,7 +23,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 /**
  * Abstract class for protoc generators generating Reactive Streams bindings for gRPC.
@@ -43,7 +42,7 @@ public abstract class ReactiveGrpcGenerator extends Generator {
     }
 
     @Override
-    public Stream<PluginProtos.CodeGeneratorResponse.File> generate(PluginProtos.CodeGeneratorRequest request) throws GeneratorException {
+    public List<PluginProtos.CodeGeneratorResponse.File> generateFiles(PluginProtos.CodeGeneratorRequest request) throws GeneratorException {
         final ProtoTypeMap typeMap = ProtoTypeMap.of(request.getProtoFileList());
 
         List<FileDescriptorProto> protosToGenerate = request.getProtoFileList().stream()
@@ -51,8 +50,7 @@ public abstract class ReactiveGrpcGenerator extends Generator {
                 .collect(Collectors.toList());
 
         List<ServiceContext> services = findServices(protosToGenerate, typeMap);
-        List<PluginProtos.CodeGeneratorResponse.File> files = generateFiles(services);
-        return files.stream();
+        return generateFiles(services);
     }
 
     private List<ServiceContext> findServices(List<FileDescriptorProto> protos, ProtoTypeMap typeMap) {

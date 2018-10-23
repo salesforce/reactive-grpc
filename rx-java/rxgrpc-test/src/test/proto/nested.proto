@@ -1,0 +1,30 @@
+syntax = "proto3";
+
+package nested;
+
+message Outer {  // Level 0
+    enum FooEnum {
+        FOO = 0;
+        BAR = 1;
+        CHEESE = 2;
+    }
+    message MiddleAA {  // Level 1
+
+        message Inner {   // Level 2
+            int64 ival = 1;
+            bool  booly = 2;
+            Outer.FooEnum enum = 3;
+        }
+    }
+    message MiddleBB {  // Level 1
+        message Inner {   // Level 2
+            int32 ival = 1;
+            bool  booly = 2;
+            Outer.FooEnum enum = 3;
+        }
+    }
+}
+
+service Nested {
+    rpc doNested (Outer.MiddleAA.Inner) returns (Outer.MiddleBB.Inner) {}
+}
