@@ -78,7 +78,6 @@ public class ChainedCallIntegrationTest {
     }
 
     @Test
-    @Ignore
     public void servicesCanCallOtherServices() {
         ReactorGreeterGrpc.ReactorGreeterStub stub = ReactorGreeterGrpc.newReactorStub(channel);
 

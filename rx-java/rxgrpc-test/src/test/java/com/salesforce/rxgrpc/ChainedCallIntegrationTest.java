@@ -80,7 +80,6 @@ public class ChainedCallIntegrationTest {
     }
 
     @Test
-    @Ignore
     public void servicesCanCallOtherServices() throws InterruptedException {
         RxGreeterGrpc.RxGreeterStub stub = RxGreeterGrpc.newRxStub(channel);
 
