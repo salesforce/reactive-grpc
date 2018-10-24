@@ -14,6 +14,7 @@ import io.grpc.ServerBuilder;
 import io.reactivex.Flowable;
 import io.reactivex.Single;
 import io.reactivex.observers.TestObserver;
+import io.reactivex.subscribers.TestSubscriber;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Rule;
@@ -74,9 +75,8 @@ public class ChainedCallIntegrationTest {
 
     @After
     public void stopServer() throws InterruptedException {
-        server.shutdown();
-        server.awaitTermination();
-        channel.shutdown();
+        server.shutdownNow();
+        channel.shutdownNow();
 
         server = null;
         channel = null;
@@ -90,23 +90,28 @@ public class ChainedCallIntegrationTest {
                 // one -> one
                 .compose(stub::sayHello)
                 .map(ChainedCallIntegrationTest::bridge)
-                .doOnSuccess(System.out::println)
+                .doOnSuccess(x -> System.out.println("OO " + x.getName()))
+
                 // one -> many
                 .as(stub::sayHelloRespStream)
                 .map(ChainedCallIntegrationTest::bridge)
-                .doOnNext(System.out::println)
+                .doOnNext(x -> System.out.println("OM " + x.getName()))
+
                 // many -> many
                 .compose(stub::sayHelloBothStream)
                 .map(ChainedCallIntegrationTest::bridge)
-                .doOnNext(System.out::println)
+                .doOnNext(x -> System.out.println("MM " + x.getName()))
+
                 // many -> one
                 .as(stub::sayHelloReqStream)
                 .map(ChainedCallIntegrationTest::bridge)
-                .doOnSuccess(System.out::println)
+                .doOnSuccess(x -> System.out.println("MO " + x.getName()))
+
                 // one -> one
                 .compose(stub::sayHello)
-                .map(HelloResponse::getMessage)
-                .doOnSuccess(System.out::println);
+                .doOnSuccess(x -> System.out.println("OO " + x.getMessage()))
+
+                .map(HelloResponse::getMessage);
 
 
         TestObserver<String> test = chain.test();
