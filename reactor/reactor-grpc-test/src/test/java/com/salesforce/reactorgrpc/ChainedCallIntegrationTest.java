@@ -69,7 +69,7 @@ public class ChainedCallIntegrationTest {
     }
 
     @After
-    public void stopServer() throws InterruptedException {
+    public void stopServer() {
         server.shutdownNow();
         channel.shutdownNow();
 
@@ -78,8 +78,7 @@ public class ChainedCallIntegrationTest {
     }
 
     @Test
-    @Ignore("Flaky test: https://github.com/salesforce/reactive-grpc/issues/107")
-    public void servicesCanCallOtherServices() throws InterruptedException {
+    public void servicesCanCallOtherServices() {
         ReactorGreeterGrpc.ReactorGreeterStub stub = ReactorGreeterGrpc.newReactorStub(channel);
 
         Mono<String> chain = Mono.just(request("X"))

@@ -139,7 +139,8 @@ public class ConcurrentRequestIntegrationTest {
             ListenableFuture<Boolean> oneToOne = executorService.submit(() -> {
                 StepVerifier.create(resp1.map(HelloResponse::getMessage))
                         .expectNext("Hello reactorjava")
-                        .verifyComplete();
+                        .expectComplete()
+                .verify(Duration.ofSeconds(1));
                 return true;
             });
 
@@ -147,7 +148,8 @@ public class ConcurrentRequestIntegrationTest {
             ListenableFuture<Boolean> oneToMany = executorService.submit(() -> {
                 StepVerifier.create(resp2.map(HelloResponse::getMessage))
                         .expectNext("Hello reactorjava", "Hi reactorjava", "Greetings reactorjava")
-                        .verifyComplete();
+                        .expectComplete()
+                .verify(Duration.ofSeconds(1));
                 return true;
             });
 
@@ -155,7 +157,8 @@ public class ConcurrentRequestIntegrationTest {
             ListenableFuture<Boolean> manyToOne = executorService.submit(() -> {
                 StepVerifier.create(resp3.map(HelloResponse::getMessage))
                         .expectNext("Hello a and b and c")
-                        .verifyComplete();
+                        .expectComplete()
+                .verify(Duration.ofSeconds(1));
                 return true;
             });
 
@@ -163,7 +166,8 @@ public class ConcurrentRequestIntegrationTest {
             ListenableFuture<Boolean> manyToMany = executorService.submit(() -> {
                 StepVerifier.create(resp4.map(HelloResponse::getMessage))
                         .expectNext("Hello a and b", "Hello c and d", "Hello e")
-                        .verifyComplete();
+                        .expectComplete()
+                .verify(Duration.ofSeconds(1));
                 return true;
             });
 

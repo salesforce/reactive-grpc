@@ -167,7 +167,8 @@ public class CancellationPropagationIntegrationTest {
 
         StepVerifier.create(observer)
                 .expectNext(protoNum(9))
-                .verifyComplete();
+                .expectComplete()
+                .verify(Duration.ofSeconds(1));
 
         await().atMost(org.awaitility.Duration.FIVE_HUNDRED_MILLISECONDS).untilTrue(requestWasCanceled);
 
@@ -206,7 +207,8 @@ public class CancellationPropagationIntegrationTest {
 
         StepVerifier.create(observer)
                 .expectNext(protoNum(-1))
-                .verifyComplete();
+                .expectComplete()
+                .verify(Duration.ofSeconds(1));
 
         await().atMost(org.awaitility.Duration.FIVE_HUNDRED_MILLISECONDS).untilTrue(requestWasCanceled);
 
@@ -245,7 +247,8 @@ public class CancellationPropagationIntegrationTest {
 
         StepVerifier.create(observer)
                 .expectNext(protoNum(9))
-                .verifyComplete();
+                .expectComplete()
+                .verify(Duration.ofSeconds(1));
 
         await().atMost(org.awaitility.Duration.FIVE_HUNDRED_MILLISECONDS).untilTrue(requestWasCanceled);
 
@@ -284,7 +287,8 @@ public class CancellationPropagationIntegrationTest {
 
         StepVerifier.create(observer)
                 .expectNext(protoNum(-1))
-                .verifyComplete();
+                .expectComplete()
+                .verify(Duration.ofSeconds(1));
 
         await().atMost(org.awaitility.Duration.FIVE_HUNDRED_MILLISECONDS).untilTrue(requestWasCanceled);
 

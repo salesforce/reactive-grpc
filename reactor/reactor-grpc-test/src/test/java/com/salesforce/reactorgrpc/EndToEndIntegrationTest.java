@@ -96,7 +96,8 @@ public class EndToEndIntegrationTest {
 
         StepVerifier.create(resp.map(HelloResponse::getMessage))
                 .expectNext("Hello reactorjava")
-                .verifyComplete();
+                .expectComplete()
+                .verify(Duration.ofSeconds(1));
     }
 
     @Test
@@ -107,7 +108,8 @@ public class EndToEndIntegrationTest {
 
         StepVerifier.create(resp.map(HelloResponse::getMessage))
                 .expectNext("Hello reactorjava", "Hi reactorjava", "Greetings reactorjava")
-                .verifyComplete();
+                .expectComplete()
+                .verify(Duration.ofSeconds(1));
     }
 
     @Test
@@ -122,7 +124,8 @@ public class EndToEndIntegrationTest {
 
         StepVerifier.create(resp.map(HelloResponse::getMessage))
                 .expectNext("Hello a and b and c")
-                .verifyComplete();
+                .expectComplete()
+                .verify(Duration.ofSeconds(1));
     }
 
     @Test
@@ -139,6 +142,7 @@ public class EndToEndIntegrationTest {
 
         StepVerifier.create(resp.map(HelloResponse::getMessage))
                 .expectNext("Hello a and b", "Hello c and d", "Hello e")
-                .verifyComplete();
+                .expectComplete()
+                .verify(Duration.ofSeconds(1));
     }
 }

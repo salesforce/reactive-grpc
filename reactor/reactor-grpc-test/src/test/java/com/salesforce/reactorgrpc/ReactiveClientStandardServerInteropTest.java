@@ -123,7 +123,8 @@ public class ReactiveClientStandardServerInteropTest {
 
         StepVerifier.create(reactorResponse)
                 .expectNext("Hello World")
-                .verifyComplete();
+                .expectComplete()
+                .verify(Duration.ofSeconds(1));
     }
 
     @Test
@@ -134,7 +135,8 @@ public class ReactiveClientStandardServerInteropTest {
 
         StepVerifier.create(reactorResponse)
                 .expectNext("Hello World", "Hi World", "Greetings World")
-                .verifyComplete();
+                .expectComplete()
+                .verify(Duration.ofSeconds(1));
     }
 
     @Test
@@ -145,7 +147,8 @@ public class ReactiveClientStandardServerInteropTest {
 
         StepVerifier.create(reactorResponse)
                 .expectNext("Hello A and B and C")
-                .verifyComplete();
+                .expectComplete()
+                .verify(Duration.ofSeconds(1));
     }
 
     @Test
@@ -156,7 +159,8 @@ public class ReactiveClientStandardServerInteropTest {
 
         StepVerifier.create(reactorResponse)
                 .expectNext("Hello A and B", "Hello C and D")
-                .verifyComplete();
+                .expectComplete()
+                .verify(Duration.ofSeconds(1));
     }
 
     private HelloRequest toRequest(String name) {

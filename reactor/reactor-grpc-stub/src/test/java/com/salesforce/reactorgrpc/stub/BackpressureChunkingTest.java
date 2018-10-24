@@ -24,7 +24,8 @@ public class BackpressureChunkingTest {
 
         StepVerifier.create(chunked)
                 .expectNext(0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19)
-                .verifyComplete();
+                .expectComplete()
+                .verify(Duration.ofSeconds(1));
 
         assertThat(requests).containsExactly((long) chunkSize, (long) chunkSize);
     }
@@ -41,7 +42,8 @@ public class BackpressureChunkingTest {
         StepVerifier.create(chunked)
                 .thenRequest(chunkSize + 4)
                 .expectNext(0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19)
-                .verifyComplete();
+                .expectComplete()
+                .verify(Duration.ofSeconds(1));
 
         assertThat(requests).containsExactly((long) chunkSize, (long) 4);
     }

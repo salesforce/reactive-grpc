@@ -103,7 +103,8 @@ public class ClientThreadIntegrationTest {
                         .map(HelloResponse::getMessage)
                         .doOnSuccess(x -> clientThreadName.set(Thread.currentThread().getName())))
                 .expectNext("Hello reactorjava")
-                .verifyComplete();
+                .expectComplete()
+                .verify(Duration.ofSeconds(1));
 
         assertThat(clientThreadName.get()).isEqualTo("TheGrpcClient");
         assertThat(serverThreadName.get()).isEqualTo("TheGrpcServer");
@@ -128,7 +129,8 @@ public class ClientThreadIntegrationTest {
                         .map(HelloResponse::getMessage)
                         .doOnNext(x -> clientThreadName.set(Thread.currentThread().getName())))
                 .expectNext("Hello a and b", "Hello c and d", "Hello e")
-                .verifyComplete();
+                .expectComplete()
+                .verify(Duration.ofSeconds(1));
 
         assertThat(clientThreadName.get()).isEqualTo("TheGrpcClient");
         assertThat(serverThreadName.get()).isEqualTo("TheGrpcServer");

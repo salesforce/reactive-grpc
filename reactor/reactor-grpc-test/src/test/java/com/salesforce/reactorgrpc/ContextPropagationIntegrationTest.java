@@ -139,7 +139,8 @@ public class ContextPropagationIntegrationTest {
 
         StepVerifier.create(test.map(HelloResponse::getMessage))
                 .expectNext("Hello World")
-                .verifyComplete();
+                .expectComplete()
+                .verify(Duration.ofSeconds(1));
     }
 
     @Test
@@ -148,7 +149,8 @@ public class ContextPropagationIntegrationTest {
 
         StepVerifier.create(worldReq.compose(stub::sayHello).map(HelloResponse::getMessage))
                 .expectNext("Hello World")
-                .verifyComplete();
+                .expectComplete()
+                .verify(Duration.ofSeconds(1));
         assertThat(svc.getReceivedCtxValue()).isEqualTo("ServerAcceptsContext");
     }
 }
