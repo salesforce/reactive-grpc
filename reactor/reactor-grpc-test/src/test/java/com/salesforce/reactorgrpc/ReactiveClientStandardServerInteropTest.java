@@ -9,10 +9,7 @@ package com.salesforce.reactorgrpc;
 
 import io.grpc.*;
 import io.grpc.stub.StreamObserver;
-import org.junit.AfterClass;
-import org.junit.Before;
-import org.junit.BeforeClass;
-import org.junit.Test;
+import org.junit.*;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
@@ -140,6 +137,7 @@ public class ReactiveClientStandardServerInteropTest {
     }
 
     @Test
+    @Ignore
     public void manyToOne() {
         ReactorGreeterGrpc.ReactorGreeterStub stub = ReactorGreeterGrpc.newReactorStub(channel);
         Flux<String> reactorRequest = Flux.just("A", "B", "C");
@@ -148,7 +146,7 @@ public class ReactiveClientStandardServerInteropTest {
         StepVerifier.create(reactorResponse)
                 .expectNext("Hello A and B and C")
                 .expectComplete()
-                .verify(Duration.ofSeconds(1));
+                .verify(Duration.ofSeconds(0));
     }
 
     @Test
