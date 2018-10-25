@@ -80,14 +80,15 @@ public class ChainedCallIntegrationTest {
     }
 
     @Test
+    @Ignore
     public void servicesCanCallOtherServices() throws InterruptedException {
         RxGreeterGrpc.RxGreeterStub stub = RxGreeterGrpc.newRxStub(channel);
 
         Single<String> chain = Single.just(request("X"))
                 // one -> one
-//                .compose(stub::sayHello)
-//                .map(ChainedCallIntegrationTest::bridge)
-//                .doOnSuccess(x -> System.out.println("OO " + x.getName()))
+                .compose(stub::sayHello)
+                .map(ChainedCallIntegrationTest::bridge)
+                .doOnSuccess(x -> System.out.println("OO " + x.getName()))
 
                 // one -> many
                 .as(stub::sayHelloRespStream)
