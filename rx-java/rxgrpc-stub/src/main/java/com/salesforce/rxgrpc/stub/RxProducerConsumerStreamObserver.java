@@ -27,6 +27,6 @@ public class RxProducerConsumerStreamObserver<TRequest, TResponse> extends React
 
     @Override
     public Publisher<TResponse> getReactiveConsumerFromPublisher(ReactiveStreamObserverPublisherClient<TResponse> publisher) {
-        return Flowable.unsafeCreate(publisher); //.lift(new BackpressureChunkingOperator<TResponse>());
+        return Flowable.unsafeCreate(publisher).lift(new BackpressureChunkingOperator<TResponse>());
     }
 }
