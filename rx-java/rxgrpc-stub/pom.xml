@@ -18,6 +18,7 @@
     <modelVersion>4.0.0</modelVersion>
 
     <artifactId>rxgrpc-stub</artifactId>
+    <packaging>bundle</packaging>
 
     <properties>
         <java.version>1.6</java.version>
@@ -96,6 +97,42 @@
                         <artifactId>java16</artifactId>
                         <version>1.0</version>
                     </signature>
+                </configuration>
+            </plugin>
+
+            <plugin>
+                <groupId>org.apache.felix</groupId>
+                <artifactId>maven-bundle-plugin</artifactId>
+                <version>2.5.0</version>
+                <extensions>true</extensions>
+
+                <executions>
+                    <execution>
+                        <id>bundle-manifest</id>
+                        <phase>process-classes</phase>
+                        <goals>
+                            <goal>manifest</goal>
+                        </goals>
+                    </execution>
+                </executions>
+
+                <configuration>
+                    <instructions>
+                        <Import-Package>
+                            com.google.common.base,
+                            com.google.common.util.concurrent,
+                            com.salesforce.reactivegrpc.common,
+                            io.grpc,
+                            io.grpc.stub,
+                            io.reactivex,
+                            java.util.concurrent,
+                            java.util.concurrent.atomic,
+                            org.reactivestreams,
+                        </Import-Package>
+                        <Export-Package>
+                            com.salesforce.rxgrpc.stub
+                        </Export-Package>
+                    </instructions>
                 </configuration>
             </plugin>
         </plugins>
