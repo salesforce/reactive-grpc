@@ -7,6 +7,8 @@
 
 package com.salesforce.reactivegrpc.common;
 
+import java.util.concurrent.atomic.AtomicLongFieldUpdater;
+
 import org.reactivestreams.Subscriber;
 import org.reactivestreams.Subscription;
 
@@ -38,61 +40,86 @@ public class ReactiveBackpressureChunker<T> {
     }
 
     public Subscriber<? super T> apply(final Subscriber<? super T> downstream) {
-        return new Subscriber<T>() {
-            private Subscription subscription;
+        return new ReactiveBackpressureChunkerSubscriber<T>(downstream, chunkSize);
+    }
 
-            // The number of messages we have actually received from the sender
-            private long have = 0;
-            // The final number of messages we are trying to acquire
-            private long want = 0;
-            // The number of messages we have requested from the sender
-            private long outstanding = 0;
+    /**
+     * Some docs.
+     * @param <T>
+     */
+    private static final class ReactiveBackpressureChunkerSubscriber<T> implements Subscriber<T>, Subscription {
 
-            @Override
-            public void onSubscribe(final Subscription subscription) {
-                this.subscription = subscription;
-                downstream.onSubscribe(new Subscription() {
-                    @Override
-                    public void request(long r) {
-                        // Increase the number of messages we want
-                        want += r;
-                        maybeRequestMore();
-                    }
+        // The number of messages we have actually received from the sender
+        private volatile     long                   have = 0;
+        private static final AtomicLongFieldUpdater<ReactiveBackpressureChunkerSubscriber> HAVE =
+                AtomicLongFieldUpdater.newUpdater(ReactiveBackpressureChunkerSubscriber.class, "have");
 
-                    @Override
-                    public void cancel() {
-                        subscription.cancel();
-                    }
-                });
-            }
+        // The final number of messages we are trying to acquire
+        private volatile     long                   want = 0;
+        private static final AtomicLongFieldUpdater<ReactiveBackpressureChunkerSubscriber> WANT =
+                AtomicLongFieldUpdater.newUpdater(ReactiveBackpressureChunkerSubscriber.class, "want");
+        // The number of messages we have requested from the sender
+        private volatile     long                   outstanding = 0;
+        private static final AtomicLongFieldUpdater<ReactiveBackpressureChunkerSubscriber> OUTSTANDING =
+                AtomicLongFieldUpdater.newUpdater(ReactiveBackpressureChunkerSubscriber.class, "outstanding");
 
-            @Override
-            public void onNext(T t) {
-                downstream.onNext(t);
-                // Increment the number of messages we have
-                have += 1;
-                maybeRequestMore();
-            }
+        private final Subscriber<? super T> downstream;
+        private final long chunkSize;
 
-            @Override
-            public void onError(Throwable throwable) {
-                downstream.onError(throwable);
-            }
+        private Subscription subscription;
 
-            @Override
-            public void onComplete() {
-                downstream.onComplete();
-            }
+        private ReactiveBackpressureChunkerSubscriber(
+                Subscriber<? super T> downstream,
+                long size
+        ) {
+            this.downstream = downstream;
+            chunkSize = size;
+        }
 
-            private void maybeRequestMore() {
-                if (have < want) {
-                    if (have >= outstanding) {
-                        long toRequest = have + chunkSize < want ? chunkSize : want - have;
-                        outstanding += toRequest;
-                        subscription.request(toRequest);
-                    }
+        @Override
+        public void onSubscribe(final Subscription subscription) {
+            this.subscription = subscription;
+            downstream.onSubscribe(this);
+        }
+
+        @Override
+        public synchronized void onNext(T t) {
+            downstream.onNext(t);
+            // Increment the number of messages we have
+            HAVE.incrementAndGet(this);
+            maybeRequestMore();
+        }
+
+        @Override
+        public void onError(Throwable throwable) {
+            downstream.onError(throwable);
+        }
+
+        @Override
+        public void onComplete() {
+            downstream.onComplete();
+        }
+
+        @Override
+        public synchronized void request(long r) {
+            // Increase the number of messages we want
+            WANT.addAndGet(this, r);
+            maybeRequestMore();
+        }
+
+        @Override
+        public void cancel() {
+            subscription.cancel();
+        }
+
+        private synchronized void maybeRequestMore() {
+            if (have < want) {
+                if (have >= outstanding) {
+                    long toRequest = have + chunkSize < want ? chunkSize : want - have;
+                    OUTSTANDING.addAndGet(this, toRequest);
+                    subscription.request(toRequest);
                 }
             }
-        };
+        }
     }
 }
