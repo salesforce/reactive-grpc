@@ -7,7 +7,7 @@
 
 package com.salesforce.reactivegrpc.common;
 
-import com.google.common.base.Preconditions;
+//import com.google.common.base.Preconditions;
 import io.grpc.Status;
 import io.grpc.StatusException;
 import io.grpc.StatusRuntimeException;
@@ -15,7 +15,7 @@ import io.grpc.stub.CallStreamObserver;
 import org.reactivestreams.Subscriber;
 import org.reactivestreams.Subscription;
 
-import java.util.concurrent.CountDownLatch;
+//import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import static com.google.common.base.Preconditions.checkNotNull;
@@ -46,7 +46,7 @@ public abstract class ReactivePublisherBackpressureOnReadyHandlerBase<T> impleme
     private final CallStreamObserver<T> requestStream;
     private Subscription subscription;
     private AtomicBoolean canceled = new AtomicBoolean(false);
-    private CountDownLatch subscribed = new CountDownLatch(1);
+//    private CountDownLatch subscribed = new CountDownLatch(1);
 
     // Guard against spurious onReady() calls caused by a race between onNext() and onReady(). If the transport
     // toggles isReady() from false to true while onNext() is executing, but before onNext() checks isReady(),
@@ -61,13 +61,26 @@ public abstract class ReactivePublisherBackpressureOnReadyHandlerBase<T> impleme
 
     @Override
     public void run() {
-        try {
-            subscribed.await();
-        } catch (InterruptedException e) {
-
+//        try {
+//            subscribed.await();
+//        } catch (InterruptedException e) {
+//
+//        }
+//        Preconditions.checkState(subscription != null, "onSubscribe() not yet called");
+//        synchronized (this) {
+//            if (subscription!= null && !isCanceled() && requestStream.isReady() && wasReady.compareAndSet(false,
+//                    true)) {
+//                 restart the pump
+//                subscription.request(1);
+//            }
+//        }
+        if (wasReady.compareAndSet(false, true)) {
+            tryRequestOne();
         }
-        Preconditions.checkState(subscription != null, "onSubscribe() not yet called");
-        if (!isCanceled() && requestStream.isReady() && wasReady.compareAndSet(false, true)) {
+    }
+
+    synchronized void tryRequestOne() {
+        if (subscription != null && !isCanceled() && requestStream.isReady()) {
             // restart the pump
             subscription.request(1);
         }
@@ -92,7 +105,10 @@ public abstract class ReactivePublisherBackpressureOnReadyHandlerBase<T> impleme
             subscription.cancel();
         } else {
             this.subscription = subscription;
-            subscribed.countDown();
+//            subscribed.countDown();
+            if (wasReady.get()) {
+                tryRequestOne();
+            }
         }
     }
 
