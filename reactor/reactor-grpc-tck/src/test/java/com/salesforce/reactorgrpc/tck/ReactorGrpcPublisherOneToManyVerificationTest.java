@@ -57,7 +57,7 @@ public class ReactorGrpcPublisherOneToManyVerificationTest extends PublisherVeri
     public Publisher<Message> createPublisher(long elements) {
         ReactorTckGrpc.ReactorTckStub stub = ReactorTckGrpc.newReactorStub(channel);
         Mono<Message> request = Mono.just(toMessage((int) elements));
-        Publisher<Message> publisher = stub.oneToMany(request).publishOn(Schedulers.immediate());
+        Publisher<Message> publisher = stub.oneToMany(request);
 
         return publisher;
     }

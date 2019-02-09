@@ -7,16 +7,14 @@
 
 package com.salesforce.reactorgrpc.stub;
 
-import com.google.common.util.concurrent.Runnables;
-import com.salesforce.reactivegrpc.common.CancellableStreamObserver;
-import com.salesforce.reactivegrpc.common.ReactiveProducerStreamObserver;
+import java.util.function.BiConsumer;
+import java.util.function.Function;
+
+import io.grpc.stub.CallStreamObserver;
 import io.grpc.stub.StreamObserver;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import reactor.core.publisher.Operators;
-
-import java.util.function.BiConsumer;
-import java.util.function.Function;
 
 /**
  * Utility functions for processing different client call idioms. We have one-to-one correspondence
@@ -32,11 +30,11 @@ public final class ClientCalls {
      * Implements a unary -> unary call using {@link Mono} -> {@link Mono}.
      */
     public static <TRequest, TResponse> Mono<TResponse> oneToOne(
-            Mono<TRequest> rxRequest,
+            Mono<TRequest> monoSource,
             BiConsumer<TRequest, StreamObserver<TResponse>> delegate) {
         try {
             return Mono
-                    .<TResponse>create(emitter -> rxRequest.subscribe(
+                    .<TResponse>create(emitter -> monoSource.subscribe(
                         request -> delegate.accept(request, new StreamObserver<TResponse>() {
                             @Override
                             public void onNext(TResponse tResponse) {
@@ -66,13 +64,18 @@ public final class ClientCalls {
      * stream of messages.
      */
     public static <TRequest, TResponse> Flux<TResponse> oneToMany(
-            Mono<TRequest> rxRequest,
+            Mono<TRequest> monoSource,
             BiConsumer<TRequest, StreamObserver<TResponse>> delegate) {
         try {
-            ReactorConsumerStreamObserver<TRequest, TResponse> consumerStreamObserver = new ReactorConsumerStreamObserver<>();
-            rxRequest.subscribe(request -> delegate.accept(request, consumerStreamObserver));
-            return ((Flux<TResponse>) consumerStreamObserver.getRxConsumer())
-                    .transform(Operators.lift(new SubscribeOnlyOnceLifter<TResponse>()));
+            return monoSource
+                    .flatMapMany(request -> {
+                        ReactorClientStreamObserverAndPublisher<TResponse> consumerStreamObserver =
+                            new ReactorClientStreamObserverAndPublisher<>(null);
+
+                        delegate.accept(request, consumerStreamObserver);
+
+                        return consumerStreamObserver;
+                    });
         } catch (Throwable throwable) {
             return Flux.error(throwable);
         }
@@ -82,23 +85,22 @@ public final class ClientCalls {
      * Implements a stream -> unary call as {@link Flux} -> {@link Mono}, where the client transits a stream of
      * messages.
      */
+    @SuppressWarnings("unchecked")
     public static <TRequest, TResponse> Mono<TResponse> manyToOne(
-            Flux<TRequest> rxRequest,
+            Flux<TRequest> fluxSource,
             Function<StreamObserver<TResponse>, StreamObserver<TRequest>> delegate) {
         try {
-            return Mono
-                    .<TResponse>create(emitter -> {
-                        ReactiveProducerStreamObserver<TRequest, TResponse> reactiveProducerStreamObserver = new ReactiveProducerStreamObserver<>(
-                                rxRequest,
-                                emitter::success,
-                                emitter::error,
-                                Runnables.doNothing());
-                        delegate.apply(
-                                new CancellableStreamObserver<>(reactiveProducerStreamObserver,
-                                reactiveProducerStreamObserver::cancel));
-                        reactiveProducerStreamObserver.rxSubscribe();
-                    })
-                    .transform(Operators.lift(new SubscribeOnlyOnceLifter<TResponse>()));
+            ReactorSubscriberAndClientProducer<TRequest> subscriberAndGRPCProducer =
+                    fluxSource.subscribeWith(new ReactorSubscriberAndClientProducer<>());
+            ReactorClientStreamObserverAndPublisher<TResponse> observerAndPublisher =
+                    new ReactorClientStreamObserverAndPublisher<>(
+                        s -> subscriberAndGRPCProducer.subscribe((CallStreamObserver<TRequest>) s),
+                        subscriberAndGRPCProducer::cancel
+                    );
+            delegate.apply(observerAndPublisher);
+
+            return Flux.from(observerAndPublisher)
+                       .singleOrEmpty();
         } catch (Throwable throwable) {
             return Mono.error(throwable);
         }
@@ -108,15 +110,21 @@ public final class ClientCalls {
      * Implements a bidirectional stream -> stream call as {@link Flux} -> {@link Flux}, where both the client
      * and the server independently stream to each other.
      */
+    @SuppressWarnings("unchecked")
     public static <TRequest, TResponse> Flux<TResponse> manyToMany(
-            Flux<TRequest> rxRequest,
+            Flux<TRequest> fluxSource,
             Function<StreamObserver<TResponse>, StreamObserver<TRequest>> delegate) {
         try {
-            ReactorProducerConsumerStreamObserver<TRequest, TResponse> consumerStreamObserver = new ReactorProducerConsumerStreamObserver<>(rxRequest);
-            delegate.apply(new CancellableStreamObserver<>(consumerStreamObserver, consumerStreamObserver::cancel));
-            consumerStreamObserver.rxSubscribe();
-            return ((Flux<TResponse>) consumerStreamObserver.getRxConsumer())
-                    .transform(Operators.lift(new SubscribeOnlyOnceLifter<TResponse>()));
+            ReactorSubscriberAndClientProducer<TRequest> subscriberAndGRPCProducer =
+                fluxSource.subscribeWith(new ReactorSubscriberAndClientProducer<>());
+            ReactorClientStreamObserverAndPublisher<TResponse> observerAndPublisher =
+                new ReactorClientStreamObserverAndPublisher<>(
+                        s -> subscriberAndGRPCProducer.subscribe((CallStreamObserver<TRequest>) s),
+                        subscriberAndGRPCProducer::cancel
+                );
+            delegate.apply(observerAndPublisher);
+
+            return Flux.from(observerAndPublisher);
         } catch (Throwable throwable) {
             return Flux.error(throwable);
         }

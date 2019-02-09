@@ -7,18 +7,16 @@
 
 package com.salesforce.rxgrpc.stub;
 
-import com.google.common.util.concurrent.Runnables;
-import com.salesforce.reactivegrpc.common.CancellableStreamObserver;
-import com.salesforce.reactivegrpc.common.ReactiveProducerStreamObserver;
+import com.salesforce.reactivegrpc.common.BiConsumer;
+import com.salesforce.reactivegrpc.common.Function;
+import io.grpc.stub.CallStreamObserver;
 import io.grpc.stub.StreamObserver;
 import io.reactivex.Flowable;
 import io.reactivex.Single;
-
-import com.salesforce.reactivegrpc.common.BiConsumer;
-import com.salesforce.reactivegrpc.common.Function;
 import io.reactivex.SingleEmitter;
 import io.reactivex.SingleOnSubscribe;
 import io.reactivex.functions.Consumer;
+import org.reactivestreams.Publisher;
 
 /**
  * Utility functions for processing different client call idioms. We have one-to-one correspondence
@@ -86,15 +84,18 @@ public final class ClientCalls {
             Single<TRequest> rxRequest,
             final BiConsumer<TRequest, StreamObserver<TResponse>> delegate) {
         try {
-            final RxConsumerStreamObserver<TRequest, TResponse> consumerStreamObserver = new RxConsumerStreamObserver<TRequest, TResponse>();
-            rxRequest.subscribe(new Consumer<TRequest>() {
-                @Override
-                public void accept(TRequest request) {
-                    delegate.accept(request, consumerStreamObserver);
-                }
-            });
-            return ((Flowable<TResponse>) consumerStreamObserver.getRxConsumer())
-                    .lift(new SubscribeOnlyOnceFlowableOperator<TResponse>());
+            return rxRequest
+                    .flatMapPublisher(new io.reactivex.functions.Function<TRequest, Publisher<? extends TResponse>>() {
+                        @Override
+                        public Publisher<? extends TResponse> apply(TRequest request) {
+                        RxClientStreamObserverAndPublisher<TResponse> consumerStreamObserver =
+                            new RxClientStreamObserverAndPublisher<TResponse>(null);
+
+                        delegate.accept(request, consumerStreamObserver);
+
+                        return consumerStreamObserver;
+                        }
+                    });
         } catch (Throwable throwable) {
             return Flowable.error(throwable);
         }
@@ -104,40 +105,32 @@ public final class ClientCalls {
      * Implements a stream -> unary call as {@link Flowable} -> {@link Single}, where the client transits a stream of
      * messages.
      */
+    @SuppressWarnings("unchecked")
     public static <TRequest, TResponse> Single<TResponse> manyToOne(
-            final Flowable<TRequest> rxRequest,
+            final Flowable<TRequest> flowableSource,
             final Function<StreamObserver<TResponse>, StreamObserver<TRequest>> delegate) {
         try {
-            return Single
-                .create(new SingleOnSubscribe<TResponse>() {
-                    @Override
-                    public void subscribe(final SingleEmitter<TResponse> emitter) {
-                        final ReactiveProducerStreamObserver<TRequest, TResponse> rxProducerStreamObserver = new ReactiveProducerStreamObserver<TRequest, TResponse>(
-                            rxRequest,
-                            new com.salesforce.reactivegrpc.common.Consumer<TResponse>() {
-                                @Override
-                                public void accept(TResponse t) {
-                                    emitter.onSuccess(t);
-                                }
-                            },
-                            new com.salesforce.reactivegrpc.common.Consumer<Throwable>() {
-                                @Override
-                                public void accept(Throwable t) {
-                                    emitter.onError(t);
-                                }
-                            },
-                            Runnables.doNothing());
-                        delegate.apply(
-                            new CancellableStreamObserver<TRequest, TResponse>(rxProducerStreamObserver,
-                                new Runnable() {
-                                    @Override
-                                    public void run() {
-                                        rxProducerStreamObserver.cancel();
-                                    }
-                                }));
-                        rxProducerStreamObserver.rxSubscribe();
-                    }
-                }).lift(new SubscribeOnlyOnceSingleOperator<TResponse>());
+            final RxSubscriberAndClientProducer<TRequest> subscriberAndGRPCProducer =
+                    flowableSource.subscribeWith(new RxSubscriberAndClientProducer<TRequest>());
+            RxClientStreamObserverAndPublisher<TResponse> observerAndPublisher =
+                    new RxClientStreamObserverAndPublisher<TResponse>(
+                        new com.salesforce.reactivegrpc.common.Consumer<CallStreamObserver<?>>() {
+                            @Override
+                            public void accept(CallStreamObserver<?> observer) {
+                                subscriberAndGRPCProducer.subscribe((CallStreamObserver<TRequest>) observer);
+                            }
+                        },
+                        new Runnable() {
+                            @Override
+                            public void run() {
+                                subscriberAndGRPCProducer.cancel();
+                            }
+                        }
+                    );
+             delegate.apply(observerAndPublisher);
+
+            return Flowable.unsafeCreate(observerAndPublisher)
+                           .singleOrError();
         } catch (Throwable throwable) {
             return Single.error(throwable);
         }
@@ -147,20 +140,31 @@ public final class ClientCalls {
      * Implements a bidirectional stream -> stream call as {@link Flowable} -> {@link Flowable}, where both the client
      * and the server independently stream to each other.
      */
+    @SuppressWarnings("unchecked")
     public static <TRequest, TResponse> Flowable<TResponse> manyToMany(
-            Flowable<TRequest> rxRequest,
+            Flowable<TRequest> flowableSource,
             Function<StreamObserver<TResponse>, StreamObserver<TRequest>> delegate) {
         try {
-            final RxProducerConsumerStreamObserver<TRequest, TResponse> consumerStreamObserver = new RxProducerConsumerStreamObserver<TRequest, TResponse>(rxRequest);
-            delegate.apply(new CancellableStreamObserver<TRequest, TResponse>(consumerStreamObserver, new Runnable() {
-                @Override
-                public void run() {
-                    consumerStreamObserver.cancel();
-                }
-            }));
-            consumerStreamObserver.rxSubscribe();
-            return ((Flowable<TResponse>) consumerStreamObserver.getRxConsumer())
-                    .lift(new SubscribeOnlyOnceFlowableOperator<TResponse>());
+            final RxSubscriberAndClientProducer<TRequest> subscriberAndGRPCProducer =
+                    flowableSource.subscribeWith(new RxSubscriberAndClientProducer<TRequest>());
+            RxClientStreamObserverAndPublisher<TResponse> observerAndPublisher =
+                    new RxClientStreamObserverAndPublisher<TResponse>(
+                            new com.salesforce.reactivegrpc.common.Consumer<CallStreamObserver<?>>() {
+                                @Override
+                                public void accept(CallStreamObserver<?> observer) {
+                                    subscriberAndGRPCProducer.subscribe((CallStreamObserver<TRequest>) observer);
+                                }
+                            },
+                            new Runnable() {
+                                @Override
+                                public void run() {
+                                    subscriberAndGRPCProducer.cancel();
+                                }
+                            }
+                    );
+            delegate.apply(observerAndPublisher);
+
+            return Flowable.unsafeCreate(observerAndPublisher);
         } catch (Throwable throwable) {
             return Flowable.error(throwable);
         }
