@@ -28,8 +28,8 @@ import org.testng.annotations.Test;
 @SuppressWarnings("Duplicates")
 @Test(timeOut = 3000)
 public class RxGrpcPublisherOneToManyVerificationTest extends PublisherVerification<Message> {
-    public static final long DEFAULT_TIMEOUT_MILLIS = 500;
-    public static final long PUBLISHER_REFERENCE_CLEANUP_TIMEOUT_MILLIS = 500;
+    public static final long DEFAULT_TIMEOUT_MILLIS = 500L;
+    public static final long PUBLISHER_REFERENCE_CLEANUP_TIMEOUT_MILLIS = 1000L;
 
     public RxGrpcPublisherOneToManyVerificationTest() {
         super(new TestEnvironment(DEFAULT_TIMEOUT_MILLIS, DEFAULT_TIMEOUT_MILLIS), PUBLISHER_REFERENCE_CLEANUP_TIMEOUT_MILLIS);

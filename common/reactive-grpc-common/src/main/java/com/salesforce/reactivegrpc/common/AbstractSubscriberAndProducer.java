@@ -79,14 +79,14 @@ public abstract class AbstractSubscriberAndProducer<T> implements Subscriber<T>,
     public void subscribe(final CallStreamObserver<T> downstream) {
         this.downstream = checkNotNull(downstream);
         downstream.setOnReadyHandler(this);
-
-        drain();
     }
 
     @Override
     public void run() {
         if (state == 1 && STATE.compareAndSet(this, STATE_NOT_READY, STATE_READY) || state == 2) {
             subscription.request(1);
+
+            drain();
         }
     }
 
