@@ -57,7 +57,7 @@ public class ReactorGrpcPublisherManyToManyVerificationTest extends PublisherVer
     public Publisher<Message> createPublisher(long elements) {
         ReactorTckGrpc.ReactorTckStub stub = ReactorTckGrpc.newReactorStub(channel);
         Flux<Message> request = Flux.range(0, (int)elements).map(this::toMessage);
-        Publisher<Message> publisher = stub.manyToMany(request).publishOn(Schedulers.immediate());
+        Publisher<Message> publisher = stub.manyToMany(request);
 
         return publisher;
     }

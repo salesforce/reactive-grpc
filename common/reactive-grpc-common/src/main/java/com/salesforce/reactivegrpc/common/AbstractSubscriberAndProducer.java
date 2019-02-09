@@ -83,7 +83,7 @@ public abstract class AbstractSubscriberAndProducer<T> implements Subscriber<T>,
 
     @Override
     public void run() {
-        if (state == 1 && STATE.compareAndSet(this, STATE_NOT_READY, STATE_READY) || state == 2) {
+        if (state == STATE_NOT_READY && STATE.compareAndSet(this, STATE_NOT_READY, STATE_READY)) {
             subscription.request(1);
 
             drain();
@@ -133,7 +133,7 @@ public abstract class AbstractSubscriberAndProducer<T> implements Subscriber<T>,
                     subscription.request(1);
                 } else {
                     // note that back-pressure has begun
-                    STATE.compareAndSet(this, STATE_NOT_READY, STATE_READY);
+                    STATE.compareAndSet(this, STATE_READY, STATE_NOT_READY);
                 }
             } catch (Throwable throwable) {
                 cancel();
