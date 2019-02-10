@@ -49,7 +49,7 @@ public abstract class AbstractStreamObserverAndPublisher<T>
 
     public static final int DEFAULT_CHUNK_SIZE = 16;
 
-    static final int UNSUBSCRIBED_STATE = 0;
+    static final int UNSUBSCRIBED_STATE    = 0;
     static final int SUBSCRIBED_ONCE_STATE = 1;
     static final int PREFETCHED_ONCE_STATE = 2;
 
@@ -346,7 +346,8 @@ public abstract class AbstractStreamObserverAndPublisher<T>
 
             Operators.addCap(REQUESTED, this, n);
 
-            if (state == SUBSCRIBED_ONCE_STATE && STATE.compareAndSet(this, SUBSCRIBED_ONCE_STATE, PREFETCHED_ONCE_STATE)){
+            if (state == SUBSCRIBED_ONCE_STATE && STATE.compareAndSet(this, SUBSCRIBED_ONCE_STATE,
+                    PREFETCHED_ONCE_STATE)){
                 subscription.request(prefetch);
             }
 

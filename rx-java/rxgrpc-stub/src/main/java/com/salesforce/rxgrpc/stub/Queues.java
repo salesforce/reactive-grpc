@@ -1,4 +1,11 @@
 /*
+ *  Copyright (c) 2019, salesforce.com, inc.
+ *  All rights reserved.
+ *  Licensed under the BSD 3-Clause license.
+ *  For full license text, see LICENSE.txt file in the repo root  or https://opensource.org/licenses/BSD-3-Clause
+ */
+
+/*
  * Copyright (c) 2011-2017 Pivotal Software Inc, All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -24,7 +31,9 @@ import java.util.Queue;
 import java.util.concurrent.atomic.AtomicReference;
 
 import com.salesforce.reactivegrpc.common.Supplier;
+import io.reactivex.exceptions.Exceptions;
 import io.reactivex.internal.fuseable.SimplePlainQueue;
+import io.reactivex.internal.fuseable.SimpleQueue;
 import io.reactivex.internal.queue.SpscArrayQueue;
 import io.reactivex.internal.queue.SpscLinkedArrayQueue;
 
@@ -46,6 +55,17 @@ public final class Queues {
 	 */
 	public static final int SMALL_BUFFER_SIZE = Math.max(16,
 			Integer.parseInt(System.getProperty("reactor.bufferSize.small", "256")));
+
+	/**
+	 * Adapts {@link SimplePlainQueue} to generic {@link Queue}
+	 *
+	 * @param simplePlainQueue
+	 * @param <T>
+	 * @return
+	 */
+	public static <T> Queue<T> toQueue(SimpleQueue<T> simplePlainQueue) {
+		return new SimpleQueueAdapter<T>(simplePlainQueue);
+	}
 
 	/**
 	 *
@@ -410,21 +430,26 @@ public final class Queues {
 		}
 	}
 
-	static final class SimpleQueueAdapter<T> implements Queue<T>, SimplePlainQueue<T> {
+	static final class SimpleQueueAdapter<T> implements Queue<T>, SimpleQueue<T> {
 
 		String NOT_SUPPORTED_MESSAGE = "Although QueueSubscription extends Queue it is purely internal" +
 				" and only guarantees support for poll/clear/size/isEmpty." +
 				" Instances shouldn't be used/exposed as Queue outside of Reactor operators.";
 
-		final SimplePlainQueue<T> simpleQueue;
+		final SimpleQueue<T> simpleQueue;
 
-		SimpleQueueAdapter(SimplePlainQueue<T> queue) {
+		SimpleQueueAdapter(SimpleQueue<T> queue) {
 			simpleQueue = queue;
 		}
 
 		@Override
 		public T poll() {
-			return simpleQueue.poll();
+			try {
+				return simpleQueue.poll();
+			}
+			catch (Exception e) {
+				throw Exceptions.propagate(e);
+			}
 		}
 
 		@Override

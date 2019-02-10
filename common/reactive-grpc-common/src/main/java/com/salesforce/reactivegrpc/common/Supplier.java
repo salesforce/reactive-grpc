@@ -1,27 +1,10 @@
 /*
- * Copyright (c) 2012, 2013, Oracle and/or its affiliates. All rights reserved.
- * ORACLE PROPRIETARY/CONFIDENTIAL. Use is subject to license terms.
- *
- *
- *
- *
- *
- *
- *
- *
- *
- *
- *
- *
- *
- *
- *
- *
- *
- *
- *
- *
+ *  Copyright (c) 2017, salesforce.com, inc.
+ *  All rights reserved.
+ *  Licensed under the BSD 3-Clause license.
+ *  For full license text, see LICENSE.txt file in the repo root  or https://opensource.org/licenses/BSD-3-Clause
  */
+
 package com.salesforce.reactivegrpc.common;
 
 /**

@@ -1,4 +1,11 @@
 /*
+ *  Copyright (c) 2017, salesforce.com, inc.
+ *  All rights reserved.
+ *  Licensed under the BSD 3-Clause license.
+ *  For full license text, see LICENSE.txt file in the repo root  or https://opensource.org/licenses/BSD-3-Clause
+ */
+
+/*
  * Copyright (c) 2011-2018 Pivotal Software Inc, All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -15,9 +22,13 @@
  */
 package com.salesforce.reactivegrpc.common;
 
+import java.util.Objects;
 import java.util.concurrent.atomic.AtomicLongFieldUpdater;
+import java.util.concurrent.atomic.AtomicReferenceFieldUpdater;
 
 import org.reactivestreams.Subscription;
+
+import static com.google.common.base.Preconditions.checkNotNull;
 
 /**
  * An helper to support "Operator" writing, handle noop subscriptions, validate request

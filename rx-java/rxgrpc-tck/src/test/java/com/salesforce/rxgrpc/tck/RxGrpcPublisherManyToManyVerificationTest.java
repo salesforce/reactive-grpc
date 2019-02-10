@@ -7,13 +7,11 @@
 
 package com.salesforce.rxgrpc.tck;
 
-import com.google.common.util.concurrent.MoreExecutors;
 import io.grpc.ManagedChannel;
 import io.grpc.Server;
 import io.grpc.inprocess.InProcessChannelBuilder;
 import io.grpc.inprocess.InProcessServerBuilder;
 import io.reactivex.Flowable;
-import io.reactivex.schedulers.Schedulers;
 import org.reactivestreams.Publisher;
 import org.reactivestreams.tck.PublisherVerification;
 import org.reactivestreams.tck.TestEnvironment;

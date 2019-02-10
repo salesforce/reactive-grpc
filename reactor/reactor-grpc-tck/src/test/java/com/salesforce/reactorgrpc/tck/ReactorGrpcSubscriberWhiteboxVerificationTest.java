@@ -7,6 +7,8 @@
 
 package com.salesforce.reactorgrpc.tck;
 
+import javax.annotation.Nullable;
+
 import com.salesforce.reactorgrpc.stub.ReactorSubscriberAndClientProducer;
 import io.grpc.stub.ClientCallStreamObserver;
 import org.reactivestreams.Subscriber;
@@ -15,8 +17,6 @@ import org.reactivestreams.tck.SubscriberWhiteboxVerification;
 import org.reactivestreams.tck.TestEnvironment;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
-
-import javax.annotation.Nullable;
 
 /**
  * Subscriber tests from the Reactive Streams Technology Compatibility Kit.

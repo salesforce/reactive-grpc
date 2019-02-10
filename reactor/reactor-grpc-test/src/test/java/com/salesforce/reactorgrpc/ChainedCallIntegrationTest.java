@@ -78,7 +78,7 @@ public class ChainedCallIntegrationTest {
     }
 
     @Test
-    @Ignore("Flaky test: https://github.com/salesforce/reactive-grpc/issues/107")
+//    @Ignore("Flaky test: https://github.com/salesforce/reactive-grpc/issues/107")
     public void servicesCanCallOtherServices() throws InterruptedException {
         ReactorGreeterGrpc.ReactorGreeterStub stub = ReactorGreeterGrpc.newReactorStub(channel);
 

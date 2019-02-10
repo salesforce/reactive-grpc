@@ -10,6 +10,8 @@ package com.salesforce.rxgrpc.stub;
 import com.salesforce.reactivegrpc.common.AbstractSubscriberAndProducer;
 import com.salesforce.reactivegrpc.common.AbstractSubscriberAndServerProducer;
 import io.reactivex.FlowableSubscriber;
+import io.reactivex.internal.fuseable.QueueSubscription;
+import org.reactivestreams.Subscription;
 
 /**
  * The gRPC server-side implementation of {@link AbstractSubscriberAndProducer}.
@@ -19,4 +21,23 @@ import io.reactivex.FlowableSubscriber;
 public class RxSubscriberAndServerProducer<T>
         extends AbstractSubscriberAndServerProducer<T>
         implements FlowableSubscriber<T> {
+
+    @Override
+    protected void fuse(Subscription s) {
+        if (s instanceof QueueSubscription) {
+            @SuppressWarnings("unchecked")
+            QueueSubscription<T> f = (QueueSubscription<T>) s;
+
+            int m = f.requestFusion(QueueSubscription.ANY);
+
+            if (m == QueueSubscription.SYNC) {
+                sourceMode = QueueSubscription.SYNC;
+                queue = Queues.toQueue(f);
+                done = true;
+            } else if (m == QueueSubscription.ASYNC) {
+                sourceMode = QueueSubscription.ASYNC;
+                queue = Queues.toQueue(f);
+            }
+        }
+    }
 }
