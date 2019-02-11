@@ -69,7 +69,7 @@ public abstract class AbstractSubscriberAndProducer<T> implements Subscriber<T>,
 
 
     private static final int UNSUBSCRIBED_STATE = 0;
-    private static final int NOT_FUSSED_STATE   = 1;
+    private static final int NOT_FUSED_STATE    = 1;
     private static final int NOT_READY_STATE    = 2;
     private static final int READY_STATE        = 3;
     private static final int CANCELLED_STATE    = 4;
@@ -142,7 +142,7 @@ public abstract class AbstractSubscriberAndProducer<T> implements Subscriber<T>,
     public void onSubscribe(Subscription subscription) {
         checkNotNull(subscription);
 
-        if (state == 0 && STATE.compareAndSet(this, UNSUBSCRIBED_STATE, NOT_FUSSED_STATE)) {
+        if (state == 0 && STATE.compareAndSet(this, UNSUBSCRIBED_STATE, NOT_FUSED_STATE)) {
             this.subscription = subscription;
 
             fuse(subscription);
@@ -151,7 +151,7 @@ public abstract class AbstractSubscriberAndProducer<T> implements Subscriber<T>,
                 subscription.request(1);
             }
 
-            if (STATE.compareAndSet(this, NOT_FUSSED_STATE, NOT_READY_STATE)) {
+            if (STATE.compareAndSet(this, NOT_FUSED_STATE, NOT_READY_STATE)) {
                 final CallStreamObserver<T> downstream = this.downstream;
 
                 if (downstream != null && downstream.isReady() && STATE.compareAndSet(this, NOT_READY_STATE, READY_STATE)) {

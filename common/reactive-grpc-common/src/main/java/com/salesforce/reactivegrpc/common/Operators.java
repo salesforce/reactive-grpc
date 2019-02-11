@@ -22,20 +22,15 @@
  */
 package com.salesforce.reactivegrpc.common;
 
-import java.util.Objects;
 import java.util.concurrent.atomic.AtomicLongFieldUpdater;
-import java.util.concurrent.atomic.AtomicReferenceFieldUpdater;
 
 import org.reactivestreams.Subscription;
-
-import static com.google.common.base.Preconditions.checkNotNull;
 
 /**
  * An helper to support "Operator" writing, handle noop subscriptions, validate request
  * size and to cap concurrent additive operations to Long.MAX_VALUE,
  * which is generic to {@link Subscription#request(long)} handling.
  *
- * Combine utils available to operator implementations, @see http://github.com/reactor/reactive-streams-commons
  *
  */
 public abstract class Operators {

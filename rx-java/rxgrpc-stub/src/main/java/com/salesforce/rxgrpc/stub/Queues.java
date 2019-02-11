@@ -30,10 +30,10 @@ import java.util.NoSuchElementException;
 import java.util.Queue;
 import java.util.concurrent.atomic.AtomicReference;
 
-import com.salesforce.reactivegrpc.common.Supplier;
 import io.reactivex.exceptions.Exceptions;
 import io.reactivex.internal.fuseable.SimplePlainQueue;
 import io.reactivex.internal.fuseable.SimpleQueue;
+import io.reactivex.internal.queue.MpscLinkedQueue;
 import io.reactivex.internal.queue.SpscArrayQueue;
 import io.reactivex.internal.queue.SpscLinkedArrayQueue;
 
@@ -47,14 +47,12 @@ public final class Queues {
 	 * An allocation friendly default of available slots in a given container, e.g. slow publishers and or fast/few
 	 * subscribers
 	 */
-	public static final int XS_BUFFER_SIZE    = Math.max(8,
-			Integer.parseInt(System.getProperty("reactor.bufferSize.x", "32")));
+	public static final int XS_BUFFER_SIZE    = Math.max(8, Integer.parseInt(System.getProperty("rx.bufferSize.x", "32")));
 	/**
 	 * A small default of available slots in a given container, compromise between intensive pipelines, small
 	 * subscribers numbers and memory use.
 	 */
-	public static final int SMALL_BUFFER_SIZE = Math.max(16,
-			Integer.parseInt(System.getProperty("reactor.bufferSize.small", "256")));
+	public static final int SMALL_BUFFER_SIZE = Math.max(16, Integer.parseInt(System.getProperty("rx.bufferSize.small", "256")));
 
 	/**
 	 * Adapts {@link SimplePlainQueue} to generic {@link Queue}
@@ -71,81 +69,81 @@ public final class Queues {
 	 *
 	 * @param batchSize the bounded or unbounded (int.max) queue size
 	 * @param <T> the reified {@link Queue} generic type
-	 * @return an unbounded or bounded {@link Queue} {@link Supplier}
+	 * @return an unbounded or bounded {@link Queue}
 	 */
 	@SuppressWarnings("unchecked")
-	public static <T> Supplier<Queue<T>> get(int batchSize) {
+	public static <T> Queue<T> get(int batchSize) {
 		if (batchSize == Integer.MAX_VALUE) {
-			return SMALL_UNBOUNDED;
+			return unbounded();
 		}
 		if (batchSize == XS_BUFFER_SIZE) {
-			return XS_SUPPLIER;
+			return xs();
 		}
 		if (batchSize == SMALL_BUFFER_SIZE) {
-			return SMALL_SUPPLIER;
+			return small();
 		}
 		if (batchSize == 1) {
-			return ONE_SUPPLIER;
+			return one();
 		}
 		if (batchSize == 0) {
-			return ZERO_SUPPLIER;
+			return empty();
 		}
 
 		final int adjustedBatchSize = Math.max(8, batchSize);
 		if (adjustedBatchSize > 10000000) {
-			return SMALL_UNBOUNDED;
+			return unbounded();
 		}
-		else{
-			return new Supplier<Queue<T>>() {
-				@Override
-				public Queue<T> get() {
-					return new SimpleQueueAdapter<T>(new SpscArrayQueue<T>(adjustedBatchSize));
-				}
-			};
+		else {
+			return new SimpleQueueAdapter<T>(new SpscArrayQueue<T>(adjustedBatchSize));
 		}
 	}
 
 	/**
-	 * A {@link Supplier} for an empty immutable {@link Queue}, to be used as a placeholder
+	 * An empty immutable {@link Queue}, to be used as a placeholder
 	 * in methods that require a Queue when one doesn't expect to store any data in said
 	 * Queue.
 	 *
 	 * @param <T> the reified {@link Queue} generic type
-	 * @return an immutable empty {@link Queue} {@link Supplier}
+	 * @return an immutable empty {@link Queue}
 	 */
-	@SuppressWarnings("unchecked")
-	public static <T> Supplier<Queue<T>> empty() {
-		return ZERO_SUPPLIER;
+	public static <T> Queue<T> empty() {
+		return new ZeroQueue<T>();
 	}
 
 	/**
 	 *
 	 * @param <T> the reified {@link Queue} generic type
-	 * @return a bounded {@link Queue} {@link Supplier}
+	 * @return a bounded {@link Queue}
 	 */
-	@SuppressWarnings("unchecked")
-	public static <T> Supplier<Queue<T>> one() {
-		return ONE_SUPPLIER;
-	}
-
-	/**
-	 * @param <T> the reified {@link Queue} generic type
-	 *
-	 * @return a bounded {@link Queue} {@link Supplier}
-	 */
-	@SuppressWarnings("unchecked")
-	public static <T> Supplier<Queue<T>> small() {
-		return SMALL_SUPPLIER;
+	public static <T> Queue<T> one() {
+		return new OneQueue<T>();
 	}
 
 	/**
 	 *
 	 * @param <T> the reified {@link Queue} generic type
-	 * @return an unbounded {@link Queue} {@link Supplier}
+	 * @return a bounded {@link Queue}
 	 */
-	@SuppressWarnings("unchecked")
-	public static <T> Supplier<Queue<T>> unbounded() {
-		return SMALL_UNBOUNDED;
+	public static <T> Queue<T> xs() {
+		return new SimpleQueueAdapter<T>(new SpscArrayQueue<T>(XS_BUFFER_SIZE));
+	}
+
+	/**
+	 * @param <T> the reified {@link Queue} generic type
+	 *
+	 * @return a bounded {@link Queue}
+	 */
+	public static <T> Queue<T> small() {
+		return new SimpleQueueAdapter<T>(new SpscArrayQueue<T>(SMALL_BUFFER_SIZE));
+	}
+
+	/**
+	 *
+	 * @param <T> the reified {@link Queue} generic type
+	 * @return an unbounded {@link Queue}
+	 */
+	public static <T> Queue<T> unbounded() {
+		return new SimpleQueueAdapter<T>(new SpscLinkedArrayQueue<T>(SMALL_BUFFER_SIZE));
 	}
 
 	/**
@@ -153,32 +151,24 @@ public final class Queues {
 	 * return the default {@link #SMALL_BUFFER_SIZE} size.
 	 * @param linkSize the link size
 	 * @param <T> the reified {@link Queue} generic type
-	 * @return an unbounded {@link Queue} {@link Supplier}
+	 * @return an unbounded {@link Queue}
 	 */
-	@SuppressWarnings("unchecked")
-	public static <T> Supplier<Queue<T>> unbounded(final int linkSize) {
-		if (linkSize == XS_BUFFER_SIZE) {
-			return XS_UNBOUNDED;
-		}
-		else if (linkSize == Integer.MAX_VALUE || linkSize == SMALL_BUFFER_SIZE) {
+	public static <T> Queue<T> unbounded(final int linkSize) {
+		if (linkSize == Integer.MAX_VALUE || linkSize == SMALL_BUFFER_SIZE) {
 			return unbounded();
 		}
-		return new Supplier<Queue<T>>() {
-			@Override
-			public Queue<T> get() {
-				return new SimpleQueueAdapter<T>(new SpscLinkedArrayQueue<T>(linkSize));
-			}
-		};
+		return new SimpleQueueAdapter<T>(new SpscLinkedArrayQueue<T>(linkSize));
 	}
 
 	/**
+	 * Returns an unbounded queue suitable for multi-producer/single-consumer (MPSC)
+	 * scenarios.
 	 *
 	 * @param <T> the reified {@link Queue} generic type
-	 * @return a bounded {@link Queue} {@link Supplier}
+	 * @return an unbounded MPSC {@link Queue}
 	 */
-	@SuppressWarnings("unchecked")
-	public static <T> Supplier<Queue<T>> xs() {
-		return XS_SUPPLIER;
+	public static <T> Queue<T> unboundedMultiproducer() {
+		return new SimpleQueueAdapter<T>(new MpscLinkedQueue<T>());
 	}
 
 	private Queues() {
@@ -227,7 +217,7 @@ public final class Queues {
 
 		@Override
 		public Iterator<T> iterator() {
-			return new QueueIterator<T>(this);
+			return Collections.singleton(get()).iterator();
 		}
 
 		@Override
@@ -406,30 +396,6 @@ public final class Queues {
 		private static final long serialVersionUID = -8876883675795156827L;
 	}
 
-	static final class QueueIterator<T> implements Iterator<T> {
-
-		final Queue<T> queue;
-
-		public QueueIterator(Queue<T> queue) {
-			this.queue = queue;
-		}
-
-		@Override
-		public boolean hasNext() {
-			return !queue.isEmpty();
-		}
-
-		@Override
-		public T next() {
-			return queue.poll();
-		}
-
-		@Override
-		public void remove() {
-			queue.remove();
-		}
-	}
-
 	static final class SimpleQueueAdapter<T> implements Queue<T>, SimpleQueue<T> {
 
 		String NOT_SUPPORTED_MESSAGE = "Although QueueSubscription extends Queue it is purely internal" +
@@ -552,47 +518,4 @@ public final class Queues {
 			throw new UnsupportedOperationException(NOT_SUPPORTED_MESSAGE);
 		}
 	}
-
-	@SuppressWarnings("rawtypes")
-    static final Supplier ZERO_SUPPLIER   = new Supplier<Queue<?>>() {
-	    @Override
-	    public Queue<?> get() {
-		    return new ZeroQueue();
-	    }
-    };
-    @SuppressWarnings("rawtypes")
-    static final Supplier ONE_SUPPLIER    = new Supplier<Queue<?>>() {
-	    @Override
-	    public Queue<?> get() {
-		    return new OneQueue();
-	    }
-    };
-    @SuppressWarnings("rawtypes")
-    static final Supplier XS_SUPPLIER     = new Supplier<Queue<?>>() {
-		@Override
-		public Queue<?> get() {
-			return new SimpleQueueAdapter(new SpscArrayQueue(XS_BUFFER_SIZE));
-		}
-	};
-	@SuppressWarnings("rawtypes")
-    static final Supplier SMALL_SUPPLIER  = new Supplier() {
-		@Override
-		public Queue<?> get() {
-			return new SimpleQueueAdapter(new SpscArrayQueue(SMALL_BUFFER_SIZE));
-		}
-	};
-	@SuppressWarnings("rawtypes")
-	static final Supplier SMALL_UNBOUNDED = new Supplier() {
-		@Override
-		public Queue<?> get() {
-			return new SimpleQueueAdapter(new SpscLinkedArrayQueue(SMALL_BUFFER_SIZE));
-		}
-	};
-	@SuppressWarnings("rawtypes")
-	static final Supplier XS_UNBOUNDED    = new Supplier() {
-		@Override
-		public Queue<?> get() {
-			return new SimpleQueueAdapter(new SpscLinkedArrayQueue(XS_BUFFER_SIZE));
-		}
-	};
 }
