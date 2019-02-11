@@ -10,35 +10,33 @@ package com.salesforce.rxgrpc.tck;
 import io.reactivex.Flowable;
 import io.reactivex.Single;
 
-public class TckService extends RxTckGrpc.TckImplBase {
+public class FussedTckService extends RxTckGrpc.TckImplBase {
     public static final int KABOOM = -1;
 
     @Override
     public Single<Message> oneToOne(Single<Message> request) {
-        return request.hide().map(this::maybeExplode);
+        return request.map(this::maybeExplode);
     }
 
     @Override
     public Flowable<Message> oneToMany(Single<Message> request) {
         return request
-                .hide()
                 .map(this::maybeExplode)
                 .toFlowable()
                 // send back no more than 10 responses
                 .flatMap(message -> Flowable.range(1, Math.min(message.getNumber(), 10))
                         ,false, 1, 1)
-                .map(this::toMessage)
-                .hide();
+                .map(this::toMessage);
     }
 
     @Override
     public Single<Message> manyToOne(Flowable<Message> request) {
-        return request.hide().map(this::maybeExplode).last(Message.newBuilder().setNumber(0).build()).hide();
+        return request.map(this::maybeExplode).last(Message.newBuilder().setNumber(0).build());
     }
 
     @Override
     public Flowable<Message> manyToMany(Flowable<Message> request) {
-        return request.hide().map(this::maybeExplode);
+        return request.map(this::maybeExplode);
     }
 
     private Message maybeExplode(Message req) throws Exception {

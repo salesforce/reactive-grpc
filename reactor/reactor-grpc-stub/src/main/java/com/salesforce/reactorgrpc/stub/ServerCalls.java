@@ -121,25 +121,7 @@ public final class ServerCalls {
             ReactorSubscriberAndServerProducer<TResponse> subscriber = new ReactorSubscriberAndServerProducer<>();
             subscriber.subscribe((ServerCallStreamObserver<TResponse>) responseObserver);
             // Don't try to respond if the server has already canceled the request
-            rxResponse.subscribe(
-                tResponse -> {
-                    if (!streamObserverPublisher.isCancelled()) {
-                        subscriber.onNext(tResponse);
-                    }
-                },
-                throwable -> {
-                    if (!streamObserverPublisher.isCancelled()) {
-                        streamObserverPublisher.abortPendingCancel();
-                        subscriber.onError(throwable);
-                    }
-                },
-                () -> {
-                    if (!streamObserverPublisher.isCancelled()) {
-                        subscriber.onComplete();
-                    }
-                },
-                subscriber::onSubscribe
-            );
+            rxResponse.subscribe(subscriber);
         } catch (Throwable throwable) {
             responseObserver.onError(prepareError(throwable));
         }

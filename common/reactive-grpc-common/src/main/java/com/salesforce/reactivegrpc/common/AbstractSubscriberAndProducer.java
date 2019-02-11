@@ -76,7 +76,7 @@ public abstract class AbstractSubscriberAndProducer<T> implements Subscriber<T>,
 
 
 
-    Subscription subscription;
+    volatile Subscription subscription;
     Throwable throwable;
 
     protected boolean   done;
@@ -116,8 +116,7 @@ public abstract class AbstractSubscriberAndProducer<T> implements Subscriber<T>,
 
     @Override
     public void run() {
-        if (state == NOT_READY_STATE && STATE.compareAndSet(this,
-                NOT_READY_STATE, READY_STATE)) {
+        if (state == NOT_READY_STATE && STATE.compareAndSet(this, NOT_READY_STATE, READY_STATE)) {
             drain();
         }
     }
@@ -155,8 +154,7 @@ public abstract class AbstractSubscriberAndProducer<T> implements Subscriber<T>,
             if (STATE.compareAndSet(this, NOT_FUSSED_STATE, NOT_READY_STATE)) {
                 final CallStreamObserver<T> downstream = this.downstream;
 
-                if (downstream != null && downstream.isReady() && STATE.compareAndSet(this,
-                        NOT_READY_STATE, READY_STATE)) {
+                if (downstream != null && downstream.isReady() && STATE.compareAndSet(this, NOT_READY_STATE, READY_STATE)) {
                     drain();
                 }
             } else {

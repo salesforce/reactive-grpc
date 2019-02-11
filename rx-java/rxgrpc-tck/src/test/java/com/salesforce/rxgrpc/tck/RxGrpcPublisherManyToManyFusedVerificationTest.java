@@ -25,11 +25,11 @@ import org.testng.annotations.Test;
  */
 @SuppressWarnings("Duplicates")
 @Test(timeOut = 3000)
-public class RxGrpcPublisherManyToManyVerificationTest extends PublisherVerification<Message> {
+public class RxGrpcPublisherManyToManyFusedVerificationTest extends PublisherVerification<Message> {
     public static final long DEFAULT_TIMEOUT_MILLIS = 500L;
     public static final long PUBLISHER_REFERENCE_CLEANUP_TIMEOUT_MILLIS = 1000L;
 
-    public RxGrpcPublisherManyToManyVerificationTest() {
+    public RxGrpcPublisherManyToManyFusedVerificationTest() {
         super(new TestEnvironment(DEFAULT_TIMEOUT_MILLIS, DEFAULT_TIMEOUT_MILLIS), PUBLISHER_REFERENCE_CLEANUP_TIMEOUT_MILLIS);
     }
 
@@ -39,7 +39,7 @@ public class RxGrpcPublisherManyToManyVerificationTest extends PublisherVerifica
     @BeforeClass
     public static void setup() throws Exception {
         System.out.println("RxGrpcPublisherManyToManyVerificationTest");
-        server = InProcessServerBuilder.forName("RxGrpcPublisherManyToManyVerificationTest").addService(new TckService()).build().start();
+        server = InProcessServerBuilder.forName("RxGrpcPublisherManyToManyVerificationTest").addService(new FussedTckService()).build().start();
         channel = InProcessChannelBuilder.forName("RxGrpcPublisherManyToManyVerificationTest").usePlaintext().build();
     }
 
@@ -56,7 +56,7 @@ public class RxGrpcPublisherManyToManyVerificationTest extends PublisherVerifica
     public Publisher<Message> createPublisher(long elements) {
         RxTckGrpc.RxTckStub stub = RxTckGrpc.newRxStub(channel);
         Flowable<Message> request = Flowable.range(0, (int)elements).map(this::toMessage);
-        Publisher<Message> publisher = request.hide().compose(stub::manyToMany).hide();
+        Publisher<Message> publisher = request.compose(stub::manyToMany);
 
         return publisher;
     }
@@ -65,7 +65,7 @@ public class RxGrpcPublisherManyToManyVerificationTest extends PublisherVerifica
     public Publisher<Message> createFailedPublisher() {
         RxTckGrpc.RxTckStub stub = RxTckGrpc.newRxStub(channel);
         Flowable<Message> request = Flowable.just(toMessage(TckService.KABOOM));
-        Publisher<Message> publisher = request.hide().compose(stub::manyToMany).hide();
+        Publisher<Message> publisher = request.compose(stub::manyToMany);
 
         return publisher;
     }

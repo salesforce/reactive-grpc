@@ -213,6 +213,8 @@ public abstract class AbstractStreamObserverAndPublisher<T>
             a.onNext(null);
 
             if (d) {
+                doTerminate();
+
                 downstream = null;
 
                 Throwable ex = error;
@@ -221,6 +223,7 @@ public abstract class AbstractStreamObserverAndPublisher<T>
                 } else {
                     a.onComplete();
                 }
+
                 return;
             }
 
@@ -264,6 +267,8 @@ public abstract class AbstractStreamObserverAndPublisher<T>
             return true;
         }
         if (d && empty) {
+            doTerminate();
+
             Throwable e = error;
             downstream = null;
             if (e != null) {
@@ -271,6 +276,7 @@ public abstract class AbstractStreamObserverAndPublisher<T>
             } else {
                 a.onComplete();
             }
+
             return true;
         }
 
@@ -301,8 +307,6 @@ public abstract class AbstractStreamObserverAndPublisher<T>
         error = t;
         done = true;
 
-        doTerminate();
-
         drain();
     }
 
@@ -313,8 +317,6 @@ public abstract class AbstractStreamObserverAndPublisher<T>
         }
 
         done = true;
-
-        doTerminate();
 
         drain();
     }
@@ -332,7 +334,7 @@ public abstract class AbstractStreamObserverAndPublisher<T>
             }
         } else {
             actual.onSubscribe(Operators.EmptySubscription.INSTANCE);
-            actual.onError(new IllegalStateException("UnicastProcessor allows only a single Subscriber"));
+            actual.onError(new IllegalStateException(getClass().getSimpleName() + " allows only a single Subscriber"));
         }
     }
 
@@ -346,8 +348,7 @@ public abstract class AbstractStreamObserverAndPublisher<T>
 
             Operators.addCap(REQUESTED, this, n);
 
-            if (state == SUBSCRIBED_ONCE_STATE && STATE.compareAndSet(this, SUBSCRIBED_ONCE_STATE,
-                    PREFETCHED_ONCE_STATE)){
+            if (state == SUBSCRIBED_ONCE_STATE && STATE.compareAndSet(this, SUBSCRIBED_ONCE_STATE, PREFETCHED_ONCE_STATE)){
                 subscription.request(prefetch);
             }
 

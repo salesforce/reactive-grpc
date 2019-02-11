@@ -139,39 +139,7 @@ public final class ServerCalls {
             final RxSubscriberAndServerProducer<TResponse> subscriber = new RxSubscriberAndServerProducer<TResponse>();
             subscriber.subscribe((ServerCallStreamObserver<TResponse>) responseObserver);
             // Don't try to respond if the server has already canceled the request
-            rxResponse.subscribe(
-                    new Consumer<TResponse>() {
-                        @Override
-                        public void accept(TResponse tResponse) {
-                            if (!streamObserverPublisher.isCancelled()) {
-                                subscriber.onNext(tResponse);
-                            }
-                        }
-                    },
-                    new Consumer<Throwable>() {
-                        @Override
-                        public void accept(Throwable throwable) {
-                            if (!streamObserverPublisher.isCancelled()) {
-                                streamObserverPublisher.abortPendingCancel();
-                                subscriber.onError(throwable);
-                            }
-                        }
-                    },
-                    new Action() {
-                        @Override
-                        public void run() {
-                            if (!streamObserverPublisher.isCancelled()) {
-                                subscriber.onComplete();
-                            }
-                        }
-                    },
-                    new Consumer<Subscription>() {
-                        @Override
-                        public void accept(Subscription subscription) {
-                            subscriber.onSubscribe(subscription);
-                        }
-                    }
-            );
+            rxResponse.subscribe(subscriber);
         } catch (Throwable throwable) {
             responseObserver.onError(prepareError(throwable));
         }
