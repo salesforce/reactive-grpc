@@ -5,43 +5,41 @@
  *  For full license text, see LICENSE.txt file in the repo root  or https://opensource.org/licenses/BSD-3-Clause
  */
 
-package com.salesforce.rxgrpc.tck;
+package com.salesforce.reactorgrpc.tck;
 
-import io.reactivex.Flowable;
-import io.reactivex.Single;
+import reactor.core.publisher.Flux;
+import reactor.core.publisher.Mono;
 
-public class FussedTckService extends RxTckGrpc.TckImplBase {
+public class FusedTckService extends ReactorTckGrpc.TckImplBase {
     public static final int KABOOM = -1;
 
     @Override
-    public Single<Message> oneToOne(Single<Message> request) {
+    public Mono<Message> oneToOne(Mono<Message> request) {
         return request.map(this::maybeExplode);
     }
 
     @Override
-    public Flowable<Message> oneToMany(Single<Message> request) {
+    public Flux<Message> oneToMany(Mono<Message> request) {
         return request
                 .map(this::maybeExplode)
-                .toFlowable()
                 // send back no more than 10 responses
-                .flatMap(message -> Flowable.range(1, Math.min(message.getNumber(), 10))
-                        ,false, 1, 1)
+                .flatMapMany(message -> Flux.range(0, Math.min(message.getNumber(), 10)))
                 .map(this::toMessage);
     }
 
     @Override
-    public Single<Message> manyToOne(Flowable<Message> request) {
+    public Mono<Message> manyToOne(Flux<Message> request) {
         return request.map(this::maybeExplode).last(Message.newBuilder().setNumber(0).build());
     }
 
     @Override
-    public Flowable<Message> manyToMany(Flowable<Message> request) {
+    public Flux<Message> manyToMany(Flux<Message> request) {
         return request.map(this::maybeExplode);
     }
 
-    private Message maybeExplode(Message req) throws Exception {
+    private Message maybeExplode(Message req) {
         if (req.getNumber() < 0) {
-            throw new Exception("Kaboom!");
+            throw new RuntimeException("Kaboom!");
         } else {
             return req;
         }

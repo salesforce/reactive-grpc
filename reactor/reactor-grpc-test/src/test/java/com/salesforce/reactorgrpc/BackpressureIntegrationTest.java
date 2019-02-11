@@ -14,57 +14,49 @@ import io.grpc.testing.GrpcServerRule;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.junit.runners.Parameterized;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
 
 import java.time.Duration;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.stream.IntStream;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
 @SuppressWarnings("Duplicates")
+@RunWith(Parameterized.class)
 public class BackpressureIntegrationTest {
+    private static final int NUMBER_OF_STREAM_ELEMENTS = 270;
+
+
+
+    @Parameterized.Parameters
+    public static Collection<Object[]> data() {
+        return Arrays.asList(new Object[][] {
+                { new TestService(), false },
+                { new FusedTestService(), true }
+        });
+    }
+
     @Rule
     public GrpcServerRule serverRule = new GrpcServerRule();
 
-    private static final int NUMBER_OF_STREAM_ELEMENTS = 270;
 
     private static AtomicLong lastValueTime;
     private static AtomicLong numberOfWaits;
 
-    private static class TestService extends ReactorNumbersGrpc.NumbersImplBase {
-        @Override
-        public Mono<NumberProto.Number> requestPressure(Flux<NumberProto.Number> request) {
-            return request
-                    .map(proto -> proto.getNumber(0))
-                    .doOnNext(i -> System.out.println("    --> " + i))
-                    .doOnNext(i -> waitIfValuesAreEqual(i, 3))
-                    .last(-1)
-                    .map(BackpressureIntegrationTest::protoNum);
-        }
+    private final ReactorNumbersGrpc.NumbersImplBase service;
+    private final boolean expectFusion;
 
-        @Override
-        public Flux<NumberProto.Number> responsePressure(Mono<Empty> request) {
-            return Flux
-                    .fromIterable(IntStream.range(0, NUMBER_OF_STREAM_ELEMENTS)::iterator)
-                    .doOnNext(i -> System.out.println("   <-- " + i))
-                    .doOnNext(i -> updateNumberOfWaits(lastValueTime, numberOfWaits))
-                    .map(BackpressureIntegrationTest::protoNum);
-        }
 
-        @Override
-        public Flux<NumberProto.Number> twoWayRequestPressure(Flux<NumberProto.Number> request) {
-            return requestPressure(request).flux();
-        }
-
-        @Override
-        public Flux<NumberProto.Number> twoWayResponsePressure(Flux<NumberProto.Number> request) {
-            request.subscribe();
-            return responsePressure(null);
-        }
+    public BackpressureIntegrationTest(ReactorNumbersGrpc.NumbersImplBase service, boolean expectFusion) {
+        this.service = service;
+        this.expectFusion = expectFusion;
     }
 
     @Before
@@ -75,7 +67,7 @@ public class BackpressureIntegrationTest {
 
     @Test
     public void clientToServerBackpressure() {
-        serverRule.getServiceRegistry().addService(new TestService());
+        serverRule.getServiceRegistry().addService(service);
 
         ReactorNumbersGrpc.ReactorNumbersStub stub = ReactorNumbersGrpc.newReactorStub(serverRule.getChannel());
 
@@ -87,17 +79,23 @@ public class BackpressureIntegrationTest {
 
         Mono<NumberProto.Number> reactorResponse = reactorRequest.as(stub::requestPressure);
 
-        StepVerifier.create(reactorResponse)
-                .expectNextMatches(v -> v.getNumber(0) == NUMBER_OF_STREAM_ELEMENTS - 1)
-                .expectComplete()
-                .verify(Duration.ofSeconds(5));
+        StepVerifier.Step<NumberProto.Number> stepVerifier = StepVerifier.create(reactorResponse);
+
+        if (expectFusion) {
+            stepVerifier = ((StepVerifier.FirstStep<NumberProto.Number>) stepVerifier).expectFusion();
+        }
+
+        stepVerifier
+                    .expectNextMatches(v -> v.getNumber(0) == NUMBER_OF_STREAM_ELEMENTS - 1)
+                    .expectComplete()
+                    .verify(Duration.ofSeconds(5));
 
         assertThat(numberOfWaits.get()).isEqualTo(1);
     }
 
     @Test
     public void serverToClientBackpressure() {
-        serverRule.getServiceRegistry().addService(new TestService());
+        serverRule.getServiceRegistry().addService(service);
 
         ReactorNumbersGrpc.ReactorNumbersStub stub = ReactorNumbersGrpc.newReactorStub(serverRule.getChannel());
 
@@ -107,7 +105,9 @@ public class BackpressureIntegrationTest {
                 .doOnNext(n -> System.out.println(n.getNumber(0) + "  <--"))
                 .doOnNext(n -> waitIfValuesAreEqual(n.getNumber(0), 3));
 
-        StepVerifier.create(reactorResponse)
+
+        StepVerifier
+                .create(reactorResponse)
                 .expectNextCount(NUMBER_OF_STREAM_ELEMENTS)
                 .expectComplete()
                 .verify(Duration.ofSeconds(5));
@@ -117,17 +117,23 @@ public class BackpressureIntegrationTest {
 
     @Test
     public void bidiResponseBackpressure() {
-        serverRule.getServiceRegistry().addService(new TestService());
+        serverRule.getServiceRegistry().addService(service);
 
         ReactorNumbersGrpc.ReactorNumbersStub stub = ReactorNumbersGrpc.newReactorStub(serverRule.getChannel());
 
         Flux<NumberProto.Number> reactorRequest = Flux.empty();
 
-        Flux<NumberProto.Number> reactorResponse = reactorRequest.compose(stub::twoWayResponsePressure)
+        Flux<NumberProto.Number> reactorResponse = reactorRequest.transform(stub::twoWayResponsePressure)
                 .doOnNext(n -> System.out.println(n.getNumber(0) + "  <--"))
                 .doOnNext(n -> waitIfValuesAreEqual(n.getNumber(0), 3));
 
-        StepVerifier.create(reactorResponse)
+        StepVerifier.Step<NumberProto.Number> stepVerifier = StepVerifier.create(reactorResponse);
+
+        if (expectFusion) {
+            stepVerifier = ((StepVerifier.FirstStep<NumberProto.Number>) stepVerifier).expectFusion();
+        }
+
+        stepVerifier
                 .expectNextCount(NUMBER_OF_STREAM_ELEMENTS)
                 .expectComplete()
                 .verify(Duration.ofSeconds(5));
@@ -137,7 +143,7 @@ public class BackpressureIntegrationTest {
 
     @Test
     public void bidiRequestBackpressure() {
-        serverRule.getServiceRegistry().addService(new TestService());
+        serverRule.getServiceRegistry().addService(service);
 
         ReactorNumbersGrpc.ReactorNumbersStub stub = ReactorNumbersGrpc.newReactorStub(serverRule.getChannel());
 
@@ -147,9 +153,15 @@ public class BackpressureIntegrationTest {
                 .doOnNext(i -> updateNumberOfWaits(lastValueTime, numberOfWaits))
                 .map(BackpressureIntegrationTest::protoNum);
 
-        Flux<NumberProto.Number> reactorResponse = reactorRequest.compose(stub::twoWayRequestPressure);
+        Flux<NumberProto.Number> reactorResponse = reactorRequest.transform(stub::twoWayRequestPressure);
 
-        StepVerifier.create(reactorResponse)
+        StepVerifier.Step<NumberProto.Number> stepVerifier = StepVerifier.create(reactorResponse);
+
+        if (expectFusion) {
+            stepVerifier = ((StepVerifier.FirstStep<NumberProto.Number>) stepVerifier).expectFusion();
+        }
+
+        stepVerifier
                 .expectNextMatches(v -> v.getNumber(0) == NUMBER_OF_STREAM_ELEMENTS - 1)
                 .expectComplete()
                 .verify(Duration.ofSeconds(5));
@@ -181,5 +193,75 @@ public class BackpressureIntegrationTest {
         Arrays.setAll(ints, operand -> i);
 
         return NumberProto.Number.newBuilder().addAllNumber(Arrays.asList(ints)).build();
+    }
+
+
+    private static class TestService extends ReactorNumbersGrpc.NumbersImplBase {
+        @Override
+        public Mono<NumberProto.Number> requestPressure(Flux<NumberProto.Number> request) {
+            return request
+                    .hide()
+                    .map(proto -> proto.getNumber(0))
+                    .doOnNext(i -> System.out.println("    --> " + i))
+                    .doOnNext(i -> waitIfValuesAreEqual(i, 3))
+                    .last(-1)
+                    .map(BackpressureIntegrationTest::protoNum)
+                    .hide();
+        }
+
+        @Override
+        public Flux<NumberProto.Number> responsePressure(Mono<Empty> request) {
+            return Flux
+                    .fromIterable(IntStream.range(0, NUMBER_OF_STREAM_ELEMENTS)::iterator)
+                    .doOnNext(i -> System.out.println("   <-- " + i))
+                    .doOnNext(i -> updateNumberOfWaits(lastValueTime, numberOfWaits))
+                    .map(BackpressureIntegrationTest::protoNum)
+                    .hide();
+        }
+
+        @Override
+        public Flux<NumberProto.Number> twoWayRequestPressure(Flux<NumberProto.Number> request) {
+            return requestPressure(request).flux();
+        }
+
+        @Override
+        public Flux<NumberProto.Number> twoWayResponsePressure(Flux<NumberProto.Number> request) {
+            return Flux.merge(
+                    request.then(Mono.empty()),
+                    responsePressure(null)
+            );
+        }
+    }
+
+    private static class FusedTestService extends ReactorNumbersGrpc.NumbersImplBase {
+        @Override
+        public Mono<NumberProto.Number> requestPressure(Flux<NumberProto.Number> request) {
+            return request
+                    .map(proto -> proto.getNumber(0))
+                    .doOnNext(i -> System.out.println("    --> " + i))
+                    .doOnNext(i -> waitIfValuesAreEqual(i, 3))
+                    .last(-1)
+                    .map(BackpressureIntegrationTest::protoNum);
+        }
+
+        @Override
+        public Flux<NumberProto.Number> responsePressure(Mono<Empty> request) {
+            return Flux
+                    .fromIterable(IntStream.range(0, NUMBER_OF_STREAM_ELEMENTS)::iterator)
+                    .doOnNext(i -> System.out.println("   <-- " + i))
+                    .doOnNext(i -> updateNumberOfWaits(lastValueTime, numberOfWaits))
+                    .map(BackpressureIntegrationTest::protoNum);
+        }
+
+        @Override
+        public Flux<NumberProto.Number> twoWayRequestPressure(Flux<NumberProto.Number> request) {
+            return requestPressure(request).flux();
+        }
+
+        @Override
+        public Flux<NumberProto.Number> twoWayResponsePressure(Flux<NumberProto.Number> request) {
+            request.subscribe();
+            return responsePressure(null);
+        }
     }
 }

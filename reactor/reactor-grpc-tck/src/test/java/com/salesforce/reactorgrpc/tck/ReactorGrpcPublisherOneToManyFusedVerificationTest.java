@@ -25,11 +25,12 @@ import reactor.core.publisher.Mono;
  */
 @SuppressWarnings("Duplicates")
 @Test(timeOut = 3000)
-public class ReactorGrpcPublisherOneToManyVerificationTest extends PublisherVerification<Message> {
+public class ReactorGrpcPublisherOneToManyFusedVerificationTest
+        extends PublisherVerification<Message> {
     public static final long DEFAULT_TIMEOUT_MILLIS = 500L;
     public static final long PUBLISHER_REFERENCE_CLEANUP_TIMEOUT_MILLIS = 1000L;
 
-    public ReactorGrpcPublisherOneToManyVerificationTest() {
+    public ReactorGrpcPublisherOneToManyFusedVerificationTest() {
         super(new TestEnvironment(DEFAULT_TIMEOUT_MILLIS, DEFAULT_TIMEOUT_MILLIS), PUBLISHER_REFERENCE_CLEANUP_TIMEOUT_MILLIS);
     }
 
@@ -39,7 +40,7 @@ public class ReactorGrpcPublisherOneToManyVerificationTest extends PublisherVeri
     @BeforeClass
     public static void setup() throws Exception {
         System.out.println("ReactorGrpcPublisherOneToManyVerificationTest");
-        server = InProcessServerBuilder.forName("ReactorGrpcPublisherOneToManyVerificationTest").addService(new TckService()).build().start();
+        server = InProcessServerBuilder.forName("ReactorGrpcPublisherOneToManyVerificationTest").addService(new FusedTckService()).build().start();
         channel = InProcessChannelBuilder.forName("ReactorGrpcPublisherOneToManyVerificationTest").usePlaintext().build();
     }
 
@@ -56,7 +57,7 @@ public class ReactorGrpcPublisherOneToManyVerificationTest extends PublisherVeri
     public Publisher<Message> createPublisher(long elements) {
         ReactorTckGrpc.ReactorTckStub stub = ReactorTckGrpc.newReactorStub(channel);
         Mono<Message> request = Mono.just(toMessage((int) elements));
-        Publisher<Message> publisher = stub.oneToMany(request.hide()).hide();
+        Publisher<Message> publisher = stub.oneToMany(request);
 
         return publisher;
     }
@@ -65,7 +66,7 @@ public class ReactorGrpcPublisherOneToManyVerificationTest extends PublisherVeri
     public Publisher<Message> createFailedPublisher() {
         ReactorTckGrpc.ReactorTckStub stub = ReactorTckGrpc.newReactorStub(channel);
         Mono<Message> request = Mono.just(toMessage(TckService.KABOOM));
-        Publisher<Message> publisher = stub.oneToMany(request.hide()).hide();
+        Publisher<Message> publisher = stub.oneToMany(request);
 
         return publisher;
     }

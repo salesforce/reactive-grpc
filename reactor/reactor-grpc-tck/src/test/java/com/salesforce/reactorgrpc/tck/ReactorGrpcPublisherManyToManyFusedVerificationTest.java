@@ -17,7 +17,7 @@ import org.reactivestreams.tck.TestEnvironment;
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
-import reactor.core.publisher.Mono;
+import reactor.core.publisher.Flux;
 
 /**
  * Publisher tests from the Reactive Streams Technology Compatibility Kit.
@@ -25,11 +25,12 @@ import reactor.core.publisher.Mono;
  */
 @SuppressWarnings("Duplicates")
 @Test(timeOut = 3000)
-public class ReactorGrpcPublisherOneToManyVerificationTest extends PublisherVerification<Message> {
+public class ReactorGrpcPublisherManyToManyFusedVerificationTest
+        extends PublisherVerification<Message> {
     public static final long DEFAULT_TIMEOUT_MILLIS = 500L;
     public static final long PUBLISHER_REFERENCE_CLEANUP_TIMEOUT_MILLIS = 1000L;
 
-    public ReactorGrpcPublisherOneToManyVerificationTest() {
+    public ReactorGrpcPublisherManyToManyFusedVerificationTest() {
         super(new TestEnvironment(DEFAULT_TIMEOUT_MILLIS, DEFAULT_TIMEOUT_MILLIS), PUBLISHER_REFERENCE_CLEANUP_TIMEOUT_MILLIS);
     }
 
@@ -38,9 +39,9 @@ public class ReactorGrpcPublisherOneToManyVerificationTest extends PublisherVeri
 
     @BeforeClass
     public static void setup() throws Exception {
-        System.out.println("ReactorGrpcPublisherOneToManyVerificationTest");
-        server = InProcessServerBuilder.forName("ReactorGrpcPublisherOneToManyVerificationTest").addService(new TckService()).build().start();
-        channel = InProcessChannelBuilder.forName("ReactorGrpcPublisherOneToManyVerificationTest").usePlaintext().build();
+        System.out.println("ReactorGrpcPublisherManyToManyVerificationTest");
+        server = InProcessServerBuilder.forName("ReactorGrpcPublisherManyToManyVerificationTest").addService(new FusedTckService()).build().start();
+        channel = InProcessChannelBuilder.forName("ReactorGrpcPublisherManyToManyVerificationTest").usePlaintext().build();
     }
 
     @AfterClass
@@ -55,8 +56,8 @@ public class ReactorGrpcPublisherOneToManyVerificationTest extends PublisherVeri
     @Override
     public Publisher<Message> createPublisher(long elements) {
         ReactorTckGrpc.ReactorTckStub stub = ReactorTckGrpc.newReactorStub(channel);
-        Mono<Message> request = Mono.just(toMessage((int) elements));
-        Publisher<Message> publisher = stub.oneToMany(request.hide()).hide();
+        Flux<Message> request = Flux.range(0, (int)elements).map(this::toMessage);
+        Publisher<Message> publisher = stub.manyToMany(request);
 
         return publisher;
     }
@@ -64,8 +65,8 @@ public class ReactorGrpcPublisherOneToManyVerificationTest extends PublisherVeri
     @Override
     public Publisher<Message> createFailedPublisher() {
         ReactorTckGrpc.ReactorTckStub stub = ReactorTckGrpc.newReactorStub(channel);
-        Mono<Message> request = Mono.just(toMessage(TckService.KABOOM));
-        Publisher<Message> publisher = stub.oneToMany(request.hide()).hide();
+        Flux<Message> request = Flux.just(toMessage(TckService.KABOOM));
+        Publisher<Message> publisher = stub.manyToMany(request);
 
         return publisher;
     }

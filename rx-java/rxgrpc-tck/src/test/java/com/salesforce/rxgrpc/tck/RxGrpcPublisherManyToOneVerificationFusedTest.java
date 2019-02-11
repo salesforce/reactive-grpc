@@ -40,7 +40,7 @@ public class RxGrpcPublisherManyToOneVerificationFusedTest extends PublisherVeri
     @BeforeClass
     public static void setup() throws Exception {
         System.out.println("RxGrpcPublisherManyToOneVerificationTest");
-        server = InProcessServerBuilder.forName("RxGrpcPublisherManyToOneVerificationTest").addService(new FussedTckService()).build().start();
+        server = InProcessServerBuilder.forName("RxGrpcPublisherManyToOneVerificationTest").addService(new FusedTckService()).build().start();
         channel = InProcessChannelBuilder.forName("RxGrpcPublisherManyToOneVerificationTest").usePlaintext().build();
     }
 
