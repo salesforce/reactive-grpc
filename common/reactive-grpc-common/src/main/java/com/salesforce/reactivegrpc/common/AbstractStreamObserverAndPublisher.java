@@ -78,17 +78,17 @@ public abstract class AbstractStreamObserverAndPublisher<T>
 
     volatile int state;
     @SuppressWarnings("rawtypes")
-    protected static final AtomicIntegerFieldUpdater<AbstractStreamObserverAndPublisher> STATE =
+    static final AtomicIntegerFieldUpdater<AbstractStreamObserverAndPublisher> STATE =
             AtomicIntegerFieldUpdater.newUpdater(AbstractStreamObserverAndPublisher.class, "state");
 
     volatile int wip;
     @SuppressWarnings("rawtypes")
-    protected static final AtomicIntegerFieldUpdater<AbstractStreamObserverAndPublisher> WIP =
+    static final AtomicIntegerFieldUpdater<AbstractStreamObserverAndPublisher> WIP =
             AtomicIntegerFieldUpdater.newUpdater(AbstractStreamObserverAndPublisher.class, "wip");
 
     volatile long requested;
     @SuppressWarnings("rawtypes")
-    protected static final AtomicLongFieldUpdater<AbstractStreamObserverAndPublisher> REQUESTED =
+    static final AtomicLongFieldUpdater<AbstractStreamObserverAndPublisher> REQUESTED =
             AtomicLongFieldUpdater.newUpdater(AbstractStreamObserverAndPublisher.class, "requested");
 
     int produced;
@@ -213,8 +213,6 @@ public abstract class AbstractStreamObserverAndPublisher<T>
             a.onNext(null);
 
             if (d) {
-                doTerminate();
-
                 downstream = null;
 
                 Throwable ex = error;
@@ -223,7 +221,6 @@ public abstract class AbstractStreamObserverAndPublisher<T>
                 } else {
                     a.onComplete();
                 }
-
                 return;
             }
 
@@ -267,8 +264,6 @@ public abstract class AbstractStreamObserverAndPublisher<T>
             return true;
         }
         if (d && empty) {
-            doTerminate();
-
             Throwable e = error;
             downstream = null;
             if (e != null) {
@@ -276,7 +271,6 @@ public abstract class AbstractStreamObserverAndPublisher<T>
             } else {
                 a.onComplete();
             }
-
             return true;
         }
 
@@ -307,6 +301,8 @@ public abstract class AbstractStreamObserverAndPublisher<T>
         error = t;
         done = true;
 
+        doTerminate();
+
         drain();
     }
 
@@ -317,6 +313,8 @@ public abstract class AbstractStreamObserverAndPublisher<T>
         }
 
         done = true;
+
+        doTerminate();
 
         drain();
     }

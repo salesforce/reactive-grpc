@@ -21,21 +21,21 @@ public class RxServerStreamObserverAndPublisher<T>
     public RxServerStreamObserverAndPublisher(
             ServerCallStreamObserver<?> serverCallStreamObserver,
             Consumer<CallStreamObserver<?>> onSubscribe) {
-        super(serverCallStreamObserver, Queues.<T>get(DEFAULT_CHUNK_SIZE).get(), onSubscribe);
+        super(serverCallStreamObserver, Queues.<T>get(DEFAULT_CHUNK_SIZE), onSubscribe);
     }
 
     public RxServerStreamObserverAndPublisher(
             ServerCallStreamObserver<?> serverCallStreamObserver,
             Consumer<CallStreamObserver<?>> onSubscribe,
             Runnable onTerminate) {
-        super(serverCallStreamObserver, Queues.<T>get(DEFAULT_CHUNK_SIZE).get(), onSubscribe, onTerminate);
+        super(serverCallStreamObserver, Queues.<T>get(DEFAULT_CHUNK_SIZE), onSubscribe, onTerminate);
     }
 
     public RxServerStreamObserverAndPublisher(
             ServerCallStreamObserver<?> serverCallStreamObserver,
             int prefetch,
             Consumer<CallStreamObserver<?>> onSubscribe) {
-        super(serverCallStreamObserver, Queues.<T>get(prefetch).get(), prefetch, onSubscribe);
+        super(serverCallStreamObserver, Queues.<T>get(prefetch), prefetch, onSubscribe);
     }
 
     public RxServerStreamObserverAndPublisher(
@@ -43,7 +43,7 @@ public class RxServerStreamObserverAndPublisher<T>
             int prefetch,
             Consumer<CallStreamObserver<?>> onSubscribe,
             Runnable onTerminate) {
-        super(serverCallStreamObserver, Queues.<T>get(prefetch).get(), prefetch, onSubscribe, onTerminate);
+        super(serverCallStreamObserver, Queues.<T>get(prefetch), prefetch, onSubscribe, onTerminate);
     }
 
     @Override

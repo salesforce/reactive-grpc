@@ -7,6 +7,12 @@
 
 package com.salesforce.reactorgrpc;
 
+import java.time.Duration;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.concurrent.atomic.AtomicLong;
+import java.util.stream.IntStream;
+
 import com.google.protobuf.Empty;
 import com.salesforce.servicelibs.NumberProto;
 import com.salesforce.servicelibs.ReactorNumbersGrpc;
@@ -20,19 +26,12 @@ import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
 
-import java.time.Duration;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.concurrent.atomic.AtomicLong;
-import java.util.stream.IntStream;
-
 import static org.assertj.core.api.Assertions.assertThat;
 
 @SuppressWarnings("Duplicates")
 @RunWith(Parameterized.class)
 public class BackpressureIntegrationTest {
     private static final int NUMBER_OF_STREAM_ELEMENTS = 270;
-
 
 
     @Parameterized.Parameters
@@ -77,6 +76,10 @@ public class BackpressureIntegrationTest {
                 .doOnNext(i -> updateNumberOfWaits(lastValueTime, numberOfWaits))
                 .map(BackpressureIntegrationTest::protoNum);
 
+        if (!expectFusion) {
+            reactorRequest = reactorRequest.hide();
+        }
+
         Mono<NumberProto.Number> reactorResponse = reactorRequest.as(stub::requestPressure);
 
         StepVerifier.Step<NumberProto.Number> stepVerifier = StepVerifier.create(reactorResponse);
@@ -101,6 +104,10 @@ public class BackpressureIntegrationTest {
 
         Mono<Empty> reactorRequest = Mono.just(Empty.getDefaultInstance());
 
+        if (!expectFusion) {
+            reactorRequest = reactorRequest.hide();
+        }
+
         Flux<NumberProto.Number> reactorResponse = reactorRequest.as(stub::responsePressure)
                 .doOnNext(n -> System.out.println(n.getNumber(0) + "  <--"))
                 .doOnNext(n -> waitIfValuesAreEqual(n.getNumber(0), 3));
@@ -122,6 +129,10 @@ public class BackpressureIntegrationTest {
         ReactorNumbersGrpc.ReactorNumbersStub stub = ReactorNumbersGrpc.newReactorStub(serverRule.getChannel());
 
         Flux<NumberProto.Number> reactorRequest = Flux.empty();
+
+        if (!expectFusion) {
+            reactorRequest = reactorRequest.hide();
+        }
 
         Flux<NumberProto.Number> reactorResponse = reactorRequest.transform(stub::twoWayResponsePressure)
                 .doOnNext(n -> System.out.println(n.getNumber(0) + "  <--"))
@@ -152,6 +163,10 @@ public class BackpressureIntegrationTest {
                 .doOnNext(i -> System.out.println(i + " --> "))
                 .doOnNext(i -> updateNumberOfWaits(lastValueTime, numberOfWaits))
                 .map(BackpressureIntegrationTest::protoNum);
+
+        if (!expectFusion) {
+            reactorRequest = reactorRequest.hide();
+        }
 
         Flux<NumberProto.Number> reactorResponse = reactorRequest.transform(stub::twoWayRequestPressure);
 

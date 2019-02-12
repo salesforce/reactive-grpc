@@ -18,26 +18,26 @@ public class RxClientStreamObserverAndPublisher<T>
         implements QueueSubscription<T> {
 
     public RxClientStreamObserverAndPublisher(Consumer<CallStreamObserver<?>> onSubscribe) {
-        super(Queues.<T>get(DEFAULT_CHUNK_SIZE).get(), onSubscribe);
+        super(Queues.<T>get(DEFAULT_CHUNK_SIZE), onSubscribe);
     }
 
     public RxClientStreamObserverAndPublisher(
             Consumer<CallStreamObserver<?>> onSubscribe,
             Runnable onTerminate) {
-        super(Queues.<T>get(DEFAULT_CHUNK_SIZE).get(), onSubscribe, onTerminate);
+        super(Queues.<T>get(DEFAULT_CHUNK_SIZE), onSubscribe, onTerminate);
     }
 
     public RxClientStreamObserverAndPublisher(
             int prefetch,
             Consumer<CallStreamObserver<?>> onSubscribe) {
-        super(Queues.<T>get(prefetch).get(), prefetch, onSubscribe);
+        super(Queues.<T>get(prefetch), prefetch, onSubscribe);
     }
 
     public RxClientStreamObserverAndPublisher(
             int prefetch,
             Consumer<CallStreamObserver<?>> onSubscribe,
             Runnable onTerminate) {
-        super(Queues.<T>get(prefetch).get(), prefetch, onSubscribe, onTerminate);
+        super(Queues.<T>get(prefetch), prefetch, onSubscribe, onTerminate);
     }
 
     @Override
