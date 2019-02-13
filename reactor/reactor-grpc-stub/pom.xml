@@ -39,7 +39,7 @@
         <dependency>
             <groupId>io.projectreactor.addons</groupId>
             <artifactId>reactor-extra</artifactId>
-            <version>${reactor.version}</version>
+            <version>${reactor.extra.version}</version>
             <scope>test</scope>
         </dependency>
         <dependency>
