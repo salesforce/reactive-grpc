@@ -15,6 +15,7 @@ import java.util.concurrent.atomic.AtomicLongFieldUpdater;
 import java.util.concurrent.atomic.AtomicReferenceFieldUpdater;
 import java.util.concurrent.locks.LockSupport;
 
+import com.google.common.math.LongMath;
 import io.grpc.stub.CallStreamObserver;
 import io.grpc.stub.StreamObserver;
 import org.reactivestreams.Publisher;
@@ -319,6 +320,18 @@ public abstract class AbstractStreamObserverAndPublisher<T>
         drain();
     }
 
+    private static final Subscription EMPTY_SUBSCRIPTION = new Subscription() {
+        @Override
+        public void cancel() {
+            // deliberately no op
+        }
+
+        @Override
+        public void request(long n) {
+            // deliberately no op
+        }
+    };
+
     @Override
     public void subscribe(Subscriber<? super T> actual) {
         if (state == UNSUBSCRIBED_STATE && STATE.compareAndSet(this, UNSUBSCRIBED_STATE, SUBSCRIBED_ONCE_STATE)) {
@@ -331,7 +344,7 @@ public abstract class AbstractStreamObserverAndPublisher<T>
                 drain();
             }
         } else {
-            actual.onSubscribe(Operators.EmptySubscription.INSTANCE);
+            actual.onSubscribe(EMPTY_SUBSCRIPTION);
             actual.onError(new IllegalStateException(getClass().getSimpleName() + " allows only a single Subscriber"));
         }
     }
@@ -342,15 +355,39 @@ public abstract class AbstractStreamObserverAndPublisher<T>
 
     @Override
     public void request(long n) {
-        if (Operators.validate(n)) {
+        if (n > 0) {
 
-            Operators.addCap(REQUESTED, this, n);
+            addCap(REQUESTED, this, n);
 
             if (state == SUBSCRIBED_ONCE_STATE && STATE.compareAndSet(this, SUBSCRIBED_ONCE_STATE, PREFETCHED_ONCE_STATE)){
                 subscription.request(prefetch);
             }
 
             drain();
+        }
+    }
+
+    /**
+     * Concurrent addition bound to Long.MAX_VALUE.
+     * Any concurrent write will "happen before" this operation.
+     *
+     * @param <T> the parent instance type
+     * @param updater  current field updater
+     * @param instance current instance to update
+     * @param toAdd    delta to add
+     * @return value before addition or Long.MAX_VALUE
+     */
+    private static <T> long addCap(AtomicLongFieldUpdater<T> updater, T instance, long toAdd) {
+        long r, u;
+        for (;;) {
+            r = updater.get(instance);
+            if (r == Long.MAX_VALUE) {
+                return Long.MAX_VALUE;
+            }
+            u = LongMath.saturatedAdd(r, toAdd);
+            if (updater.compareAndSet(instance, r, u)) {
+                return r;
+            }
         }
     }
 
