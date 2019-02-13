@@ -5,6 +5,9 @@
 #  - "[a-z]+/test_.*"  # regexp accepted
 
 coverage:
-  range: 20..80
+  range: 10..80
   round: down
   precision: 2
+
+  status:
+    patch: off
