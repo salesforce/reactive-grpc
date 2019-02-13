@@ -13,6 +13,7 @@ import io.grpc.stub.CallStreamObserver;
 import io.grpc.stub.ServerCallStreamObserver;
 import io.reactivex.internal.fuseable.QueueFuseable;
 import io.reactivex.internal.fuseable.QueueSubscription;
+import io.reactivex.internal.queue.SpscArrayQueue;
 
 public class RxServerStreamObserverAndPublisher<T>
         extends AbstractServerStreamObserverAndPublisher<T>
@@ -21,29 +22,7 @@ public class RxServerStreamObserverAndPublisher<T>
     public RxServerStreamObserverAndPublisher(
             ServerCallStreamObserver<?> serverCallStreamObserver,
             Consumer<CallStreamObserver<?>> onSubscribe) {
-        super(serverCallStreamObserver, Queues.<T>get(DEFAULT_CHUNK_SIZE), onSubscribe);
-    }
-
-    public RxServerStreamObserverAndPublisher(
-            ServerCallStreamObserver<?> serverCallStreamObserver,
-            Consumer<CallStreamObserver<?>> onSubscribe,
-            Runnable onTerminate) {
-        super(serverCallStreamObserver, Queues.<T>get(DEFAULT_CHUNK_SIZE), onSubscribe, onTerminate);
-    }
-
-    public RxServerStreamObserverAndPublisher(
-            ServerCallStreamObserver<?> serverCallStreamObserver,
-            int prefetch,
-            Consumer<CallStreamObserver<?>> onSubscribe) {
-        super(serverCallStreamObserver, Queues.<T>get(prefetch), prefetch, onSubscribe);
-    }
-
-    public RxServerStreamObserverAndPublisher(
-            ServerCallStreamObserver<?> serverCallStreamObserver,
-            int prefetch,
-            Consumer<CallStreamObserver<?>> onSubscribe,
-            Runnable onTerminate) {
-        super(serverCallStreamObserver, Queues.<T>get(prefetch), prefetch, onSubscribe, onTerminate);
+        super(serverCallStreamObserver, new SimpleQueueAdapter<T>(new SpscArrayQueue<T>(DEFAULT_CHUNK_SIZE)), onSubscribe);
     }
 
     @Override

@@ -32,11 +32,11 @@ public class RxSubscriberAndClientProducer<T>
 
             if (m == QueueSubscription.SYNC) {
                 sourceMode = QueueSubscription.SYNC;
-                queue = Queues.toQueue(f);
+                queue = new SimpleQueueAdapter<T>(f);
                 done = true;
             } else if (m == QueueSubscription.ASYNC) {
                 sourceMode = QueueSubscription.ASYNC;
-                queue = Queues.toQueue(f);
+                queue = new SimpleQueueAdapter<T>(f);
             }
         }
     }

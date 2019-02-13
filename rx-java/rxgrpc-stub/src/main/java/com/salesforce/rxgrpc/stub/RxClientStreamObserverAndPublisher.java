@@ -12,32 +12,20 @@ import com.salesforce.reactivegrpc.common.Consumer;
 import io.grpc.stub.CallStreamObserver;
 import io.reactivex.internal.fuseable.QueueFuseable;
 import io.reactivex.internal.fuseable.QueueSubscription;
+import io.reactivex.internal.queue.SpscArrayQueue;
 
 public class RxClientStreamObserverAndPublisher<T>
         extends AbstractClientStreamObserverAndPublisher<T>
         implements QueueSubscription<T> {
 
     public RxClientStreamObserverAndPublisher(Consumer<CallStreamObserver<?>> onSubscribe) {
-        super(Queues.<T>get(DEFAULT_CHUNK_SIZE), onSubscribe);
+        super(new SimpleQueueAdapter<T>(new SpscArrayQueue<T>(DEFAULT_CHUNK_SIZE)), onSubscribe);
     }
 
     public RxClientStreamObserverAndPublisher(
             Consumer<CallStreamObserver<?>> onSubscribe,
             Runnable onTerminate) {
-        super(Queues.<T>get(DEFAULT_CHUNK_SIZE), onSubscribe, onTerminate);
-    }
-
-    public RxClientStreamObserverAndPublisher(
-            int prefetch,
-            Consumer<CallStreamObserver<?>> onSubscribe) {
-        super(Queues.<T>get(prefetch), prefetch, onSubscribe);
-    }
-
-    public RxClientStreamObserverAndPublisher(
-            int prefetch,
-            Consumer<CallStreamObserver<?>> onSubscribe,
-            Runnable onTerminate) {
-        super(Queues.<T>get(prefetch), prefetch, onSubscribe, onTerminate);
+        super(new SimpleQueueAdapter<T>(new SpscArrayQueue<T>(DEFAULT_CHUNK_SIZE)), onSubscribe, onTerminate);
     }
 
     @Override
