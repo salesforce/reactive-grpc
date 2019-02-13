@@ -22,21 +22,18 @@ public class ReactorSubscriberAndServerProducer<T>
         implements CoreSubscriber<T> {
 
     @Override
-    protected void fuse(Subscription s) {
+    protected Subscription fuse(Subscription s) {
         if (s instanceof Fuseable.QueueSubscription) {
             @SuppressWarnings("unchecked")
             Fuseable.QueueSubscription<T> f = (Fuseable.QueueSubscription<T>) s;
 
             int m = f.requestFusion(Fuseable.ANY);
 
-            if (m == Fuseable.SYNC) {
-                sourceMode = Fuseable.SYNC;
-                queue = f;
-                done = true;
-            } else if (m == Fuseable.ASYNC) {
-                sourceMode = Fuseable.ASYNC;
-                queue = f;
+            if (m != Fuseable.NONE) {
+                return new FusionAwareQueueSubscriptionAdapter<T>(f, m);
             }
         }
+
+        return s;
     }
 }

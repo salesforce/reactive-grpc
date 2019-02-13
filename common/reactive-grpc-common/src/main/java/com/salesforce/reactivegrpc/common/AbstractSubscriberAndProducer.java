@@ -45,6 +45,8 @@ import static com.google.common.base.Preconditions.checkNotNull;
  */
 public abstract class AbstractSubscriberAndProducer<T> implements Subscriber<T>, Runnable {
 
+    /** Indicates the fusion has not happened yet. */
+    private static final int NOT_FUSED = -1;
     /** Indicates the QueueSubscription can't support the requested mode. */
     private static final int NONE = 0;
     /** Indicates the QueueSubscription can perform sync-fusion. */
@@ -65,41 +67,34 @@ public abstract class AbstractSubscriberAndProducer<T> implements Subscriber<T>,
      */
     private static final int THREAD_BARRIER = 4;
 
+    private static final Subscription CANCELLED_SUBSCRIPTION = new Subscription() {
+        @Override
+        public void cancel() {
+            // deliberately no op
+        }
 
+        @Override
+        public void request(long n) {
+            // deliberately no op
+        }
+    };
 
+    private Throwable throwable;
+    private boolean   done;
 
-    private static final int UNSUBSCRIBED_STATE = 0;
-    private static final int NOT_FUSED_STATE    = 1;
-    private static final int NOT_READY_STATE    = 2;
-    private static final int READY_STATE        = 3;
-    private static final int CANCELLED_STATE    = 4;
+    private boolean isRequested;
 
-
+    private int sourceMode = NOT_FUSED;
 
     private volatile Subscription subscription;
-    private Throwable throwable;
-
-    protected boolean   done;
-    protected Queue<T> queue;
-    protected int      sourceMode;
-
+    @SuppressWarnings("rawtypes")
+    private static final AtomicReferenceFieldUpdater<AbstractSubscriberAndProducer, Subscription> SUBSCRIPTION =
+        AtomicReferenceFieldUpdater.newUpdater(AbstractSubscriberAndProducer.class, Subscription.class, "subscription");
 
     protected volatile CallStreamObserver<T> downstream;
     @SuppressWarnings("rawtypes")
     private static final AtomicReferenceFieldUpdater<AbstractSubscriberAndProducer, CallStreamObserver> DOWNSTREAM =
         AtomicReferenceFieldUpdater.newUpdater(AbstractSubscriberAndProducer.class, CallStreamObserver.class, "downstream");
-
-
-    // Guard against spurious onReady() calls caused by a race between onNext() and onReady(). If the transport
-    // toggles isReady() from false to true while onNext() is executing, but before onNext() checks isReady(),
-    // request(1) would be called twice - state by onNext() and state by the onReady() scheduled during onNext()'s
-    // execution.
-    // STATE = 0 Was not ready
-    // STATE = 1 Was ready
-    private volatile int state;
-    @SuppressWarnings("rawtypes")
-    private static final AtomicIntegerFieldUpdater<AbstractSubscriberAndProducer> STATE =
-        AtomicIntegerFieldUpdater.newUpdater(AbstractSubscriberAndProducer.class, "state");
 
     private volatile int wip;
     @SuppressWarnings("rawtypes")
@@ -116,51 +111,38 @@ public abstract class AbstractSubscriberAndProducer<T> implements Subscriber<T>,
 
     @Override
     public void run() {
-        if (state == NOT_READY_STATE && STATE.compareAndSet(this, NOT_READY_STATE, READY_STATE)) {
+        Subscription s = this.subscription;
+        if (s != null && s != CANCELLED_SUBSCRIPTION) {
             drain();
         }
     }
 
     public void cancel() {
-        if (!isCanceled() && STATE.getAndSet(this, CANCELLED_STATE) > 1) {
-            subscription.cancel();
-            subscription = null;
+        Subscription s = SUBSCRIPTION.getAndSet(this, CANCELLED_SUBSCRIPTION);
+        if (s != CANCELLED_SUBSCRIPTION) {
+            s.cancel();
 
             if (WIP.getAndIncrement(this) == 0) {
-                if (queue != null) {
-                    queue.clear();
+                if (s instanceof Queue) {
+                    ((Queue) s).clear();
                 }
             }
         }
     }
 
     public boolean isCanceled() {
-        return state == CANCELLED_STATE;
+        return subscription == CANCELLED_SUBSCRIPTION;
     }
 
     @Override
     public void onSubscribe(Subscription subscription) {
         checkNotNull(subscription);
 
-        if (state == 0 && STATE.compareAndSet(this, UNSUBSCRIBED_STATE, NOT_FUSED_STATE)) {
-            this.subscription = subscription;
+        subscription = fuse(subscription);
 
-            fuse(subscription);
+        if (this.subscription == null && SUBSCRIPTION.compareAndSet(this, null, subscription)) {
 
-            if (sourceMode == ASYNC) {
-                subscription.request(1);
-            }
-
-            if (STATE.compareAndSet(this, NOT_FUSED_STATE, NOT_READY_STATE)) {
-                final CallStreamObserver<T> downstream = this.downstream;
-
-                if (downstream != null && downstream.isReady() && STATE.compareAndSet(this, NOT_READY_STATE, READY_STATE)) {
-                    drain();
-                }
-            } else {
-                subscription.cancel();
-                this.subscription = null;
-            }
+            drain();
 
             return;
         }
@@ -182,20 +164,8 @@ public abstract class AbstractSubscriberAndProducer<T> implements Subscriber<T>,
 
             try {
                 stream.onNext(t);
-
-                if (stream.isReady()) {
-                    // keep the pump going
-                    subscription.request(1);
-                } else {
-                    // note that back-pressure has begun
-                    if (STATE.compareAndSet(this, READY_STATE, NOT_READY_STATE)) {
-                        if (stream.isReady() && STATE.compareAndSet(this,
-                                NOT_READY_STATE, READY_STATE)) {
-                            // double check keep the pump going
-                            subscription.request(1);
-                        }
-                    }
-                }
+                isRequested = false;
+                drain();
             } catch (Throwable throwable) {
                 cancel();
                 stream.onError(prepareError(throwable));
@@ -224,48 +194,49 @@ public abstract class AbstractSubscriberAndProducer<T> implements Subscriber<T>,
         }
     }
 
-    protected abstract void fuse(Subscription subscription);
+    protected abstract Subscription fuse(Subscription subscription);
 
     void drain() {
         if (WIP.getAndIncrement(this) != 0) {
             return;
         }
 
+        int mode = sourceMode;
+
         int missed = 1;
         final CallStreamObserver<? super T> a = downstream;
 
+
+        if (mode == NOT_FUSED) {
+            final Subscription s = subscription;
+
+            if (s instanceof FusionModeAwareSubscription) {
+                mode = ((FusionModeAwareSubscription) s).mode();
+
+                if (mode == SYNC) {
+                    done = true;
+                } else {
+                    s.request(1);
+                }
+            } else {
+                mode = NONE;
+            }
+
+            sourceMode = mode;
+        }
+
+
         for (;;) {
             if (a != null) {
-                if (sourceMode == SYNC) {
-                    runSync();
-
-                    return;
-                } else if (sourceMode == ASYNC) {
-                    runAsync();
-
-                    return;
-                } else if (done) {
-                    Throwable t = throwable;
-
-                    if (t != null) {
-                        try {
-                            a.onError(prepareError(t));
-                        } catch (Throwable ignore) {
-                            cancel();
-                        }
-                    } else {
-                        try {
-                            a.onCompleted();
-                        } catch (Throwable throwable) {
-                            cancel();
-                            a.onError(prepareError(throwable));
-                        }
-                    }
-
-                    return;
+                if (mode == SYNC) {
+                    drainSync();
+                } else if (mode == ASYNC) {
+                    drainAsync();
                 } else {
-                    subscription.request(1);
+                    drainRegular();
                 }
+
+                return;
             }
 
             missed = WIP.addAndGet(this, -missed);
@@ -275,13 +246,12 @@ public abstract class AbstractSubscriberAndProducer<T> implements Subscriber<T>,
         }
     }
 
-
-
-    void runSync() {
+    void drainSync() {
         int missed = 1;
 
         final CallStreamObserver<? super T> a = downstream;
-        final Queue<T> q = queue;
+        @SuppressWarnings("unchecked")
+        final Queue<T> q = (Queue<T>) subscription;
 
         for (;;) {
 
@@ -331,14 +301,6 @@ public abstract class AbstractSubscriberAndProducer<T> implements Subscriber<T>,
                 return;
             }
 
-            if (!a.isReady()) {
-                if (STATE.compareAndSet(this, READY_STATE, NOT_READY_STATE)) {
-                    if (a.isReady()) {
-                        STATE.compareAndSet(this, NOT_READY_STATE, READY_STATE);
-                    }
-                }
-            }
-
             int w = wip;
             if (missed == w) {
                 missed = WIP.addAndGet(this, -missed);
@@ -351,12 +313,13 @@ public abstract class AbstractSubscriberAndProducer<T> implements Subscriber<T>,
         }
     }
 
-    void runAsync() {
+    void drainAsync() {
         int missed = 1;
 
         final Subscription s = subscription;
         final CallStreamObserver<? super T> a = downstream;
-        final Queue<T> q = queue;
+        @SuppressWarnings("unchecked")
+        final Queue<T> q = (Queue<T>) subscription;
 
         long sent = 0;
 
@@ -370,7 +333,7 @@ public abstract class AbstractSubscriberAndProducer<T> implements Subscriber<T>,
                     v = q.poll();
                 } catch (Throwable ex) {
                     s.cancel();
-                    queue.clear();
+                    q.clear();
 
                     try {
                         a.onError(prepareError(ex));
@@ -381,7 +344,7 @@ public abstract class AbstractSubscriberAndProducer<T> implements Subscriber<T>,
 
                 boolean empty = v == null;
 
-                if (checkTerminated(d, empty, a)) {
+                if (checkTerminated(d, empty, a, q)) {
                     return;
                 }
 
@@ -394,16 +357,8 @@ public abstract class AbstractSubscriberAndProducer<T> implements Subscriber<T>,
                 sent++;
             }
 
-            if (checkTerminated(done, q.isEmpty(), a)) {
+            if (checkTerminated(done, q.isEmpty(), a, q)) {
                 return;
-            }
-
-            if (!a.isReady()) {
-                if (STATE.compareAndSet(this, READY_STATE, NOT_READY_STATE)) {
-                    if (a.isReady()) {
-                        STATE.compareAndSet(this, NOT_READY_STATE, READY_STATE);
-                    }
-                }
             }
 
             int w = wip;
@@ -422,16 +377,60 @@ public abstract class AbstractSubscriberAndProducer<T> implements Subscriber<T>,
         }
     }
 
-    boolean checkTerminated(boolean d, boolean empty, CallStreamObserver<?> a) {
+    void drainRegular() {
+        int missed = 1;
+        final CallStreamObserver<? super T> a = downstream;
+
+        for (;;) {
+
+            if (done) {
+                Throwable t = throwable;
+
+                if (t != null) {
+                    try {
+                        a.onError(prepareError(t));
+                    } catch (Throwable ignore) {
+                        cancel();
+                    }
+                } else {
+                    try {
+                        a.onCompleted();
+                    } catch (Throwable throwable) {
+                        cancel();
+                        a.onError(prepareError(throwable));
+                    }
+                }
+
+                return;
+            } else {
+                if (a.isReady() && !isRequested) {
+                    isRequested = true;
+                    subscription.request(1);
+                }
+            }
+
+            int w = wip;
+            if (missed == w) {
+                missed = WIP.addAndGet(this, -missed);
+                if (missed == 0) {
+                    break;
+                }
+            } else {
+                missed = w;
+            }
+        }
+    }
+
+    boolean checkTerminated(boolean d, boolean empty, CallStreamObserver<?> a, Queue<T> q) {
         if (isCanceled()) {
-            queue.clear();
+            q.clear();
             return true;
         }
 
         if (d) {
             Throwable t = throwable;
             if (t != null) {
-                queue.clear();
+                q.clear();
                 try {
                     a.onError(prepareError(t));
                 } catch (Throwable ignore) {

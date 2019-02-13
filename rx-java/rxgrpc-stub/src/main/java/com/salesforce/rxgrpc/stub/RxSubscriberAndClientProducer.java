@@ -22,21 +22,18 @@ public class RxSubscriberAndClientProducer<T>
         implements FlowableSubscriber<T> {
 
     @Override
-    protected void fuse(Subscription s) {
+    protected Subscription fuse(Subscription s) {
         if (s instanceof QueueSubscription) {
             @SuppressWarnings("unchecked")
             QueueSubscription<T> f = (QueueSubscription<T>) s;
 
             int m = f.requestFusion(QueueSubscription.ANY);
 
-            if (m == QueueSubscription.SYNC) {
-                sourceMode = QueueSubscription.SYNC;
-                queue = new SimpleQueueAdapter<T>(f);
-                done = true;
-            } else if (m == QueueSubscription.ASYNC) {
-                sourceMode = QueueSubscription.ASYNC;
-                queue = new SimpleQueueAdapter<T>(f);
+            if (m != QueueSubscription.NONE) {
+                return new FusionAwareQueueSubscriptionAdapter<T>(f, m);
             }
         }
+
+        return s;
     }
 }

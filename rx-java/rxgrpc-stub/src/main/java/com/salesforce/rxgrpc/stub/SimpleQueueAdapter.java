@@ -6,8 +6,7 @@
  */
 package com.salesforce.rxgrpc.stub;
 
-import io.reactivex.exceptions.Exceptions;
-import io.reactivex.internal.fuseable.SimpleQueue;
+import io.reactivex.internal.fuseable.SimplePlainQueue;
 
 import java.util.Collection;
 import java.util.Iterator;
@@ -17,21 +16,17 @@ import java.util.Queue;
  * Adapts the RxJava {@code SimpleQueue} interface to a common java {@link Queue}.
  * @param <T>
  */
-final class SimpleQueueAdapter<T> implements Queue<T>, SimpleQueue<T> {
+final class SimpleQueueAdapter<T> implements Queue<T>, SimplePlainQueue<T> {
 
-    private final SimpleQueue<T> simpleQueue;
+    private final SimplePlainQueue<T> simpleQueue;
 
-    SimpleQueueAdapter(SimpleQueue<T> queue) {
+    SimpleQueueAdapter(SimplePlainQueue<T> queue) {
         simpleQueue = queue;
     }
 
     @Override
     public T poll() {
-        try {
-            return simpleQueue.poll();
-        } catch (Exception e) {
-            throw Exceptions.propagate(e);
-        }
+        return simpleQueue.poll();
     }
 
     @Override

@@ -15,7 +15,6 @@ import java.util.concurrent.atomic.AtomicLongFieldUpdater;
 import java.util.concurrent.atomic.AtomicReferenceFieldUpdater;
 import java.util.concurrent.locks.LockSupport;
 
-import com.google.common.math.LongMath;
 import io.grpc.stub.CallStreamObserver;
 import io.grpc.stub.StreamObserver;
 import org.reactivestreams.Publisher;
@@ -47,6 +46,18 @@ public abstract class AbstractStreamObserverAndPublisher<T>
             " purely internal and only guarantees support for poll/clear/size/isEmpty." +
             " Instances shouldn't be used/exposed as Queue outside of RxGrpc operators.";
 
+    private static final Subscription EMPTY_SUBSCRIPTION = new Subscription() {
+        @Override
+        public void cancel() {
+            // deliberately no op
+        }
+
+        @Override
+        public void request(long n) {
+            // deliberately no op
+        }
+    };
+
 
     protected static final int DEFAULT_CHUNK_SIZE = 16;
 
@@ -72,7 +83,9 @@ public abstract class AbstractStreamObserverAndPublisher<T>
     private volatile boolean cancelled;
 
     protected volatile CallStreamObserver<?> subscription;
-
+    @SuppressWarnings("rawtypes")
+    private static final AtomicReferenceFieldUpdater<AbstractStreamObserverAndPublisher, CallStreamObserver> SUBSCRIPTION =
+        AtomicReferenceFieldUpdater.newUpdater(AbstractStreamObserverAndPublisher.class, CallStreamObserver.class, "subscription");
 
     private volatile Runnable onTerminate;
     @SuppressWarnings("rawtypes")
@@ -128,11 +141,15 @@ public abstract class AbstractStreamObserverAndPublisher<T>
     }
 
     protected void onSubscribe(final CallStreamObserver<?> upstream) {
-        upstream.disableAutoInboundFlowControl();
-        subscription = upstream;
-        if (onSubscribe != null) {
-            onSubscribe.accept(upstream);
+        if (subscription == null && SUBSCRIPTION.compareAndSet(this, null, upstream)) {
+            upstream.disableAutoInboundFlowControl();
+            if (onSubscribe != null) {
+                onSubscribe.accept(upstream);
+            }
+            return;
         }
+
+        throw new IllegalStateException(getClass() + " can be subscribed only once");
     }
 
     void doTerminate() {
@@ -321,18 +338,6 @@ public abstract class AbstractStreamObserverAndPublisher<T>
         drain();
     }
 
-    private static final Subscription EMPTY_SUBSCRIPTION = new Subscription() {
-        @Override
-        public void cancel() {
-            // deliberately no op
-        }
-
-        @Override
-        public void request(long n) {
-            // deliberately no op
-        }
-    };
-
     @Override
     public void subscribe(Subscriber<? super T> actual) {
         if (state == UNSUBSCRIBED_STATE && STATE.compareAndSet(this, UNSUBSCRIBED_STATE, SUBSCRIBED_ONCE_STATE)) {
@@ -385,7 +390,12 @@ public abstract class AbstractStreamObserverAndPublisher<T>
             if (r == Long.MAX_VALUE) {
                 return Long.MAX_VALUE;
             }
-            u = LongMath.saturatedAdd(r, toAdd);
+
+            u = r + toAdd;
+            if (u < 0L) {
+                u =  Long.MAX_VALUE;
+            }
+
             if (updater.compareAndSet(instance, r, u)) {
                 return r;
             }
