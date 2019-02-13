@@ -76,17 +76,17 @@ public abstract class AbstractSubscriberAndProducer<T> implements Subscriber<T>,
 
 
 
-    volatile Subscription subscription;
-    Throwable throwable;
+    private volatile Subscription subscription;
+    private Throwable throwable;
 
     protected boolean   done;
     protected Queue<T> queue;
     protected int      sourceMode;
 
 
-    volatile CallStreamObserver<T> downstream;
+    protected volatile CallStreamObserver<T> downstream;
     @SuppressWarnings("rawtypes")
-    static final AtomicReferenceFieldUpdater<AbstractSubscriberAndProducer, CallStreamObserver> DOWNSTREAM =
+    private static final AtomicReferenceFieldUpdater<AbstractSubscriberAndProducer, CallStreamObserver> DOWNSTREAM =
         AtomicReferenceFieldUpdater.newUpdater(AbstractSubscriberAndProducer.class, CallStreamObserver.class, "downstream");
 
 
@@ -96,14 +96,14 @@ public abstract class AbstractSubscriberAndProducer<T> implements Subscriber<T>,
     // execution.
     // STATE = 0 Was not ready
     // STATE = 1 Was ready
-    volatile int state;
+    private volatile int state;
     @SuppressWarnings("rawtypes")
-    static final AtomicIntegerFieldUpdater<AbstractSubscriberAndProducer> STATE =
+    private static final AtomicIntegerFieldUpdater<AbstractSubscriberAndProducer> STATE =
         AtomicIntegerFieldUpdater.newUpdater(AbstractSubscriberAndProducer.class, "state");
 
-    volatile int wip;
+    private volatile int wip;
     @SuppressWarnings("rawtypes")
-    static final AtomicIntegerFieldUpdater<AbstractSubscriberAndProducer> WIP =
+    private static final AtomicIntegerFieldUpdater<AbstractSubscriberAndProducer> WIP =
             AtomicIntegerFieldUpdater.newUpdater(AbstractSubscriberAndProducer.class, "wip");
 
     public void subscribe(final CallStreamObserver<T> downstream) {
@@ -240,36 +240,30 @@ public abstract class AbstractSubscriberAndProducer<T> implements Subscriber<T>,
                     runSync();
 
                     return;
-                }
-                else if (sourceMode == ASYNC) {
+                } else if (sourceMode == ASYNC) {
                     runAsync();
 
                     return;
-                }
-                else if (done) {
+                } else if (done) {
                     Throwable t = throwable;
 
                     if (t != null) {
                         try {
                             a.onError(prepareError(t));
-                        }
-                        catch (Throwable ignore) {
+                        } catch (Throwable ignore) {
                             cancel();
                         }
-                    }
-                    else {
+                    } else {
                         try {
                             a.onCompleted();
-                        }
-                        catch (Throwable throwable) {
+                        } catch (Throwable throwable) {
                             cancel();
                             a.onError(prepareError(throwable));
                         }
                     }
 
                     return;
-                }
-                else {
+                } else {
                     subscription.request(1);
                 }
             }
@@ -296,8 +290,7 @@ public abstract class AbstractSubscriberAndProducer<T> implements Subscriber<T>,
 
                 try {
                     v = q.poll();
-                }
-                catch (Throwable ex) {
+                } catch (Throwable ex) {
                     try {
                         a.onError(prepareError(ex));
                     } catch (Throwable ignore) {
@@ -352,8 +345,7 @@ public abstract class AbstractSubscriberAndProducer<T> implements Subscriber<T>,
                 if (missed == 0) {
                     break;
                 }
-            }
-            else {
+            } else {
                 missed = w;
             }
         }
@@ -376,8 +368,7 @@ public abstract class AbstractSubscriberAndProducer<T> implements Subscriber<T>,
 
                 try {
                     v = q.poll();
-                }
-                catch (Throwable ex) {
+                } catch (Throwable ex) {
                     s.cancel();
                     queue.clear();
 
@@ -425,8 +416,7 @@ public abstract class AbstractSubscriberAndProducer<T> implements Subscriber<T>,
                     break;
                 }
                 sent = 0;
-            }
-            else {
+            } else {
                 missed = w;
             }
         }

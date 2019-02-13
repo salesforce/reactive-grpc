@@ -119,8 +119,8 @@ public final class ClientCalls {
                 fluxSource.subscribeWith(new ReactorSubscriberAndClientProducer<>());
             ReactorClientStreamObserverAndPublisher<TResponse> observerAndPublisher =
                 new ReactorClientStreamObserverAndPublisher<>(
-                        s -> subscriberAndGRPCProducer.subscribe((CallStreamObserver<TRequest>) s),
-                        subscriberAndGRPCProducer::cancel
+                    s -> subscriberAndGRPCProducer.subscribe((CallStreamObserver<TRequest>) s),
+                    subscriberAndGRPCProducer::cancel
                 );
             delegate.apply(observerAndPublisher);
 

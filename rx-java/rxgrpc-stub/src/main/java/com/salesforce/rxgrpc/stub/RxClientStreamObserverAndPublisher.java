@@ -14,6 +14,10 @@ import io.reactivex.internal.fuseable.QueueFuseable;
 import io.reactivex.internal.fuseable.QueueSubscription;
 import io.reactivex.internal.queue.SpscArrayQueue;
 
+/**
+ * TODO: Explain what this class does.
+ * @param <T>
+ */
 public class RxClientStreamObserverAndPublisher<T>
         extends AbstractClientStreamObserverAndPublisher<T>
         implements QueueSubscription<T> {

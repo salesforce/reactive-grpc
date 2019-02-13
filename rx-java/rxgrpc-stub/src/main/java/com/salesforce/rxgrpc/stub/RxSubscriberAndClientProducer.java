@@ -8,13 +8,12 @@
 package com.salesforce.rxgrpc.stub;
 
 import com.salesforce.reactivegrpc.common.AbstractSubscriberAndClientProducer;
-import com.salesforce.reactivegrpc.common.AbstractSubscriberAndProducer;
 import io.reactivex.FlowableSubscriber;
 import io.reactivex.internal.fuseable.QueueSubscription;
 import org.reactivestreams.Subscription;
 
 /**
- * The gRPC client-side implementation of {@link AbstractSubscriberAndProducer}.
+ * The gRPC client-side implementation of {@link com.salesforce.reactivegrpc.common.AbstractSubscriberAndProducer}.
  *
  * @param <T>
  */

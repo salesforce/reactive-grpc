@@ -19,7 +19,7 @@ import java.util.Queue;
  */
 final class SimpleQueueAdapter<T> implements Queue<T>, SimpleQueue<T> {
 
-    final SimpleQueue<T> simpleQueue;
+    private final SimpleQueue<T> simpleQueue;
 
     SimpleQueueAdapter(SimpleQueue<T> queue) {
         simpleQueue = queue;
@@ -29,8 +29,7 @@ final class SimpleQueueAdapter<T> implements Queue<T>, SimpleQueue<T> {
     public T poll() {
         try {
             return simpleQueue.poll();
-        }
-        catch (Exception e) {
+        } catch (Exception e) {
             throw Exceptions.propagate(e);
         }
     }

@@ -7,14 +7,13 @@
 
 package com.salesforce.reactorgrpc.stub;
 
-import com.salesforce.reactivegrpc.common.AbstractSubscriberAndProducer;
 import com.salesforce.reactivegrpc.common.AbstractSubscriberAndServerProducer;
 import org.reactivestreams.Subscription;
 import reactor.core.CoreSubscriber;
 import reactor.core.Fuseable;
 
 /**
- * The gRPC server-side implementation of {@link AbstractSubscriberAndProducer}.
+ * The gRPC server-side implementation of {@link com.salesforce.reactivegrpc.common.AbstractSubscriberAndProducer}.
  *
  * @param <T>
  */

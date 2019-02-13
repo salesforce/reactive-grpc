@@ -43,56 +43,58 @@ import org.reactivestreams.Subscription;
 public abstract class AbstractStreamObserverAndPublisher<T>
         implements Publisher<T>, StreamObserver<T>, Subscription, Queue<T>  {
 
-    static final String NOT_SUPPORTED_MESSAGE = "Although QueueSubscription extends Queue it is purely internal" +
-            " and only guarantees support for poll/clear/size/isEmpty." +
-            " Instances shouldn't be used/exposed as Queue outside of Reactor operators.";
+    static final String NOT_SUPPORTED_MESSAGE = "Although AbstractStreamObserverAndPublisher implements Queue it is" +
+            " purely internal and only guarantees support for poll/clear/size/isEmpty." +
+            " Instances shouldn't be used/exposed as Queue outside of RxGrpc operators.";
 
 
-    public static final int DEFAULT_CHUNK_SIZE = 16;
+    protected static final int DEFAULT_CHUNK_SIZE = 16;
 
-    static final int UNSUBSCRIBED_STATE    = 0;
-    static final int SUBSCRIBED_ONCE_STATE = 1;
-    static final int PREFETCHED_ONCE_STATE = 2;
+    private static final int UNSUBSCRIBED_STATE    = 0;
+    private static final int SUBSCRIBED_ONCE_STATE = 1;
+    private static final int PREFETCHED_ONCE_STATE = 2;
+
+    private static final int SPIN_LOCK_PARK_NANOS = 10;
 
     protected volatile boolean outputFused;
 
-    final Queue<T> queue;
-    final int prefetch;
+    private final Queue<T> queue;
+    private final int prefetch;
 
-    final Consumer<CallStreamObserver<?>> onSubscribe;
-
-
-    volatile boolean done;
-    Throwable error;
-
-    volatile Subscriber<? super T> downstream;
-
-    volatile boolean cancelled;
-
-    volatile CallStreamObserver<?> subscription;
+    private final Consumer<CallStreamObserver<?>> onSubscribe;
 
 
-    volatile Runnable onTerminate;
+    private volatile boolean done;
+    private Throwable error;
+
+    private volatile Subscriber<? super T> downstream;
+
+    private volatile boolean cancelled;
+
+    protected volatile CallStreamObserver<?> subscription;
+
+
+    private volatile Runnable onTerminate;
     @SuppressWarnings("rawtypes")
-    static final AtomicReferenceFieldUpdater<AbstractStreamObserverAndPublisher, Runnable> ON_TERMINATE =
+    private static final AtomicReferenceFieldUpdater<AbstractStreamObserverAndPublisher, Runnable> ON_TERMINATE =
             AtomicReferenceFieldUpdater.newUpdater(AbstractStreamObserverAndPublisher.class, Runnable.class, "onTerminate");
 
-    volatile int state;
+    private volatile int state;
     @SuppressWarnings("rawtypes")
-    static final AtomicIntegerFieldUpdater<AbstractStreamObserverAndPublisher> STATE =
+    private static final AtomicIntegerFieldUpdater<AbstractStreamObserverAndPublisher> STATE =
             AtomicIntegerFieldUpdater.newUpdater(AbstractStreamObserverAndPublisher.class, "state");
 
-    volatile int wip;
+    private volatile int wip;
     @SuppressWarnings("rawtypes")
-    static final AtomicIntegerFieldUpdater<AbstractStreamObserverAndPublisher> WIP =
+    private static final AtomicIntegerFieldUpdater<AbstractStreamObserverAndPublisher> WIP =
             AtomicIntegerFieldUpdater.newUpdater(AbstractStreamObserverAndPublisher.class, "wip");
 
-    volatile long requested;
+    private volatile long requested;
     @SuppressWarnings("rawtypes")
-    static final AtomicLongFieldUpdater<AbstractStreamObserverAndPublisher> REQUESTED =
+    private static final AtomicLongFieldUpdater<AbstractStreamObserverAndPublisher> REQUESTED =
             AtomicLongFieldUpdater.newUpdater(AbstractStreamObserverAndPublisher.class, "requested");
 
-    int produced;
+    private int produced;
 
     public AbstractStreamObserverAndPublisher(
             Queue<T> queue,
@@ -189,8 +191,7 @@ public abstract class AbstractStreamObserverAndPublisher<T>
                 if (missed == 0) {
                     break;
                 }
-            }
-            else {
+            } else {
                 missed = w;
             }
         }
@@ -287,7 +288,7 @@ public abstract class AbstractStreamObserverAndPublisher<T>
         Queue<T> q = this.queue;
 
         while (!q.offer(t)) {
-            LockSupport.parkNanos(10);
+            LockSupport.parkNanos(SPIN_LOCK_PARK_NANOS);
         }
 
         drain();
@@ -359,7 +360,7 @@ public abstract class AbstractStreamObserverAndPublisher<T>
 
             addCap(REQUESTED, this, n);
 
-            if (state == SUBSCRIBED_ONCE_STATE && STATE.compareAndSet(this, SUBSCRIBED_ONCE_STATE, PREFETCHED_ONCE_STATE)){
+            if (state == SUBSCRIBED_ONCE_STATE && STATE.compareAndSet(this, SUBSCRIBED_ONCE_STATE, PREFETCHED_ONCE_STATE)) {
                 subscription.request(prefetch);
             }
 
@@ -419,8 +420,7 @@ public abstract class AbstractStreamObserverAndPublisher<T>
             if (p == prefetch) {
                 produced = 0;
                 subscription.request(p);
-            }
-            else {
+            } else {
                 produced = p;
             }
         }
@@ -448,7 +448,7 @@ public abstract class AbstractStreamObserverAndPublisher<T>
     }
 
     @Override
-    public boolean add( T t) {
+    public boolean add(T t) {
         throw new UnsupportedOperationException(NOT_SUPPORTED_MESSAGE);
     }
 

@@ -14,6 +14,10 @@ import io.grpc.stub.ServerCallStreamObserver;
 import reactor.core.Fuseable;
 import reactor.util.concurrent.Queues;
 
+/**
+ * TODO: Explain what this class does.
+ * @param <T>
+ */
 public class ReactorServerStreamObserverAndPublisher<T>
         extends AbstractServerStreamObserverAndPublisher<T>
         implements Fuseable.QueueSubscription<T>, Fuseable {
@@ -22,28 +26,6 @@ public class ReactorServerStreamObserverAndPublisher<T>
             ServerCallStreamObserver<?> serverCallStreamObserver,
             Consumer<CallStreamObserver<?>> onSubscribe) {
         super(serverCallStreamObserver, Queues.<T>get(DEFAULT_CHUNK_SIZE).get(), onSubscribe);
-    }
-
-    public ReactorServerStreamObserverAndPublisher(
-            ServerCallStreamObserver<?> serverCallStreamObserver,
-            Consumer<CallStreamObserver<?>> onSubscribe,
-            Runnable onTerminate) {
-        super(serverCallStreamObserver, Queues.<T>get(DEFAULT_CHUNK_SIZE).get(), onSubscribe, onTerminate);
-    }
-
-    public ReactorServerStreamObserverAndPublisher(
-            ServerCallStreamObserver<?> serverCallStreamObserver,
-            int prefetch,
-            Consumer<CallStreamObserver<?>> onSubscribe) {
-        super(serverCallStreamObserver, Queues.<T>get(prefetch).get(), prefetch, onSubscribe);
-    }
-
-    public ReactorServerStreamObserverAndPublisher(
-            ServerCallStreamObserver<?> serverCallStreamObserver,
-            int prefetch,
-            Consumer<CallStreamObserver<?>> onSubscribe,
-            Runnable onTerminate) {
-        super(serverCallStreamObserver, Queues.<T>get(prefetch).get(), prefetch, onSubscribe, onTerminate);
     }
 
     @Override

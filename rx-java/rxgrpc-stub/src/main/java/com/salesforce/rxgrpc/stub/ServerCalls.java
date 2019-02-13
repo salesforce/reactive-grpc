@@ -16,10 +16,7 @@ import io.grpc.stub.ServerCallStreamObserver;
 import io.grpc.stub.StreamObserver;
 import io.reactivex.Flowable;
 import io.reactivex.Single;
-import io.reactivex.functions.Action;
 import io.reactivex.functions.Consumer;
-import org.reactivestreams.Subscriber;
-import org.reactivestreams.Subscription;
 
 /**
  * Utility functions for processing different server call idioms. We have one-to-one correspondence

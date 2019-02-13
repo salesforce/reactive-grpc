@@ -88,12 +88,12 @@ public final class ClientCalls {
                     .flatMapPublisher(new io.reactivex.functions.Function<TRequest, Publisher<? extends TResponse>>() {
                         @Override
                         public Publisher<? extends TResponse> apply(TRequest request) {
-                        RxClientStreamObserverAndPublisher<TResponse> consumerStreamObserver =
-                            new RxClientStreamObserverAndPublisher<TResponse>(null);
+                            RxClientStreamObserverAndPublisher<TResponse> consumerStreamObserver =
+                                new RxClientStreamObserverAndPublisher<TResponse>(null);
 
-                        delegate.accept(request, consumerStreamObserver);
+                            delegate.accept(request, consumerStreamObserver);
 
-                        return consumerStreamObserver;
+                            return consumerStreamObserver;
                         }
                     });
         } catch (Throwable throwable) {
@@ -113,21 +113,21 @@ public final class ClientCalls {
             final RxSubscriberAndClientProducer<TRequest> subscriberAndGRPCProducer =
                     flowableSource.subscribeWith(new RxSubscriberAndClientProducer<TRequest>());
             RxClientStreamObserverAndPublisher<TResponse> observerAndPublisher =
-                    new RxClientStreamObserverAndPublisher<TResponse>(
-                        new com.salesforce.reactivegrpc.common.Consumer<CallStreamObserver<?>>() {
-                            @Override
-                            public void accept(CallStreamObserver<?> observer) {
-                                subscriberAndGRPCProducer.subscribe((CallStreamObserver<TRequest>) observer);
-                            }
-                        },
-                        new Runnable() {
-                            @Override
-                            public void run() {
-                                subscriberAndGRPCProducer.cancel();
-                            }
+                new RxClientStreamObserverAndPublisher<TResponse>(
+                    new com.salesforce.reactivegrpc.common.Consumer<CallStreamObserver<?>>() {
+                        @Override
+                        public void accept(CallStreamObserver<?> observer) {
+                            subscriberAndGRPCProducer.subscribe((CallStreamObserver<TRequest>) observer);
                         }
-                    );
-             delegate.apply(observerAndPublisher);
+                    },
+                    new Runnable() {
+                        @Override
+                        public void run() {
+                            subscriberAndGRPCProducer.cancel();
+                        }
+                    }
+                );
+            delegate.apply(observerAndPublisher);
 
             return Flowable.unsafeCreate(observerAndPublisher)
                            .singleOrError();
@@ -148,20 +148,20 @@ public final class ClientCalls {
             final RxSubscriberAndClientProducer<TRequest> subscriberAndGRPCProducer =
                     flowableSource.subscribeWith(new RxSubscriberAndClientProducer<TRequest>());
             RxClientStreamObserverAndPublisher<TResponse> observerAndPublisher =
-                    new RxClientStreamObserverAndPublisher<TResponse>(
-                            new com.salesforce.reactivegrpc.common.Consumer<CallStreamObserver<?>>() {
-                                @Override
-                                public void accept(CallStreamObserver<?> observer) {
-                                    subscriberAndGRPCProducer.subscribe((CallStreamObserver<TRequest>) observer);
-                                }
-                            },
-                            new Runnable() {
-                                @Override
-                                public void run() {
-                                    subscriberAndGRPCProducer.cancel();
-                                }
-                            }
-                    );
+                new RxClientStreamObserverAndPublisher<TResponse>(
+                    new com.salesforce.reactivegrpc.common.Consumer<CallStreamObserver<?>>() {
+                        @Override
+                        public void accept(CallStreamObserver<?> observer) {
+                            subscriberAndGRPCProducer.subscribe((CallStreamObserver<TRequest>) observer);
+                        }
+                    },
+                    new Runnable() {
+                        @Override
+                        public void run() {
+                            subscriberAndGRPCProducer.cancel();
+                        }
+                    }
+                );
             delegate.apply(observerAndPublisher);
 
             return Flowable.unsafeCreate(observerAndPublisher);
