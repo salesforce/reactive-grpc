@@ -21,20 +21,22 @@ public class TckService extends ReactorTckGrpc.TckImplBase {
     @Override
     public Flux<Message> oneToMany(Mono<Message> request) {
         return request
+                .hide()
                 .map(this::maybeExplode)
                 // send back no more than 10 responses
                 .flatMapMany(message -> Flux.range(0, Math.min(message.getNumber(), 10)))
-                .map(this::toMessage);
+                .map(this::toMessage)
+                .hide();
     }
 
     @Override
     public Mono<Message> manyToOne(Flux<Message> request) {
-        return request.map(this::maybeExplode).last(Message.newBuilder().setNumber(0).build());
+        return request.hide().map(this::maybeExplode).last(Message.newBuilder().setNumber(0).build()).hide();
     }
 
     @Override
     public Flux<Message> manyToMany(Flux<Message> request) {
-        return request.map(this::maybeExplode);
+        return request.hide().map(this::maybeExplode);
     }
 
     private Message maybeExplode(Message req) {

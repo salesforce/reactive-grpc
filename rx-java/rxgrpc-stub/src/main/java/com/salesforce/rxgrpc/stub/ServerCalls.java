@@ -9,8 +9,6 @@ package com.salesforce.rxgrpc.stub;
 
 import com.google.common.base.Preconditions;
 import com.salesforce.reactivegrpc.common.Function;
-import com.salesforce.reactivegrpc.common.ReactivePublisherBackpressureOnReadyHandlerServer;
-import com.salesforce.reactivegrpc.common.ReactiveStreamObserverPublisherServer;
 import io.grpc.Status;
 import io.grpc.StatusException;
 import io.grpc.StatusRuntimeException;
@@ -18,10 +16,7 @@ import io.grpc.stub.ServerCallStreamObserver;
 import io.grpc.stub.StreamObserver;
 import io.reactivex.Flowable;
 import io.reactivex.Single;
-import io.reactivex.functions.Action;
 import io.reactivex.functions.Consumer;
-import org.reactivestreams.Subscriber;
-import org.reactivestreams.Subscription;
 
 /**
  * Utility functions for processing different server call idioms. We have one-to-one correspondence
@@ -77,8 +72,9 @@ public final class ServerCalls {
             Single<TRequest> rxRequest = Single.just(request);
 
             Flowable<TResponse> rxResponse = Preconditions.checkNotNull(delegate.apply(rxRequest));
-            rxResponse.subscribe(new ReactivePublisherBackpressureOnReadyHandlerServer<TResponse>(
-                    (ServerCallStreamObserver<TResponse>) responseObserver));
+            RxSubscriberAndServerProducer<TResponse> serverProducer =
+                    rxResponse.subscribeWith(new RxSubscriberAndServerProducer<TResponse>());
+            serverProducer.subscribe((ServerCallStreamObserver<TResponse>) responseObserver);
         } catch (Throwable throwable) {
             responseObserver.onError(prepareError(throwable));
         }
@@ -91,20 +87,17 @@ public final class ServerCalls {
     public static <TRequest, TResponse> StreamObserver<TRequest> manyToOne(
             final StreamObserver<TResponse> responseObserver,
             Function<Flowable<TRequest>, Single<TResponse>> delegate) {
-        final ReactiveStreamObserverPublisherServer<TRequest> streamObserverPublisher =
-                new ReactiveStreamObserverPublisherServer<TRequest>((ServerCallStreamObserver<TResponse>) responseObserver);
+        final RxServerStreamObserverAndPublisher<TRequest> streamObserverPublisher =
+                new RxServerStreamObserverAndPublisher<TRequest>((ServerCallStreamObserver<TResponse>) responseObserver, null);
 
         try {
-            Single<TResponse> rxResponse = Preconditions.checkNotNull(delegate.apply(
-                    Flowable.unsafeCreate(streamObserverPublisher)
-                            .lift(new BackpressureChunkingOperator<TRequest>())
-                    ));
+            Single<TResponse> rxResponse = Preconditions.checkNotNull(delegate.apply(Flowable.unsafeCreate(streamObserverPublisher)));
             rxResponse.subscribe(
                     new Consumer<TResponse>() {
                         @Override
                         public void accept(TResponse value) {
                             // Don't try to respond if the server has already canceled the request
-                            if (!streamObserverPublisher.isCanceled()) {
+                            if (!streamObserverPublisher.isCancelled()) {
                                 responseObserver.onNext(value);
                                 responseObserver.onCompleted();
                             }
@@ -114,7 +107,7 @@ public final class ServerCalls {
                         @Override
                         public void accept(Throwable throwable) {
                             // Don't try to respond if the server has already canceled the request
-                            if (!streamObserverPublisher.isCanceled()) {
+                            if (!streamObserverPublisher.isCancelled()) {
                                 streamObserverPublisher.abortPendingCancel();
                                 responseObserver.onError(prepareError(throwable));
                             }
@@ -135,50 +128,15 @@ public final class ServerCalls {
     public static <TRequest, TResponse> StreamObserver<TRequest> manyToMany(
             StreamObserver<TResponse> responseObserver,
             Function<Flowable<TRequest>, Flowable<TResponse>> delegate) {
-        final ReactiveStreamObserverPublisherServer<TRequest> streamObserverPublisher =
-                new ReactiveStreamObserverPublisherServer<TRequest>((ServerCallStreamObserver<TResponse>) responseObserver);
+        final RxServerStreamObserverAndPublisher<TRequest> streamObserverPublisher =
+                new RxServerStreamObserverAndPublisher<TRequest>((ServerCallStreamObserver<TResponse>) responseObserver, null);
 
         try {
-            Flowable<TResponse> rxResponse = Preconditions.checkNotNull(delegate.apply(
-                    Flowable.unsafeCreate(streamObserverPublisher)
-                            .lift(new BackpressureChunkingOperator<TRequest>())
-                    ));
-            final Subscriber<TResponse> subscriber = new ReactivePublisherBackpressureOnReadyHandlerServer<TResponse>(
-                    (ServerCallStreamObserver<TResponse>) responseObserver);
+            Flowable<TResponse> rxResponse = Preconditions.checkNotNull(delegate.apply(Flowable.unsafeCreate(streamObserverPublisher)));
+            final RxSubscriberAndServerProducer<TResponse> subscriber = new RxSubscriberAndServerProducer<TResponse>();
+            subscriber.subscribe((ServerCallStreamObserver<TResponse>) responseObserver);
             // Don't try to respond if the server has already canceled the request
-            rxResponse.subscribe(
-                    new Consumer<TResponse>() {
-                        @Override
-                        public void accept(TResponse tResponse) {
-                            if (!streamObserverPublisher.isCanceled()) {
-                                subscriber.onNext(tResponse);
-                            }
-                        }
-                    },
-                    new Consumer<Throwable>() {
-                        @Override
-                        public void accept(Throwable throwable) {
-                            if (!streamObserverPublisher.isCanceled()) {
-                                streamObserverPublisher.abortPendingCancel();
-                                subscriber.onError(throwable);
-                            }
-                        }
-                    },
-                    new Action() {
-                        @Override
-                        public void run() {
-                            if (!streamObserverPublisher.isCanceled()) {
-                                subscriber.onComplete();
-                            }
-                        }
-                    },
-                    new Consumer<Subscription>() {
-                        @Override
-                        public void accept(Subscription subscription) {
-                            subscriber.onSubscribe(subscription);
-                        }
-                    }
-            );
+            rxResponse.subscribe(subscriber);
         } catch (Throwable throwable) {
             responseObserver.onError(prepareError(throwable));
         }

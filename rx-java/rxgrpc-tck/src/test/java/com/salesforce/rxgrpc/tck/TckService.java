@@ -15,28 +15,30 @@ public class TckService extends RxTckGrpc.TckImplBase {
 
     @Override
     public Single<Message> oneToOne(Single<Message> request) {
-        return request.map(this::maybeExplode);
+        return request.hide().map(this::maybeExplode);
     }
 
     @Override
     public Flowable<Message> oneToMany(Single<Message> request) {
         return request
+                .hide()
                 .map(this::maybeExplode)
                 .toFlowable()
                 // send back no more than 10 responses
                 .flatMap(message -> Flowable.range(1, Math.min(message.getNumber(), 10))
                         ,false, 1, 1)
-                .map(this::toMessage);
+                .map(this::toMessage)
+                .hide();
     }
 
     @Override
     public Single<Message> manyToOne(Flowable<Message> request) {
-        return request.map(this::maybeExplode).last(Message.newBuilder().setNumber(0).build());
+        return request.hide().map(this::maybeExplode).last(Message.newBuilder().setNumber(0).build()).hide();
     }
 
     @Override
     public Flowable<Message> manyToMany(Flowable<Message> request) {
-        return request.map(this::maybeExplode);
+        return request.hide().map(this::maybeExplode);
     }
 
     private Message maybeExplode(Message req) throws Exception {
