@@ -18,7 +18,6 @@ import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 import reactor.core.publisher.Mono;
-import reactor.core.scheduler.Schedulers;
 
 /**
  * Publisher tests from the Reactive Streams Technology Compatibility Kit.
@@ -28,7 +27,7 @@ import reactor.core.scheduler.Schedulers;
 @Test(timeOut = 3000)
 public class ReactorGrpcPublisherOneToManyVerificationTest extends PublisherVerification<Message> {
     public static final long DEFAULT_TIMEOUT_MILLIS = 500L;
-    public static final long PUBLISHER_REFERENCE_CLEANUP_TIMEOUT_MILLIS = 500L;
+    public static final long PUBLISHER_REFERENCE_CLEANUP_TIMEOUT_MILLIS = 1000L;
 
     public ReactorGrpcPublisherOneToManyVerificationTest() {
         super(new TestEnvironment(DEFAULT_TIMEOUT_MILLIS, DEFAULT_TIMEOUT_MILLIS), PUBLISHER_REFERENCE_CLEANUP_TIMEOUT_MILLIS);
@@ -57,7 +56,7 @@ public class ReactorGrpcPublisherOneToManyVerificationTest extends PublisherVeri
     public Publisher<Message> createPublisher(long elements) {
         ReactorTckGrpc.ReactorTckStub stub = ReactorTckGrpc.newReactorStub(channel);
         Mono<Message> request = Mono.just(toMessage((int) elements));
-        Publisher<Message> publisher = stub.oneToMany(request).publishOn(Schedulers.immediate());
+        Publisher<Message> publisher = stub.oneToMany(request.hide()).hide();
 
         return publisher;
     }
@@ -66,7 +65,7 @@ public class ReactorGrpcPublisherOneToManyVerificationTest extends PublisherVeri
     public Publisher<Message> createFailedPublisher() {
         ReactorTckGrpc.ReactorTckStub stub = ReactorTckGrpc.newReactorStub(channel);
         Mono<Message> request = Mono.just(toMessage(TckService.KABOOM));
-        Publisher<Message> publisher = stub.oneToMany(request);
+        Publisher<Message> publisher = stub.oneToMany(request.hide()).hide();
 
         return publisher;
     }

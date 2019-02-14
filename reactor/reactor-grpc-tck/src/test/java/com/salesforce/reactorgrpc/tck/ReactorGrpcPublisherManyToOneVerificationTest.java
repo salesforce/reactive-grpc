@@ -28,7 +28,7 @@ import reactor.core.publisher.Mono;
 @Test(timeOut = 3000)
 public class ReactorGrpcPublisherManyToOneVerificationTest extends PublisherVerification<Message> {
     public static final long DEFAULT_TIMEOUT_MILLIS = 500L;
-    public static final long PUBLISHER_REFERENCE_CLEANUP_TIMEOUT_MILLIS = 500L;
+    public static final long PUBLISHER_REFERENCE_CLEANUP_TIMEOUT_MILLIS = 1000L;
 
     public ReactorGrpcPublisherManyToOneVerificationTest() {
         super(new TestEnvironment(DEFAULT_TIMEOUT_MILLIS, DEFAULT_TIMEOUT_MILLIS), PUBLISHER_REFERENCE_CLEANUP_TIMEOUT_MILLIS);
@@ -62,7 +62,7 @@ public class ReactorGrpcPublisherManyToOneVerificationTest extends PublisherVeri
     public Publisher<Message> createPublisher(long elements) {
         ReactorTckGrpc.ReactorTckStub stub = ReactorTckGrpc.newReactorStub(channel);
         Flux<Message> request = Flux.range(0, (int)elements).map(this::toMessage);
-        Mono<Message> publisher = stub.manyToOne(request);
+        Mono<Message> publisher = stub.manyToOne(request.hide()).hide();
 
         return publisher.flux();
     }
@@ -71,7 +71,7 @@ public class ReactorGrpcPublisherManyToOneVerificationTest extends PublisherVeri
     public Publisher<Message> createFailedPublisher() {
         ReactorTckGrpc.ReactorTckStub stub = ReactorTckGrpc.newReactorStub(channel);
         Flux<Message> request = Flux.just(toMessage(TckService.KABOOM));
-        Mono<Message> publisher = stub.manyToOne(request);
+        Mono<Message> publisher = stub.manyToOne(request.hide()).hide();
 
         return publisher.flux();
     }

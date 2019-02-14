@@ -7,7 +7,9 @@
 
 package com.salesforce.reactorgrpc.tck;
 
-import com.salesforce.reactivegrpc.common.ReactivePublisherBackpressureOnReadyHandlerClient;
+import javax.annotation.Nullable;
+
+import com.salesforce.reactorgrpc.stub.ReactorSubscriberAndClientProducer;
 import io.grpc.stub.ClientCallStreamObserver;
 import org.reactivestreams.Subscriber;
 import org.reactivestreams.Subscription;
@@ -16,8 +18,6 @@ import org.reactivestreams.tck.TestEnvironment;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
-import javax.annotation.Nullable;
-
 /**
  * Subscriber tests from the Reactive Streams Technology Compatibility Kit.
  * https://github.com/reactive-streams/reactive-streams-jvm/tree/master/tck
@@ -25,8 +25,10 @@ import javax.annotation.Nullable;
 @SuppressWarnings("Duplicates")
 @Test(timeOut = 3000)
 public class ReactorGrpcSubscriberWhiteboxVerificationTest extends SubscriberWhiteboxVerification<Message> {
+    public static final long DEFAULT_TIMEOUT_MILLIS = 500L;
+
     public ReactorGrpcSubscriberWhiteboxVerificationTest() {
-        super(new TestEnvironment());
+        super(new TestEnvironment(DEFAULT_TIMEOUT_MILLIS, DEFAULT_TIMEOUT_MILLIS));
     }
 
     @BeforeClass
@@ -36,7 +38,7 @@ public class ReactorGrpcSubscriberWhiteboxVerificationTest extends SubscriberWhi
 
     @Override
     public Subscriber<Message> createSubscriber(WhiteboxSubscriberProbe<Message> probe) {
-        return new ReactivePublisherBackpressureOnReadyHandlerClient<Message>(new StubServerCallStreamObserver()) {
+        ReactorSubscriberAndClientProducer producer = new ReactorSubscriberAndClientProducer<Message>() {
             @Override
             public void onSubscribe(final Subscription s) {
                 super.onSubscribe(s);
@@ -80,6 +82,10 @@ public class ReactorGrpcSubscriberWhiteboxVerificationTest extends SubscriberWhi
                 probe.registerOnComplete();
             }
         };
+
+        producer.subscribe(new StubServerCallStreamObserver());
+
+        return producer;
     }
 
     @Override
@@ -130,7 +136,7 @@ public class ReactorGrpcSubscriberWhiteboxVerificationTest extends SubscriberWhi
 
         @Override
         public void cancel(@Nullable String s, @Nullable Throwable throwable) {
-            
+
         }
     }
 }

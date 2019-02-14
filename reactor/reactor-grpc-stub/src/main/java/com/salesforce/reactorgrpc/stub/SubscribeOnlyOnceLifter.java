@@ -20,15 +20,14 @@ import java.util.function.BiFunction;
  *
  * @param <T>
  */
-public class SubscribeOnlyOnceLifter<T> implements BiFunction<Scannable, CoreSubscriber<? super T>, CoreSubscriber<? super T>> {
-    private AtomicBoolean subscribedOnce = new AtomicBoolean(false);
+public class SubscribeOnlyOnceLifter<T> extends AtomicBoolean implements BiFunction<Scannable, CoreSubscriber<? super T>, CoreSubscriber<? super T>> {
 
     @Override
     public CoreSubscriber<? super T> apply(Scannable scannable, CoreSubscriber<? super T> coreSubscriber) {
         return new CoreSubscriber<T>() {
             @Override
             public void onSubscribe(Subscription subscription) {
-                if (subscribedOnce.getAndSet(true)) {
+                if (!compareAndSet(false, true)) {
                     throw new NullPointerException("You cannot directly subscribe to a gRPC service multiple times " +
                             "concurrently. Use Flux.share() instead.");
                 } else {

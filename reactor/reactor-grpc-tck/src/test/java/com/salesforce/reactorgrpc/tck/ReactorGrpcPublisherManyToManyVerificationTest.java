@@ -18,7 +18,6 @@ import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 import reactor.core.publisher.Flux;
-import reactor.core.scheduler.Schedulers;
 
 /**
  * Publisher tests from the Reactive Streams Technology Compatibility Kit.
@@ -28,7 +27,7 @@ import reactor.core.scheduler.Schedulers;
 @Test(timeOut = 3000)
 public class ReactorGrpcPublisherManyToManyVerificationTest extends PublisherVerification<Message> {
     public static final long DEFAULT_TIMEOUT_MILLIS = 500L;
-    public static final long PUBLISHER_REFERENCE_CLEANUP_TIMEOUT_MILLIS = 500L;
+    public static final long PUBLISHER_REFERENCE_CLEANUP_TIMEOUT_MILLIS = 1000L;
 
     public ReactorGrpcPublisherManyToManyVerificationTest() {
         super(new TestEnvironment(DEFAULT_TIMEOUT_MILLIS, DEFAULT_TIMEOUT_MILLIS), PUBLISHER_REFERENCE_CLEANUP_TIMEOUT_MILLIS);
@@ -57,7 +56,7 @@ public class ReactorGrpcPublisherManyToManyVerificationTest extends PublisherVer
     public Publisher<Message> createPublisher(long elements) {
         ReactorTckGrpc.ReactorTckStub stub = ReactorTckGrpc.newReactorStub(channel);
         Flux<Message> request = Flux.range(0, (int)elements).map(this::toMessage);
-        Publisher<Message> publisher = stub.manyToMany(request).publishOn(Schedulers.immediate());
+        Publisher<Message> publisher = stub.manyToMany(request.hide()).hide();
 
         return publisher;
     }
@@ -66,7 +65,7 @@ public class ReactorGrpcPublisherManyToManyVerificationTest extends PublisherVer
     public Publisher<Message> createFailedPublisher() {
         ReactorTckGrpc.ReactorTckStub stub = ReactorTckGrpc.newReactorStub(channel);
         Flux<Message> request = Flux.just(toMessage(TckService.KABOOM));
-        Publisher<Message> publisher = stub.manyToMany(request);
+        Publisher<Message> publisher = stub.manyToMany(request.hide()).hide();
 
         return publisher;
     }

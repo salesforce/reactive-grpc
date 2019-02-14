@@ -7,6 +7,13 @@
 
 package com.salesforce.reactorgrpc;
 
+import java.time.Duration;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.List;
+import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
+
 import com.google.common.collect.Lists;
 import com.google.common.util.concurrent.Futures;
 import com.google.common.util.concurrent.ListenableFuture;
@@ -16,79 +23,47 @@ import io.grpc.ManagedChannel;
 import io.grpc.ManagedChannelBuilder;
 import io.grpc.Server;
 import io.grpc.ServerBuilder;
-import org.junit.AfterClass;
-import org.junit.BeforeClass;
+import org.junit.After;
+import org.junit.Before;
 import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.junit.runners.Parameterized;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
 
-import java.time.Duration;
-import java.util.List;
-import java.util.concurrent.Executors;
-import java.util.concurrent.TimeUnit;
-
 import static org.assertj.core.api.Assertions.assertThat;
 
 @SuppressWarnings({"Duplicates", "unchecked"})
+@RunWith(Parameterized.class)
 public class ConcurrentRequestIntegrationTest {
     private static Server server;
     private static ManagedChannel channel;
 
-    @BeforeClass
-    public static void setupServer() throws Exception {
-        ReactorGreeterGrpc.GreeterImplBase svc = new ReactorGreeterGrpc.GreeterImplBase() {
+    @Parameterized.Parameters
+    public static Collection<Object[]> data() {
+        return Arrays.asList(new Object[][] {
+                { new TestService(), false },
+                { new FusedTestService(), true }
+        });
+    }
 
-            @Override
-            public Mono<HelloResponse> sayHello(Mono<HelloRequest> reactorRequest) {
-                return reactorRequest
-                        .doOnSuccess(System.out::println)
-                        .map(protoRequest -> greet("Hello", protoRequest));
-            }
+    private final ReactorGreeterGrpc.GreeterImplBase service;
+    private final boolean                            expectFusion;
 
-            @Override
-            public Flux<HelloResponse> sayHelloRespStream(Mono<HelloRequest> reactorRequest) {
-                return reactorRequest
-                        .doOnSuccess(System.out::println)
-                        .flatMapMany(protoRequest -> Flux.just(
-                            greet("Hello", protoRequest),
-                            greet("Hi", protoRequest),
-                            greet("Greetings", protoRequest)));
-            }
+    public ConcurrentRequestIntegrationTest(ReactorGreeterGrpc.GreeterImplBase service, boolean expectFusion) {
+        this.service = service;
+        this.expectFusion = expectFusion;
+    }
 
-            @Override
-            public Mono<HelloResponse> sayHelloReqStream(Flux<HelloRequest> reactorRequest) {
-                return reactorRequest
-                        .doOnNext(System.out::println)
-                        .map(HelloRequest::getName)
-                        .collectList()
-                        .map(names -> greet("Hello", String.join(" and ", names)));
-            }
-
-            @Override
-            public Flux<HelloResponse> sayHelloBothStream(Flux<HelloRequest> reactorRequest) {
-                return reactorRequest
-                        .doOnNext(System.out::println)
-                        .map(HelloRequest::getName)
-                        .buffer(2)
-                        .map(names -> greet("Hello", String.join(" and ", names)));
-            }
-
-            private HelloResponse greet(String greeting, HelloRequest request) {
-                return greet(greeting, request.getName());
-            }
-
-            private HelloResponse greet(String greeting, String name) {
-                return HelloResponse.newBuilder().setMessage(greeting + " " + name).build();
-            }
-        };
-
-        server = ServerBuilder.forPort(0).addService(svc).build().start();
+    @Before
+    public void setupServer() throws Exception {
+        server = ServerBuilder.forPort(0).addService(service).build().start();
         channel = ManagedChannelBuilder.forAddress("localhost", server.getPort()).usePlaintext().build();
     }
 
-    @AfterClass
-    public static void stopServer() throws InterruptedException {
+    @After
+    public void stopServer() throws InterruptedException {
         server.shutdown();
         server.awaitTermination();
         channel.shutdown();
@@ -118,6 +93,10 @@ public class ConcurrentRequestIntegrationTest {
                 HelloRequest.newBuilder().setName("b").build(),
                 HelloRequest.newBuilder().setName("c").build());
 
+        if (!expectFusion) {
+            req3 = req3.hide();
+        }
+
         Mono<HelloResponse> resp3 = req3.as(stub::sayHelloReqStream);
 
         // Many to Many
@@ -128,7 +107,11 @@ public class ConcurrentRequestIntegrationTest {
                 HelloRequest.newBuilder().setName("d").build(),
                 HelloRequest.newBuilder().setName("e").build());
 
-        Flux<HelloResponse> resp4 = req4.compose(stub::sayHelloBothStream);
+        if (!expectFusion) {
+            req4 = req4.hide();
+        }
+
+        Flux<HelloResponse> resp4 = req4.transform(stub::sayHelloBothStream);
 
         // == VERIFY RESPONSES ==
         ListeningExecutorService executorService = MoreExecutors.listeningDecorator(Executors.newCachedThreadPool());
@@ -153,7 +136,13 @@ public class ConcurrentRequestIntegrationTest {
 
             // Many to One
             ListenableFuture<Boolean> manyToOne = executorService.submit(() -> {
-                StepVerifier.create(resp3.map(HelloResponse::getMessage))
+                StepVerifier.Step<String> stepVerifier = StepVerifier.create(resp3.map(HelloResponse::getMessage));
+
+                if (expectFusion) {
+                    stepVerifier = ((StepVerifier.FirstStep<String>) stepVerifier).expectFusion();
+                }
+
+                stepVerifier
                         .expectNext("Hello a and b and c")
                         .verifyComplete();
                 return true;
@@ -161,7 +150,13 @@ public class ConcurrentRequestIntegrationTest {
 
             // Many to Many
             ListenableFuture<Boolean> manyToMany = executorService.submit(() -> {
-                StepVerifier.create(resp4.map(HelloResponse::getMessage))
+                StepVerifier.Step<String> stepVerifier = StepVerifier.create(resp4.map(HelloResponse::getMessage));
+
+                if (expectFusion) {
+                    stepVerifier = ((StepVerifier.FirstStep<String>) stepVerifier).expectFusion();
+                }
+
+                stepVerifier
                         .expectNext("Hello a and b", "Hello c and d", "Hello e")
                         .verifyComplete();
                 return true;
@@ -174,6 +169,105 @@ public class ConcurrentRequestIntegrationTest {
 
         } finally {
             executorService.shutdown();
+        }
+    }
+
+    static class TestService extends ReactorGreeterGrpc.GreeterImplBase {
+
+        @Override
+        public Mono<HelloResponse> sayHello(Mono<HelloRequest> reactorRequest) {
+            return reactorRequest
+                    .hide()
+                    .doOnSuccess(System.out::println)
+                    .map(protoRequest -> greet("Hello", protoRequest));
+        }
+
+        @Override
+        public Flux<HelloResponse> sayHelloRespStream(Mono<HelloRequest> reactorRequest) {
+            return reactorRequest
+                    .hide()
+                    .doOnSuccess(System.out::println)
+                    .flatMapMany(protoRequest -> Flux.just(
+                            greet("Hello", protoRequest),
+                            greet("Hi", protoRequest),
+                            greet("Greetings", protoRequest)))
+                    .hide();
+        }
+
+        @Override
+        public Mono<HelloResponse> sayHelloReqStream(Flux<HelloRequest> reactorRequest) {
+            return reactorRequest
+                    .hide()
+                    .doOnNext(System.out::println)
+                    .map(HelloRequest::getName)
+                    .collectList()
+                    .map(names -> greet("Hello", String.join(" and ", names)))
+                    .hide();
+        }
+
+        @Override
+        public Flux<HelloResponse> sayHelloBothStream(Flux<HelloRequest> reactorRequest) {
+            return reactorRequest
+                    .hide()
+                    .doOnNext(System.out::println)
+                    .map(HelloRequest::getName)
+                    .buffer(2)
+                    .map(names -> greet("Hello", String.join(" and ", names)))
+                    .hide();
+        }
+
+        private HelloResponse greet(String greeting, HelloRequest request) {
+            return greet(greeting, request.getName());
+        }
+
+        private HelloResponse greet(String greeting, String name) {
+            return HelloResponse.newBuilder().setMessage(greeting + " " + name).build();
+        }
+    }
+
+    static class FusedTestService extends ReactorGreeterGrpc.GreeterImplBase {
+
+        @Override
+        public Mono<HelloResponse> sayHello(Mono<HelloRequest> reactorRequest) {
+            return reactorRequest
+                    .doOnSuccess(System.out::println)
+                    .map(protoRequest -> greet("Hello", protoRequest));
+        }
+
+        @Override
+        public Flux<HelloResponse> sayHelloRespStream(Mono<HelloRequest> reactorRequest) {
+            return reactorRequest
+                    .doOnSuccess(System.out::println)
+                    .flatMapMany(protoRequest -> Flux.just(
+                            greet("Hello", protoRequest),
+                            greet("Hi", protoRequest),
+                            greet("Greetings", protoRequest)));
+        }
+
+        @Override
+        public Mono<HelloResponse> sayHelloReqStream(Flux<HelloRequest> reactorRequest) {
+            return reactorRequest
+                    .doOnNext(System.out::println)
+                    .map(HelloRequest::getName)
+                    .collectList()
+                    .map(names -> greet("Hello", String.join(" and ", names)));
+        }
+
+        @Override
+        public Flux<HelloResponse> sayHelloBothStream(Flux<HelloRequest> reactorRequest) {
+            return reactorRequest
+                    .doOnNext(System.out::println)
+                    .map(HelloRequest::getName)
+                    .buffer(2)
+                    .map(names -> greet("Hello", String.join(" and ", names)));
+        }
+
+        private HelloResponse greet(String greeting, HelloRequest request) {
+            return greet(greeting, request.getName());
+        }
+
+        private HelloResponse greet(String greeting, String name) {
+            return HelloResponse.newBuilder().setMessage(greeting + " " + name).build();
         }
     }
 }

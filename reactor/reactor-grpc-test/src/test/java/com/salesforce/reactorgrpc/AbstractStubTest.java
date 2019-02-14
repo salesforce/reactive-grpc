@@ -1,13 +1,18 @@
+/*  Copyright (c) 2017, salesforce.com, inc.
+ *  All rights reserved.
+ *  Licensed under the BSD 3-Clause license.
+ *  For full license text, see LICENSE.txt file in the repo root  or https://opensource.org/licenses/BSD-3-Clause
+ */
+
 package com.salesforce.reactorgrpc;
+
+import java.util.concurrent.TimeUnit;
 
 import io.grpc.Deadline;
 import io.grpc.ManagedChannel;
-import io.grpc.inprocess.InProcessChannelBuilder;
 import io.grpc.testing.GrpcServerRule;
 import org.junit.Rule;
 import org.junit.Test;
-
-import java.util.concurrent.TimeUnit;
 
 import static org.assertj.core.api.Assertions.assertThat;
 

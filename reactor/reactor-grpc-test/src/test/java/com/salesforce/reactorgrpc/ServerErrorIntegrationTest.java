@@ -7,57 +7,56 @@
 
 package com.salesforce.reactorgrpc;
 
-import io.grpc.*;
-import org.junit.AfterClass;
+import java.time.Duration;
+import java.util.Arrays;
+import java.util.Collection;
+
+import io.grpc.ManagedChannel;
+import io.grpc.ManagedChannelBuilder;
+import io.grpc.Server;
+import io.grpc.ServerBuilder;
+import io.grpc.Status;
+import io.grpc.StatusRuntimeException;
+import org.junit.After;
 import org.junit.Before;
-import org.junit.BeforeClass;
 import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.junit.runners.Parameterized;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
 
-import java.time.Duration;
-
 @SuppressWarnings("unchecked")
+@RunWith(Parameterized.class)
 public class ServerErrorIntegrationTest {
     private static Server server;
     private static ManagedChannel channel;
 
-    @BeforeClass
-    public static void setupServer() throws Exception {
-        ReactorGreeterGrpc.GreeterImplBase svc = new ReactorGreeterGrpc.GreeterImplBase() {
-            @Override
-            public Mono<HelloResponse> sayHello(Mono<HelloRequest> reactorRequest) {
-                return Mono.error(new StatusRuntimeException(Status.INTERNAL));
-            }
+    @Parameterized.Parameters
+    public static Collection<Object[]> data() {
+        return Arrays.asList(new Object[][] {
+                { new TestService(), false },
+                { new FusedTestService(), true }
+        });
+    }
 
-            @Override
-            public Flux<HelloResponse> sayHelloRespStream(Mono<HelloRequest> reactorRequest) {
-                return Flux.error(new StatusRuntimeException(Status.INTERNAL));
-            }
+    private final ReactorGreeterGrpc.GreeterImplBase service;
+    private final boolean                            expectFusion;
 
-            @Override
-            public Mono<HelloResponse> sayHelloReqStream(Flux<HelloRequest> reactorRequest) {
-                return Mono.error(new StatusRuntimeException(Status.INTERNAL));
-            }
-
-            @Override
-            public Flux<HelloResponse> sayHelloBothStream(Flux<HelloRequest> reactorRequest) {
-                return Flux.error(new StatusRuntimeException(Status.INTERNAL));
-            }
-        };
-
-        server = ServerBuilder.forPort(0).addService(svc).build().start();
-        channel = ManagedChannelBuilder.forAddress("localhost", server.getPort()).usePlaintext().build();
+    public ServerErrorIntegrationTest(ReactorGreeterGrpc.GreeterImplBase service, boolean expectFusion) {
+        this.service = service;
+        this.expectFusion = expectFusion;
     }
 
     @Before
-    public void init() {
+    public void setupServer() throws Exception {
         StepVerifier.setDefaultTimeout(Duration.ofSeconds(3));
+        server = ServerBuilder.forPort(0).addService(service).build().start();
+        channel = ManagedChannelBuilder.forAddress("localhost", server.getPort()).usePlaintext().build();
     }
 
-    @AfterClass
-    public static void stopServer() {
+    @After
+    public void stopServer() {
         server.shutdown();
         channel.shutdown();
 
@@ -91,17 +90,87 @@ public class ServerErrorIntegrationTest {
     @Test
     public void manyToOne() {
         ReactorGreeterGrpc.ReactorGreeterStub stub = ReactorGreeterGrpc.newReactorStub(channel);
-        Mono<HelloResponse> resp = Flux.just(HelloRequest.getDefaultInstance()).as(stub::sayHelloReqStream);
-        StepVerifier.create(resp)
+        Flux<HelloRequest> requestFlux = Flux.just(HelloRequest.getDefaultInstance());
+
+        if (!expectFusion) {
+            requestFlux = requestFlux.hide();
+        }
+
+        Mono<HelloResponse> resp = requestFlux.as(stub::sayHelloReqStream);
+
+        StepVerifier.Step<HelloResponse> stepVerifier = StepVerifier.create(resp);
+
+        if (expectFusion) {
+            stepVerifier = ((StepVerifier.FirstStep<HelloResponse>) stepVerifier).expectFusion();
+        }
+
+        stepVerifier
                 .verifyErrorMatches(t -> t instanceof StatusRuntimeException && ((StatusRuntimeException)t).getStatus() == Status.INTERNAL);
     }
 
     @Test
     public void manyToMany() {
         ReactorGreeterGrpc.ReactorGreeterStub stub = ReactorGreeterGrpc.newReactorStub(channel);
-        Flux<HelloResponse> resp = Flux.just(HelloRequest.getDefaultInstance()).compose(stub::sayHelloBothStream);
-        StepVerifier.create(resp)
+        Flux<HelloRequest> requestFlux = Flux.just(HelloRequest.getDefaultInstance());
+
+        if (!expectFusion) {
+            requestFlux = requestFlux.hide();
+        }
+
+        Flux<HelloResponse> resp = requestFlux.transform(stub::sayHelloBothStream);
+
+        StepVerifier.Step<HelloResponse> stepVerifier = StepVerifier.create(resp);
+
+        if (expectFusion) {
+            stepVerifier = ((StepVerifier.FirstStep<HelloResponse>) stepVerifier).expectFusion();
+        }
+
+        stepVerifier
                 .verifyErrorMatches(t -> t instanceof StatusRuntimeException && ((StatusRuntimeException)t).getStatus() == Status.INTERNAL);
+    }
+
+    static class TestService extends ReactorGreeterGrpc.GreeterImplBase {
+        @Override
+        public Mono<HelloResponse> sayHello(Mono<HelloRequest> reactorRequest) {
+            return Mono.<HelloResponse>error(new StatusRuntimeException(Status.INTERNAL)).hide();
+        }
+
+        @Override
+        public Flux<HelloResponse> sayHelloRespStream(Mono<HelloRequest> reactorRequest) {
+            return Flux.<HelloResponse>error(new StatusRuntimeException(Status.INTERNAL)).hide();
+        }
+
+        @Override
+        public Mono<HelloResponse> sayHelloReqStream(Flux<HelloRequest> reactorRequest) {
+            return Mono.<HelloResponse>error(new StatusRuntimeException(Status.INTERNAL)).hide();
+        }
+
+        @Override
+        public Flux<HelloResponse> sayHelloBothStream(Flux<HelloRequest> reactorRequest) {
+            return Flux.<HelloResponse>error(new StatusRuntimeException(Status.INTERNAL)).hide();
+        }
+    }
+
+    static class FusedTestService extends ReactorGreeterGrpc.GreeterImplBase {
+        @Override
+        public Mono<HelloResponse> sayHello(Mono<HelloRequest> reactorRequest) {
+            return Mono.error(new StatusRuntimeException(Status.INTERNAL));
+        }
+
+        @Override
+        public Flux<HelloResponse> sayHelloRespStream(Mono<HelloRequest> reactorRequest) {
+            return Flux.error(new StatusRuntimeException(Status.INTERNAL));
+        }
+
+        @Override
+        public Mono<HelloResponse> sayHelloReqStream(Flux<HelloRequest> reactorRequest) {
+            return Mono.error(new StatusRuntimeException(Status.INTERNAL));
+        }
+
+        @Override
+        public Flux<HelloResponse> sayHelloBothStream(Flux<HelloRequest> reactorRequest) {
+            return Flux.error(new StatusRuntimeException(Status.INTERNAL));
+        }
     }
 
 }

@@ -7,7 +7,14 @@
 
 package com.salesforce.reactorgrpc;
 
-import io.grpc.*;
+import java.time.Duration;
+import java.util.ArrayList;
+import java.util.List;
+
+import io.grpc.ManagedChannel;
+import io.grpc.ManagedChannelBuilder;
+import io.grpc.Server;
+import io.grpc.ServerBuilder;
 import io.grpc.stub.StreamObserver;
 import org.junit.AfterClass;
 import org.junit.Before;
@@ -16,10 +23,6 @@ import org.junit.Test;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
-
-import java.time.Duration;
-import java.util.ArrayList;
-import java.util.List;
 
 @SuppressWarnings("Duplicates")
 public class ReactiveClientStandardServerInteropTest {

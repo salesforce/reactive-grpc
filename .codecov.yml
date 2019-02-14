@@ -4,3 +4,10 @@
 #  - "**/*.py"         # glob accepted
 #  - "[a-z]+/test_.*"  # regexp accepted
 
+coverage:
+  range: 10..80
+  round: down
+  precision: 2
+
+  status:
+    patch: off
