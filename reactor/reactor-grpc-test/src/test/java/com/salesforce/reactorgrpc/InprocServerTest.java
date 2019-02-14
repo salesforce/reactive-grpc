@@ -15,7 +15,7 @@ import java.util.List;
 
 public class InprocServerTest {
     @Rule
-    public GrpcServerRule serverRule = new GrpcServerRule(); //.directExecutor();
+    public GrpcServerRule serverRule = new GrpcServerRule().directExecutor();
 
     @Before
     public void before() {
