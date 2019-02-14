@@ -1,0 +1,36 @@
+syntax = "proto3";
+
+package demo.proto;
+
+option java_multiple_files = true;
+option java_package = "demo.proto";
+option java_outer_classname = "HelloWorldProto";
+
+/*
+ * Define the service's operations
+ */
+service SkipGreeter {
+    rpc skipGreet (stream Frame) returns (stream Greeting) {}
+}
+
+/*
+ * Define the service's data structures
+ */
+message Config {
+    int32 skip = 1;
+}
+
+message Payload {
+    string name = 1;
+}
+
+message Frame {
+    oneof value {
+        Config config = 1;
+        Payload payload = 2;
+    }
+}
+
+message Greeting {
+    string message = 1;
+}
