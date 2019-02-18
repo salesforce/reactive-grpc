@@ -78,7 +78,7 @@ public class StreamObserverAndPublisherTest {
             });
         }
 
-        Assertions.assertThat(testSubscriber.awaitTerminalEvent(10, TimeUnit.SECONDS)).isTrue();
+        Assertions.assertThat(testSubscriber.awaitTerminalEvent(1, TimeUnit.MINUTES)).isTrue();
         testSubscriber.assertValueCount(countPerThread);
 
         Assertions.assertThat(processor.outputFused).isFalse();
@@ -112,7 +112,7 @@ public class StreamObserverAndPublisherTest {
             });
         }
 
-        Assertions.assertThat(testSubscriber.awaitTerminalEvent(10, TimeUnit.SECONDS)).isTrue();
+        Assertions.assertThat(testSubscriber.awaitTerminalEvent(1, TimeUnit.MINUTES)).isTrue();
         testSubscriber.assertValueCount(countPerThread);
 
         Assertions.assertThat(processor.outputFused).isTrue();

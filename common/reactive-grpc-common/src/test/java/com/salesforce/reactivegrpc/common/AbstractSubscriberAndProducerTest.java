@@ -130,7 +130,7 @@ public class AbstractSubscriberAndProducerTest {
             latch.await();
             producer.onSubscribe(upstream);
 
-            Assertions.assertThat(cancelLatch.await(10, TimeUnit.SECONDS)).isTrue();
+            Assertions.assertThat(cancelLatch.await(1, TimeUnit.MINUTES)).isTrue();
         }
     }
 
@@ -170,7 +170,7 @@ public class AbstractSubscriberAndProducerTest {
 
         racePauseResuming(downstream, 10000);
 
-        Assertions.assertThat(downstream.awaitTerminal(10, TimeUnit.SECONDS)).isTrue();
+        Assertions.assertThat(downstream.awaitTerminal(1, TimeUnit.MINUTES)).isTrue();
         Assertions.assertThat(downstream.e).isNull();
         Assertions.assertThat(producer).hasFieldOrPropertyWithValue("sourceMode", 0);
         Assertions.assertThat(unhandledThrowable).isEmpty();
@@ -196,7 +196,7 @@ public class AbstractSubscriberAndProducerTest {
 
         racePauseResuming(downstream, 10000);
 
-        Assertions.assertThat(downstream.awaitTerminal(10, TimeUnit.SECONDS)).isTrue();
+        Assertions.assertThat(downstream.awaitTerminal(1, TimeUnit.MINUTES)).isTrue();
         Assertions.assertThat(downstream.e).isNull();
         Assertions.assertThat(producer).hasFieldOrPropertyWithValue("sourceMode", 2);
         Assertions.assertThat(downstream.collected)
@@ -228,7 +228,7 @@ public class AbstractSubscriberAndProducerTest {
 
         racePauseResuming(downstream, 10000);
 
-        Assertions.assertThat(downstream.awaitTerminal(10, TimeUnit.SECONDS)).isTrue();
+        Assertions.assertThat(downstream.awaitTerminal(1, TimeUnit.MINUTES)).isTrue();
         Assertions.assertThat(downstream.e).isNull();
         Assertions.assertThat(producer).hasFieldOrPropertyWithValue("sourceMode", 1);
         Assertions.assertThat(downstream.collected)
@@ -276,7 +276,7 @@ public class AbstractSubscriberAndProducerTest {
 
         racePauseResuming(downstream, 10000);
 
-        Assertions.assertThat(downstream.awaitTerminal(10, TimeUnit.SECONDS)).isTrue();
+        Assertions.assertThat(downstream.awaitTerminal(1, TimeUnit.MINUTES)).isTrue();
         Assertions.assertThat(downstream.e)
                   .isExactlyInstanceOf(StatusException.class)
                   .hasCauseInstanceOf(NullPointerException.class);
@@ -309,7 +309,7 @@ public class AbstractSubscriberAndProducerTest {
 
         racePauseResuming(downstream, 10000);
 
-        Assertions.assertThat(downstream.awaitTerminal(10, TimeUnit.SECONDS)).isTrue();
+        Assertions.assertThat(downstream.awaitTerminal(1, TimeUnit.MINUTES)).isTrue();
         Assertions.assertThat(downstream.e)
                   .isExactlyInstanceOf(StatusException.class)
                   .hasCauseInstanceOf(NullPointerException.class);
@@ -407,8 +407,8 @@ public class AbstractSubscriberAndProducerTest {
 
         racePauseResuming(downstream, 10000);
 
-        Assertions.assertThat(downstream.awaitTerminal(10, TimeUnit.SECONDS)).isTrue();
-        Assertions.assertThat(cancellationLatch.await(10, TimeUnit.SECONDS)).isTrue();
+        Assertions.assertThat(downstream.awaitTerminal(1, TimeUnit.MINUTES)).isTrue();
+        Assertions.assertThat(cancellationLatch.await(1, TimeUnit.MINUTES)).isTrue();
         Assertions.assertThat(downstream.e)
                   .isExactlyInstanceOf(StatusException.class)
                   .hasCauseInstanceOf(NullPointerException.class);
@@ -462,8 +462,8 @@ public class AbstractSubscriberAndProducerTest {
 
         downstream.throwOnNext();
 
-        Assertions.assertThat(downstream.awaitTerminal(10, TimeUnit.SECONDS)).isTrue();
-        Assertions.assertThat(cancellationLatch.await(10, TimeUnit.SECONDS)).isTrue();
+        Assertions.assertThat(downstream.awaitTerminal(1, TimeUnit.MINUTES)).isTrue();
+        Assertions.assertThat(cancellationLatch.await(1, TimeUnit.MINUTES)).isTrue();
         Assertions.assertThat(downstream.e)
                   .isExactlyInstanceOf(StatusException.class)
                   .hasCauseInstanceOf(OnNextTestException.class);
@@ -502,8 +502,8 @@ public class AbstractSubscriberAndProducerTest {
 
         downstream.throwOnNext();
 
-        Assertions.assertThat(downstream.awaitTerminal(10, TimeUnit.SECONDS)).isTrue();
-        Assertions.assertThat(cancellationLatch.await(10, TimeUnit.SECONDS)).isTrue();
+        Assertions.assertThat(downstream.awaitTerminal(1, TimeUnit.MINUTES)).isTrue();
+        Assertions.assertThat(cancellationLatch.await(1, TimeUnit.MINUTES)).isTrue();
         Assertions.assertThat(downstream.e)
                   .isExactlyInstanceOf(StatusException.class)
                   .hasCauseInstanceOf(OnNextTestException.class);
@@ -546,8 +546,8 @@ public class AbstractSubscriberAndProducerTest {
 
         downstream.throwOnNext();
 
-        Assertions.assertThat(downstream.awaitTerminal(10, TimeUnit.SECONDS)).isTrue();
-        Assertions.assertThat(cancellationLatch.await(10, TimeUnit.SECONDS)).isTrue();
+        Assertions.assertThat(downstream.awaitTerminal(1, TimeUnit.MINUTES)).isTrue();
+        Assertions.assertThat(cancellationLatch.await(1, TimeUnit.MINUTES)).isTrue();
         Assertions.assertThat(downstream.e)
                   .isExactlyInstanceOf(StatusException.class)
                   .hasCauseInstanceOf(OnNextTestException.class);
@@ -599,7 +599,7 @@ public class AbstractSubscriberAndProducerTest {
 
         producer.cancel();
 
-        Assertions.assertThat(cancellationLatch.await(10, TimeUnit.SECONDS)).isTrue();
+        Assertions.assertThat(cancellationLatch.await(1, TimeUnit.MINUTES)).isTrue();
         Assertions.assertThat(downstream.done.getCount()).isEqualTo(1);
         Assertions.assertThat(downstream.e).isNull();
         Assertions.assertThat(requested.get()).isEqualTo(produced.get());
@@ -637,7 +637,7 @@ public class AbstractSubscriberAndProducerTest {
 
         producer.cancel();
 
-        Assertions.assertThat(cancellationLatch.await(10, TimeUnit.SECONDS)).isTrue();
+        Assertions.assertThat(cancellationLatch.await(1, TimeUnit.MINUTES)).isTrue();
 
         Assertions.assertThat(downstream.done.getCount()).isEqualTo(1);
         Assertions.assertThat(downstream.e).isNull();
@@ -681,7 +681,7 @@ public class AbstractSubscriberAndProducerTest {
 
         producer.cancel();
 
-        Assertions.assertThat(cancellationLatch.await(10, TimeUnit.SECONDS)).isTrue();
+        Assertions.assertThat(cancellationLatch.await(1, TimeUnit.MINUTES)).isTrue();
 
         Assertions.assertThat(downstream.done.getCount()).isEqualTo(1);
         Assertions.assertThat(downstream.e).isNull();
