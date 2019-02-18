@@ -155,16 +155,16 @@ public abstract class AbstractSubscriberAndProducer<T> implements Subscriber<T>,
         if (!isCanceled()) {
             checkNotNull(t);
 
-            final CallStreamObserver<T> a = downstream;
+            final CallStreamObserver<T> subscriber = downstream;
 
             try {
-                a.onNext(t);
+                subscriber.onNext(t);
                 isRequested = false;
                 drain();
             } catch (Throwable throwable) {
                 cancel();
                 try {
-                    a.onError(prepareError(throwable));
+                    subscriber.onError(prepareError(throwable));
                 } catch (Throwable ignore) { }
             }
         }
@@ -201,7 +201,7 @@ public abstract class AbstractSubscriberAndProducer<T> implements Subscriber<T>,
         int mode = sourceMode;
 
         int missed = 1;
-        final CallStreamObserver<? super T> a = downstream;
+        final CallStreamObserver<? super T> subscriber = downstream;
 
 
         if (mode == NOT_FUSED) {
@@ -224,7 +224,7 @@ public abstract class AbstractSubscriberAndProducer<T> implements Subscriber<T>,
 
 
         for (;;) {
-            if (a != null) {
+            if (subscriber != null) {
                 if (mode == SYNC) {
                     drainSync();
                 } else if (mode == ASYNC) {
@@ -246,13 +246,13 @@ public abstract class AbstractSubscriberAndProducer<T> implements Subscriber<T>,
     void drainSync() {
         int missed = 1;
 
-        final CallStreamObserver<? super T> a = downstream;
+        final CallStreamObserver<? super T> subscriber = downstream;
         @SuppressWarnings("unchecked")
         final Queue<T> q = (Queue<T>) subscription;
 
         for (;;) {
 
-            while (a.isReady()) {
+            while (subscriber.isReady()) {
                 T v;
 
                 try {
@@ -261,7 +261,7 @@ public abstract class AbstractSubscriberAndProducer<T> implements Subscriber<T>,
                     cancel();
                     q.clear();
                     try {
-                        a.onError(prepareError(ex));
+                        subscriber.onError(prepareError(ex));
                     } catch (Throwable ignore) { }
                     return;
                 }
@@ -273,18 +273,18 @@ public abstract class AbstractSubscriberAndProducer<T> implements Subscriber<T>,
 
                 if (v == null) {
                     try {
-                        a.onCompleted();
+                        subscriber.onCompleted();
                     } catch (Throwable ignore) { }
                     return;
                 }
 
                 try {
-                    a.onNext(v);
+                    subscriber.onNext(v);
                 } catch (Throwable ex) {
                     cancel();
                     q.clear();
                     try {
-                        a.onError(prepareError(ex));
+                        subscriber.onError(prepareError(ex));
                     } catch (Throwable ignore) { }
                     return;
                 }
@@ -297,7 +297,7 @@ public abstract class AbstractSubscriberAndProducer<T> implements Subscriber<T>,
 
             if (q.isEmpty()) {
                 try {
-                    a.onCompleted();
+                    subscriber.onCompleted();
                 } catch (Throwable ignore) { }
                 return;
             }
@@ -317,7 +317,7 @@ public abstract class AbstractSubscriberAndProducer<T> implements Subscriber<T>,
     void drainAsync() {
         int missed = 1;
 
-        final CallStreamObserver<? super T> a = downstream;
+        final CallStreamObserver<? super T> subscriber = downstream;
         final Subscription s = subscription;
         @SuppressWarnings("unchecked")
         final Queue<T> q = (Queue<T>) subscription;
@@ -326,7 +326,7 @@ public abstract class AbstractSubscriberAndProducer<T> implements Subscriber<T>,
 
         for (;;) {
 
-            while (a.isReady()) {
+            while (subscriber.isReady()) {
                 boolean d = done;
                 T v;
 
@@ -336,14 +336,14 @@ public abstract class AbstractSubscriberAndProducer<T> implements Subscriber<T>,
                     cancel();
                     q.clear();
                     try {
-                        a.onError(prepareError(ex));
+                        subscriber.onError(prepareError(ex));
                     } catch (Throwable ignore) { }
                     return;
                 }
 
                 boolean empty = v == null;
 
-                if (checkTerminated(d, empty, a, q)) {
+                if (checkTerminated(d, empty, subscriber, q)) {
                     return;
                 }
 
@@ -352,12 +352,12 @@ public abstract class AbstractSubscriberAndProducer<T> implements Subscriber<T>,
                 }
 
                 try {
-                    a.onNext(v);
+                    subscriber.onNext(v);
                 } catch (Throwable ex) {
                     cancel();
                     q.clear();
                     try {
-                        a.onError(prepareError(ex));
+                        subscriber.onError(prepareError(ex));
                     } catch (Throwable ignore) { }
                     return;
                 }
@@ -365,7 +365,7 @@ public abstract class AbstractSubscriberAndProducer<T> implements Subscriber<T>,
                 sent++;
             }
 
-            if (checkTerminated(done, q.isEmpty(), a, q)) {
+            if (checkTerminated(done, q.isEmpty(), subscriber, q)) {
                 return;
             }
 

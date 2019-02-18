@@ -161,7 +161,7 @@ public abstract class AbstractStreamObserverAndPublisher<T>
         }
     }
 
-    void drainRegular(final Subscriber<? super T> a) {
+    void drainRegular(final Subscriber<? super T> subscriber) {
         int missed = 1;
 
         final CallStreamObserver<?> s = subscription;
@@ -177,7 +177,7 @@ public abstract class AbstractStreamObserverAndPublisher<T>
                 T t = q.poll();
                 boolean empty = t == null;
 
-                if (checkTerminated(d, empty, a, q)) {
+                if (checkTerminated(d, empty, subscriber, q)) {
                     return;
                 }
 
@@ -185,7 +185,7 @@ public abstract class AbstractStreamObserverAndPublisher<T>
                     break;
                 }
 
-                a.onNext(t);
+                subscriber.onNext(t);
 
                 sent++;
 
@@ -200,7 +200,7 @@ public abstract class AbstractStreamObserverAndPublisher<T>
             }
 
             if (r == sent) {
-                if (checkTerminated(done, q.isEmpty(), a, q)) {
+                if (checkTerminated(done, q.isEmpty(), subscriber, q)) {
                     return;
                 }
             }
@@ -218,7 +218,7 @@ public abstract class AbstractStreamObserverAndPublisher<T>
         }
     }
 
-    void drainFused(final Subscriber<? super T> a) {
+    void drainFused(final Subscriber<? super T> subscriber) {
         int missed = 1;
 
         final Queue<T> q = queue;
@@ -233,16 +233,16 @@ public abstract class AbstractStreamObserverAndPublisher<T>
 
             boolean d = done;
 
-            a.onNext(null);
+            subscriber.onNext(null);
 
             if (d) {
                 downstream = null;
 
                 Throwable ex = error;
                 if (ex != null) {
-                    a.onError(ex);
+                    subscriber.onError(ex);
                 } else {
-                    a.onComplete();
+                    subscriber.onComplete();
                 }
                 return;
             }
@@ -262,12 +262,12 @@ public abstract class AbstractStreamObserverAndPublisher<T>
         int missed = 1;
 
         for (;;) {
-            final Subscriber<? super T> a = downstream;
-            if (a != null) {
+            final Subscriber<? super T> subscriber = downstream;
+            if (subscriber != null) {
                 if (outputFused) {
-                    drainFused(a);
+                    drainFused(subscriber);
                 } else {
-                    drainRegular(a);
+                    drainRegular(subscriber);
                 }
                 return;
             }
@@ -279,7 +279,7 @@ public abstract class AbstractStreamObserverAndPublisher<T>
         }
     }
 
-    boolean checkTerminated(boolean d, boolean empty, Subscriber<? super T> a, Queue<T> q) {
+    boolean checkTerminated(boolean d, boolean empty, Subscriber<? super T> subscriber, Queue<T> q) {
         if (cancelled) {
             q.clear();
             downstream = null;
@@ -290,9 +290,9 @@ public abstract class AbstractStreamObserverAndPublisher<T>
             Throwable e = error;
             downstream = null;
             if (e != null) {
-                a.onError(e);
+                subscriber.onError(e);
             } else {
-                a.onComplete();
+                subscriber.onComplete();
             }
             return true;
         }
