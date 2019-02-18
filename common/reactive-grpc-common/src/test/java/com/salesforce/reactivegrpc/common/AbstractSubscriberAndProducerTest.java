@@ -602,7 +602,7 @@ public class AbstractSubscriberAndProducerTest {
         Assertions.assertThat(cancellationLatch.await(1, TimeUnit.MINUTES)).isTrue();
         Assertions.assertThat(downstream.done.getCount()).isEqualTo(1);
         Assertions.assertThat(downstream.e).isNull();
-        Assertions.assertThat(requested.get()).isEqualTo(produced.get());
+        Assertions.assertThat(requested.get()).isBetween(produced.get(), produced.get() + 1);
         Assertions.assertThat(producer).hasFieldOrPropertyWithValue("sourceMode", 0);
         Assertions.assertThat(downstream.collected)
                   .isSubsetOf(integers);
