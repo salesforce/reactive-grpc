@@ -44,7 +44,8 @@ import static com.google.common.base.Preconditions.checkNotNull;
 public abstract class AbstractStreamObserverAndPublisher<T>
         implements Publisher<T>, StreamObserver<T>, Subscription, Queue<T>  {
 
-    static final String NOT_SUPPORTED_MESSAGE = "Although AbstractStreamObserverAndPublisher implements Queue it is" +
+    private static final String NOT_SUPPORTED_MESSAGE = "Although " +
+        "AbstractStreamObserverAndPublisher implements Queue it is" +
             " purely internal and only guarantees support for poll/clear/size/isEmpty." +
             " Instances shouldn't be used/exposed as Queue outside of RxGrpc operators.";
 
