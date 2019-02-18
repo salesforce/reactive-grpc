@@ -98,7 +98,10 @@ public abstract class AbstractSubscriberAndProducer<T> implements Subscriber<T>,
 
         if (this.downstream == null && DOWNSTREAM.compareAndSet(this, null, downstream)) {
             downstream.setOnReadyHandler(this);
+            return;
         }
+
+        throw new IllegalStateException(getClass().getSimpleName() + " does not support multiple subscribers");
     }
 
     @Override
@@ -144,7 +147,7 @@ public abstract class AbstractSubscriberAndProducer<T> implements Subscriber<T>,
 
     @Override
     public void onNext(T t) {
-        if (t == null && sourceMode == ASYNC || sourceMode == NOT_FUSED) {
+        if (sourceMode == ASYNC || sourceMode == NOT_FUSED) {
             drain();
             return;
         }
@@ -160,7 +163,9 @@ public abstract class AbstractSubscriberAndProducer<T> implements Subscriber<T>,
                 drain();
             } catch (Throwable throwable) {
                 cancel();
-                a.onError(prepareError(throwable));
+                try {
+                    a.onError(prepareError(throwable));
+                } catch (Throwable ignore) { }
             }
         }
     }
@@ -204,6 +209,7 @@ public abstract class AbstractSubscriberAndProducer<T> implements Subscriber<T>,
 
             if (s instanceof FusionModeAwareSubscription) {
                 mode = ((FusionModeAwareSubscription) s).mode();
+                sourceMode = mode;
 
                 if (mode == SYNC) {
                     done = true;
@@ -212,9 +218,8 @@ public abstract class AbstractSubscriberAndProducer<T> implements Subscriber<T>,
                 }
             } else {
                 mode = NONE;
+                sourceMode = mode;
             }
-
-            sourceMode = mode;
         }
 
 
@@ -253,6 +258,8 @@ public abstract class AbstractSubscriberAndProducer<T> implements Subscriber<T>,
                 try {
                     v = q.poll();
                 } catch (Throwable ex) {
+                    cancel();
+                    q.clear();
                     try {
                         a.onError(prepareError(ex));
                     } catch (Throwable ignore) { }
@@ -263,6 +270,7 @@ public abstract class AbstractSubscriberAndProducer<T> implements Subscriber<T>,
                     q.clear();
                     return;
                 }
+
                 if (v == null) {
                     try {
                         a.onCompleted();
@@ -273,6 +281,8 @@ public abstract class AbstractSubscriberAndProducer<T> implements Subscriber<T>,
                 try {
                     a.onNext(v);
                 } catch (Throwable ex) {
+                    cancel();
+                    q.clear();
                     try {
                         a.onError(prepareError(ex));
                     } catch (Throwable ignore) { }
@@ -307,8 +317,8 @@ public abstract class AbstractSubscriberAndProducer<T> implements Subscriber<T>,
     void drainAsync() {
         int missed = 1;
 
-        final Subscription s = subscription;
         final CallStreamObserver<? super T> a = downstream;
+        final Subscription s = subscription;
         @SuppressWarnings("unchecked")
         final Queue<T> q = (Queue<T>) subscription;
 
@@ -323,13 +333,11 @@ public abstract class AbstractSubscriberAndProducer<T> implements Subscriber<T>,
                 try {
                     v = q.poll();
                 } catch (Throwable ex) {
-                    s.cancel();
+                    cancel();
                     q.clear();
-
                     try {
                         a.onError(prepareError(ex));
                     } catch (Throwable ignore) { }
-
                     return;
                 }
 
@@ -346,8 +354,8 @@ public abstract class AbstractSubscriberAndProducer<T> implements Subscriber<T>,
                 try {
                     a.onNext(v);
                 } catch (Throwable ex) {
-                    throwable = ex;
-                    done = true;
+                    cancel();
+                    q.clear();
                     try {
                         a.onError(prepareError(ex));
                     } catch (Throwable ignore) { }
@@ -493,7 +501,6 @@ public abstract class AbstractSubscriberAndProducer<T> implements Subscriber<T>,
         public int size() {
             throw new UnsupportedOperationException(NOT_SUPPORTED_MESSAGE);
         }
-
 
         @Override
         public Object peek() {

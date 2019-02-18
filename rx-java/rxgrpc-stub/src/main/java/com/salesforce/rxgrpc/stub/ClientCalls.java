@@ -81,14 +81,14 @@ public final class ClientCalls {
      * stream of messages.
      */
     public static <TRequest, TResponse> Flowable<TResponse> oneToMany(
-            Single<TRequest> rxRequest,
+            final Single<TRequest> rxRequest,
             final BiConsumer<TRequest, StreamObserver<TResponse>> delegate) {
         try {
             return rxRequest
                     .flatMapPublisher(new io.reactivex.functions.Function<TRequest, Publisher<? extends TResponse>>() {
                         @Override
                         public Publisher<? extends TResponse> apply(TRequest request) {
-                            RxClientStreamObserverAndPublisher<TResponse> consumerStreamObserver =
+                            final RxClientStreamObserverAndPublisher<TResponse> consumerStreamObserver =
                                 new RxClientStreamObserverAndPublisher<TResponse>(null);
 
                             delegate.accept(request, consumerStreamObserver);
@@ -112,7 +112,7 @@ public final class ClientCalls {
         try {
             final RxSubscriberAndClientProducer<TRequest> subscriberAndGRPCProducer =
                     flowableSource.subscribeWith(new RxSubscriberAndClientProducer<TRequest>());
-            RxClientStreamObserverAndPublisher<TResponse> observerAndPublisher =
+            final RxClientStreamObserverAndPublisher<TResponse> observerAndPublisher =
                 new RxClientStreamObserverAndPublisher<TResponse>(
                     new com.salesforce.reactivegrpc.common.Consumer<CallStreamObserver<?>>() {
                         @Override
@@ -129,7 +129,7 @@ public final class ClientCalls {
                 );
             delegate.apply(observerAndPublisher);
 
-            return Flowable.unsafeCreate(observerAndPublisher)
+            return Flowable.fromPublisher(observerAndPublisher)
                            .singleOrError();
         } catch (Throwable throwable) {
             return Single.error(throwable);
@@ -142,12 +142,12 @@ public final class ClientCalls {
      */
     @SuppressWarnings("unchecked")
     public static <TRequest, TResponse> Flowable<TResponse> manyToMany(
-            Flowable<TRequest> flowableSource,
-            Function<StreamObserver<TResponse>, StreamObserver<TRequest>> delegate) {
+            final Flowable<TRequest> flowableSource,
+            final Function<StreamObserver<TResponse>, StreamObserver<TRequest>> delegate) {
         try {
             final RxSubscriberAndClientProducer<TRequest> subscriberAndGRPCProducer =
                     flowableSource.subscribeWith(new RxSubscriberAndClientProducer<TRequest>());
-            RxClientStreamObserverAndPublisher<TResponse> observerAndPublisher =
+            final RxClientStreamObserverAndPublisher<TResponse> observerAndPublisher =
                 new RxClientStreamObserverAndPublisher<TResponse>(
                     new com.salesforce.reactivegrpc.common.Consumer<CallStreamObserver<?>>() {
                         @Override
@@ -164,7 +164,7 @@ public final class ClientCalls {
                 );
             delegate.apply(observerAndPublisher);
 
-            return Flowable.unsafeCreate(observerAndPublisher);
+            return Flowable.fromPublisher(observerAndPublisher);
         } catch (Throwable throwable) {
             return Flowable.error(throwable);
         }

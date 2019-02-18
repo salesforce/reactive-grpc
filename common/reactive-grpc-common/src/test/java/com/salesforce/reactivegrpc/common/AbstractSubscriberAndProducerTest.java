@@ -1,6 +1,7 @@
 package com.salesforce.reactivegrpc.common;
 
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Queue;
 import java.util.concurrent.ConcurrentLinkedQueue;
@@ -8,15 +9,21 @@ import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
-import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicLong;
+import java.util.concurrent.atomic.AtomicReference;
+import java.util.concurrent.locks.LockSupport;
 
 import io.grpc.StatusException;
 import io.grpc.stub.CallStreamObserver;
+import io.reactivex.Completable;
+import io.reactivex.CompletableSource;
 import io.reactivex.Flowable;
-import io.reactivex.Scheduler;
-import io.reactivex.exceptions.Exceptions;
+import io.reactivex.Observable;
 import io.reactivex.functions.Action;
 import io.reactivex.functions.Consumer;
+import io.reactivex.functions.Function;
+import io.reactivex.functions.LongConsumer;
 import io.reactivex.plugins.RxJavaPlugins;
 import io.reactivex.schedulers.Schedulers;
 import org.assertj.core.api.Assertions;
@@ -24,6 +31,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
+import org.reactivestreams.Subscription;
 
 @RunWith(Parameterized.class)
 public class AbstractSubscriberAndProducerTest {
@@ -54,14 +62,100 @@ public class AbstractSubscriberAndProducerTest {
     }
 
     @Test
+    public void shouldSupportOnlySingleSubscribersTest() throws InterruptedException {
+        final TestCallStreamObserver downstream = new TestCallStreamObserver(executorService);
+        for (int i = 0; i < 1000; i++) {
+            final AtomicReference<Throwable> throwableAtomicReference = new AtomicReference<Throwable>();
+            final TestSubscriberProducer producer = new TestSubscriberProducer();
+            final CountDownLatch latch = new CountDownLatch(1);
+            final CountDownLatch throwingLatch = new CountDownLatch(1);
+            executorService.execute(new Runnable() {
+                @Override
+                public void run() {
+                    latch.countDown();
+                    try {
+                        producer.subscribe(downstream);
+
+                    } catch (Throwable t) {
+                        Assertions.assertThat(throwableAtomicReference.getAndSet(t)).isNull();
+                        throwingLatch.countDown();
+                    }
+                }
+            });
+            latch.await();
+            try {
+                producer.subscribe(downstream);
+            } catch (Throwable t) {
+                Assertions.assertThat(throwableAtomicReference.getAndSet(t)).isNull();
+                throwingLatch.countDown();
+            }
+
+            throwingLatch.await();
+
+            Assertions.assertThat(throwableAtomicReference.get())
+                      .isExactlyInstanceOf(IllegalStateException.class)
+                      .hasMessage("TestSubscriberProducer does not support multiple subscribers");
+        }
+    }
+
+    @Test
+    public void shouldSupportOnlySingleSubscriptionTest() throws InterruptedException {
+        for (int i = 0; i < 1000; i++) {
+            final CountDownLatch cancelLatch = new CountDownLatch(1);
+            final Subscription upstream = new Subscription() {
+                AtomicBoolean once = new AtomicBoolean();
+                @Override
+                public void request(long l) { }
+
+                @Override
+                public void cancel() {
+                    Assertions.assertThat(once.getAndSet(true)).isFalse();
+                    cancelLatch.countDown();
+                }
+            };
+            final TestSubscriberProducer producer = new TestSubscriberProducer();
+            final CountDownLatch latch = new CountDownLatch(1);
+            executorService.execute(new Runnable() {
+                @Override
+                public void run() {
+                    latch.countDown();
+                    producer.onSubscribe(upstream);
+                }
+            });
+            latch.await();
+            producer.onSubscribe(upstream);
+
+            Assertions.assertThat(cancelLatch.await(10, TimeUnit.SECONDS)).isTrue();
+        }
+    }
+
+    @Test
     public void regularModeWithRacingTest() {
+        final AtomicLong requested = new AtomicLong();
+        final AtomicBoolean pingPing = new AtomicBoolean();
         List<Integer> integers = Flowable.range(0, 10000000)
                                          .toList()
                                          .blockingGet();
 
         TestSubscriberProducer<Integer> producer = Flowable.fromIterable(integers)
                                                            .hide()
-                                                           .subscribeOn(Schedulers.computation())
+                                                           .subscribeOn(Schedulers.io())
+                                                           .observeOn(Schedulers.io())
+                                                           .doOnRequest(new LongConsumer() {
+                                                               @Override
+                                                               public void accept(long r) {
+                                                                   requested.addAndGet(r);
+                                                                   boolean state = pingPing.getAndSet(true);
+                                                                   Assertions.assertThat(state).isFalse();
+                                                               }
+                                                           })
+                                                           .doOnNext(new Consumer<Integer>() {
+                                                               @Override
+                                                               public void accept(Integer integer) {
+                                                                   boolean state = pingPing.getAndSet(false);
+                                                                   Assertions.assertThat(state).isTrue();
+                                                               }
+                                                           })
                                                            .hide()
                                                            .subscribeWith(new TestSubscriberProducer<Integer>());
 
@@ -69,17 +163,15 @@ public class AbstractSubscriberAndProducerTest {
             executorService);
         producer.subscribe(downstream);
 
-        for (int i = 0; i < 10000; i++) {
-            downstream.pause();
-            downstream.resume();
-        }
+        racePauseResuming(downstream, 10000);
 
         Assertions.assertThat(downstream.awaitTerminal(10, TimeUnit.SECONDS)).isTrue();
         Assertions.assertThat(downstream.e).isNull();
         Assertions.assertThat(producer).hasFieldOrPropertyWithValue("sourceMode", 0);
+        Assertions.assertThat(unhandledThrowable).isEmpty();
+        Assertions.assertThat(requested.get()).isEqualTo(10000000 + 1);
         Assertions.assertThat(downstream.collected)
                   .isEqualTo(integers);
-        Assertions.assertThat(unhandledThrowable).isEmpty();
     }
 
     @Test
@@ -90,16 +182,14 @@ public class AbstractSubscriberAndProducerTest {
 
         TestSubscriberProducer<Integer> producer = Flowable.fromIterable(integers)
                                                            .hide()
-                                                           .observeOn(Schedulers.computation())
+                                                           .subscribeOn(Schedulers.io())
+                                                           .observeOn(Schedulers.io())
                                                            .subscribeWith(new TestSubscriberProducer<Integer>());
 
         TestCallStreamObserver<Integer> downstream = new TestCallStreamObserver<Integer>(executorService);
         producer.subscribe(downstream);
 
-        for (int i = 0; i < 10000; i++) {
-            downstream.pause();
-            downstream.resume();
-        }
+        racePauseResuming(downstream, 10000);
 
         Assertions.assertThat(downstream.awaitTerminal(10, TimeUnit.SECONDS)).isTrue();
         Assertions.assertThat(downstream.e).isNull();
@@ -131,11 +221,7 @@ public class AbstractSubscriberAndProducerTest {
 
         startedLatch.await();
 
-        for (int i = 0; i < 10000; i++) {
-
-            downstream.pause();
-            downstream.resume();
-        }
+        racePauseResuming(downstream, 10000);
 
         Assertions.assertThat(downstream.awaitTerminal(10, TimeUnit.SECONDS)).isTrue();
         Assertions.assertThat(downstream.e).isNull();
@@ -146,8 +232,9 @@ public class AbstractSubscriberAndProducerTest {
     }
 
     @Test
-    public void regularModeWithRacingAndErrorTest() {
-
+    public void regularModeWithRacingAndOnErrorTest() {
+        final AtomicLong requested = new AtomicLong();
+        final AtomicBoolean pingPing = new AtomicBoolean();
         List<Integer> integers = Flowable.range(0, 10000000)
                                          .toList()
                                          .blockingGet();
@@ -158,7 +245,23 @@ public class AbstractSubscriberAndProducerTest {
 
         TestSubscriberProducer<Integer> producer = Flowable.fromIterable(copy)
                                                            .hide()
-                                                           .subscribeOn(Schedulers.computation())
+                                                           .subscribeOn(Schedulers.io())
+                                                           .observeOn(Schedulers.io())
+                                                           .doOnRequest(new LongConsumer() {
+                                                               @Override
+                                                               public void accept(long r) {
+                                                                   requested.addAndGet(r);
+                                                                   boolean state = pingPing.getAndSet(true);
+                                                                   Assertions.assertThat(state).isFalse();
+                                                               }
+                                                           })
+                                                           .doOnNext(new Consumer<Integer>() {
+                                                               @Override
+                                                               public void accept(Integer integer) {
+                                                                   boolean state = pingPing.getAndSet(false);
+                                                                   Assertions.assertThat(state).isTrue();
+                                                               }
+                                                           })
                                                            .hide()
                                                            .subscribeWith(new TestSubscriberProducer<Integer>());
 
@@ -166,23 +269,21 @@ public class AbstractSubscriberAndProducerTest {
             executorService);
         producer.subscribe(downstream);
 
-        for (int i = 0; i < 10000; i++) {
-            downstream.pause();
-            downstream.resume();
-        }
+        racePauseResuming(downstream, 10000);
 
         Assertions.assertThat(downstream.awaitTerminal(10, TimeUnit.SECONDS)).isTrue();
         Assertions.assertThat(downstream.e)
                   .isExactlyInstanceOf(StatusException.class)
                   .hasCauseInstanceOf(NullPointerException.class);
         Assertions.assertThat(producer).hasFieldOrPropertyWithValue("sourceMode", 0);
+        Assertions.assertThat(unhandledThrowable).isEmpty();
+        Assertions.assertThat(requested.get()).isEqualTo(10000000 + 1);
         Assertions.assertThat(downstream.collected)
                   .isEqualTo(integers);
-        Assertions.assertThat(unhandledThrowable).isEmpty();
     }
 
     @Test
-    public void asyncModeWithRacingAndErrorTest() {
+    public void asyncModeWithRacingAndOnErrorTest() {
 
         List<Integer> integers = Flowable.range(0, 10000000)
                                          .toList()
@@ -201,10 +302,7 @@ public class AbstractSubscriberAndProducerTest {
             executorService);
         producer.subscribe(downstream);
 
-        for (int i = 0; i < 10000; i++) {
-            downstream.pause();
-            downstream.resume();
-        }
+        racePauseResuming(downstream, 10000);
 
         Assertions.assertThat(downstream.awaitTerminal(10, TimeUnit.SECONDS)).isTrue();
         Assertions.assertThat(downstream.e)
@@ -217,19 +315,78 @@ public class AbstractSubscriberAndProducerTest {
     }
 
     @Test
-    public void syncModeWithRacingAndErrorTest() throws InterruptedException {
-
+    public void asyncModeWithRacingAndErrorTest() throws InterruptedException {
+        final CountDownLatch cancellationLatch = new CountDownLatch(1);
         List<Integer> integers = Flowable.range(0, 10000000)
                                          .toList()
                                          .blockingGet();
 
-        ArrayList<Integer> copy = new ArrayList<Integer>(integers);
+        TestSubscriberProducer<Integer> producer = Flowable.fromIterable(integers)
+                                                           .doOnCancel(new Action() {
+                                                               @Override
+                                                               public void run() {
+                                                                   cancellationLatch.countDown();
+                                                               }
+                                                           })
+                                                           .hide()
+                                                           .subscribeOn(Schedulers.io())
+                                                           .observeOn(Schedulers.io())
+                                                           .map(new Function<Integer, Integer>() {
+                                                               @Override
+                                                               public Integer apply(Integer i) {
+                                                                   if (i == 9999999) {
+                                                                       throw new NullPointerException();
+                                                                   }
 
-        copy.add(null);
+                                                                   return i;
+                                                               }
+                                                           })
+                                                           .subscribeWith(new TestSubscriberProducer<Integer>());
+
+        TestCallStreamObserver<Integer> downstream = new TestCallStreamObserver<Integer>(
+            executorService);
+        producer.subscribe(downstream);
+
+        racePauseResuming(downstream, 10000);
+
+        Assertions.assertThat(downstream.awaitTerminal(10, TimeUnit.SECONDS)).isTrue();
+        Assertions.assertThat(cancellationLatch.await(10, TimeUnit.SECONDS)).isTrue();
+        Assertions.assertThat(downstream.e)
+                  .isExactlyInstanceOf(StatusException.class)
+                  .hasCauseInstanceOf(NullPointerException.class);
+        Assertions.assertThat(producer).hasFieldOrPropertyWithValue("sourceMode", 2);
+        Assertions.assertThat(downstream.collected)
+                  .hasSize(integers.size() - 1)
+                  .isEqualTo(integers.subList(0, integers.size() - 1));
+        Assertions.assertThat(unhandledThrowable).isEmpty();
+    }
+
+    @Test
+    public void syncModeWithRacingAndErrorTest() throws InterruptedException {
+        final CountDownLatch cancellationLatch = new CountDownLatch(1);
+        List<Integer> integers = Flowable.range(0, 100000)
+                                         .toList()
+                                         .blockingGet();
 
         final CountDownLatch startedLatch = new CountDownLatch(1);
-        final TestSubscriberProducer<Integer> producer = Flowable.fromIterable(copy)
-                                                           .subscribeWith(new TestSubscriberProducer<Integer>());
+        final TestSubscriberProducer<Integer> producer = Flowable.fromIterable(new SlowingIterable<Integer>(integers))
+                                                                 .map(new Function<Integer, Integer>() {
+                                                                     @Override
+                                                                     public Integer apply(Integer i) {
+                                                                         if (i == 99999) {
+                                                                             throw new NullPointerException();
+                                                                         }
+
+                                                                         return i;
+                                                                     }
+                                                                 })
+                                                                 .subscribeWith(new TestSubscriberProducer<Integer>() {
+                                                                     @Override
+                                                                     public void cancel() {
+                                                                         super.cancel();
+                                                                         cancellationLatch.countDown();
+                                                                     }
+                                                                 });
 
         final TestCallStreamObserver<Integer> downstream =
             new TestCallStreamObserver<Integer>(executorService);
@@ -243,31 +400,52 @@ public class AbstractSubscriberAndProducerTest {
 
         startedLatch.await();
 
-        for (int i = 0; i < 10000; i++) {
-            downstream.pause();
-            downstream.resume();
-        }
+        racePauseResuming(downstream, 10000);
 
         Assertions.assertThat(downstream.awaitTerminal(10, TimeUnit.SECONDS)).isTrue();
+        Assertions.assertThat(cancellationLatch.await(10, TimeUnit.SECONDS)).isTrue();
         Assertions.assertThat(downstream.e)
                   .isExactlyInstanceOf(StatusException.class)
                   .hasCauseInstanceOf(NullPointerException.class);
         Assertions.assertThat(producer).hasFieldOrPropertyWithValue("sourceMode", 1);
         Assertions.assertThat(downstream.collected)
-                  .isEqualTo(integers);
+                  .hasSize(integers.size() - 1)
+                  .isEqualTo(integers.subList(0, integers.size() - 1));
         Assertions.assertThat(unhandledThrowable).isEmpty();
     }
 
     @Test
-    public void regularModeWithRacingAndOnErrorOverOnNextTest() {
-
+    public void regularModeWithRacingAndOnErrorOverOnNextTest()
+        throws InterruptedException {
+        final AtomicLong requested = new AtomicLong();
+        final AtomicLong produced = new AtomicLong();
+        final CountDownLatch cancellationLatch = new CountDownLatch(1);
         List<Integer> integers = Flowable.range(0, 10000000)
                                          .toList()
                                          .blockingGet();
 
         TestSubscriberProducer<Integer> producer = Flowable.fromIterable(integers)
+                                                           .doOnCancel(new Action() {
+                                                               @Override
+                                                               public void run() {
+                                                                   cancellationLatch.countDown();
+                                                               }
+                                                           })
                                                            .hide()
-                                                           .subscribeOn(Schedulers.computation())
+                                                           .subscribeOn(Schedulers.io())
+                                                           .observeOn(Schedulers.io())
+                                                           .doOnNext(new Consumer<Integer>() {
+                                                               @Override
+                                                               public void accept(Integer __) {
+                                                                   produced.getAndIncrement();
+                                                               }
+                                                           })
+                                                           .doOnRequest(new LongConsumer() {
+                                                               @Override
+                                                               public void accept(long r) {
+                                                                   requested.addAndGet(r);
+                                                               }
+                                                           })
                                                            .hide()
                                                            .subscribeWith(new TestSubscriberProducer<Integer>());
 
@@ -275,47 +453,52 @@ public class AbstractSubscriberAndProducerTest {
             executorService);
         producer.subscribe(downstream);
 
-        for (int i = 0; i < 100; i++) {
-            downstream.pause();
-            downstream.resume();
-        }
+        racePauseResuming(downstream, 100);
 
         downstream.throwOnNext();
 
         Assertions.assertThat(downstream.awaitTerminal(10, TimeUnit.SECONDS)).isTrue();
+        Assertions.assertThat(cancellationLatch.await(10, TimeUnit.SECONDS)).isTrue();
         Assertions.assertThat(downstream.e)
                   .isExactlyInstanceOf(StatusException.class)
                   .hasCauseInstanceOf(OnNextTestException.class);
         Assertions.assertThat(producer).hasFieldOrPropertyWithValue("sourceMode", 0);
+        Assertions.assertThat(requested.get()).isEqualTo(produced.get());
         Assertions.assertThat(downstream.collected)
                   .isSubsetOf(integers);
         Assertions.assertThat(unhandledThrowable).isEmpty();
     }
 
     @Test
-    public void asyncModeWithRacingAndOnErrorOverOnNextTest() {
-
+    public void asyncModeWithRacingAndOnErrorOverOnNextTest()
+        throws InterruptedException {
+        final CountDownLatch cancellationLatch = new CountDownLatch(1);
         List<Integer> integers = Flowable.range(0, 10000000)
                                          .toList()
                                          .blockingGet();
 
         TestSubscriberProducer<Integer> producer = Flowable.fromIterable(integers)
+                                                           .doOnCancel(new Action() {
+                                                               @Override
+                                                               public void run() {
+                                                                   cancellationLatch.countDown();
+                                                               }
+                                                           })
                                                            .hide()
-                                                           .observeOn(Schedulers.computation())
+                                                           .subscribeOn(Schedulers.io())
+                                                           .observeOn(Schedulers.io())
                                                            .subscribeWith(new TestSubscriberProducer<Integer>());
 
         TestCallStreamObserver<Integer> downstream = new TestCallStreamObserver<Integer>(
             executorService);
         producer.subscribe(downstream);
 
-        for (int i = 0; i < 100; i++) {
-            downstream.pause();
-            downstream.resume();
-        }
+        racePauseResuming(downstream, 100);
 
         downstream.throwOnNext();
 
         Assertions.assertThat(downstream.awaitTerminal(10, TimeUnit.SECONDS)).isTrue();
+        Assertions.assertThat(cancellationLatch.await(10, TimeUnit.SECONDS)).isTrue();
         Assertions.assertThat(downstream.e)
                   .isExactlyInstanceOf(StatusException.class)
                   .hasCauseInstanceOf(OnNextTestException.class);
@@ -327,14 +510,20 @@ public class AbstractSubscriberAndProducerTest {
 
     @Test
     public void syncModeWithRacingAndOnErrorOverOnNextTest() throws InterruptedException {
-
-        List<Integer> integers = Flowable.range(0, 10000000)
+        final CountDownLatch cancellationLatch = new CountDownLatch(1);
+        List<Integer> integers = Flowable.range(0, 100000)
                                          .toList()
                                          .blockingGet();
 
         final CountDownLatch startedLatch = new CountDownLatch(1);
-        final TestSubscriberProducer<Integer> producer = Flowable.fromIterable(integers)
-                                                                 .subscribeWith(new TestSubscriberProducer<Integer>());
+        final TestSubscriberProducer<Integer> producer = Flowable.fromIterable(new SlowingIterable<Integer>(integers))
+                                                                 .subscribeWith(new TestSubscriberProducer<Integer>() {
+                                                                     @Override
+                                                                     public void cancel() {
+                                                                         super.cancel();
+                                                                         cancellationLatch.countDown();
+                                                                     }
+                                                                 });
 
         final TestCallStreamObserver<Integer> downstream =
             new TestCallStreamObserver<Integer>(executorService);
@@ -348,14 +537,12 @@ public class AbstractSubscriberAndProducerTest {
 
         startedLatch.await();
 
-        for (int i = 0; i < 100; i++) {
-            downstream.pause();
-            downstream.resume();
-        }
+        racePauseResuming(downstream, 100);
 
         downstream.throwOnNext();
 
         Assertions.assertThat(downstream.awaitTerminal(10, TimeUnit.SECONDS)).isTrue();
+        Assertions.assertThat(cancellationLatch.await(10, TimeUnit.SECONDS)).isTrue();
         Assertions.assertThat(downstream.e)
                   .isExactlyInstanceOf(StatusException.class)
                   .hasCauseInstanceOf(OnNextTestException.class);
@@ -367,6 +554,8 @@ public class AbstractSubscriberAndProducerTest {
 
     @Test
     public void regularModeWithRacingAndCancellationTest() throws InterruptedException {
+        final AtomicLong requested = new AtomicLong();
+        final AtomicLong produced = new AtomicLong();
         final CountDownLatch cancellationLatch = new CountDownLatch(1);
         List<Integer> integers = Flowable.range(0, 10000000)
                                          .toList()
@@ -374,31 +563,41 @@ public class AbstractSubscriberAndProducerTest {
 
         TestSubscriberProducer<Integer> producer = Flowable.fromIterable(integers)
                                                            .hide()
-                                                           .subscribeOn(Schedulers.computation())
-                                                           .hide()
+                                                           .subscribeOn(Schedulers.io())
+                                                           .observeOn(Schedulers.io())
+                                                           .doOnNext(new Consumer<Integer>() {
+                                                               @Override
+                                                               public void accept(Integer __) {
+                                                                   produced.incrementAndGet();
+                                                               }
+                                                           })
                                                            .doOnCancel(new Action() {
                                                                @Override
                                                                public void run() {
                                                                    cancellationLatch.countDown();
                                                                }
                                                            })
+                                                           .doOnRequest(new LongConsumer() {
+                                                               @Override
+                                                               public void accept(long r) {
+                                                                   requested.addAndGet(r);
+                                                               }
+                                                           })
+                                                           .hide()
                                                            .subscribeWith(new TestSubscriberProducer<Integer>());
 
         TestCallStreamObserver<Integer> downstream = new TestCallStreamObserver<Integer>(
             executorService);
         producer.subscribe(downstream);
 
-        for (int i = 0; i < 100; i++) {
-            downstream.pause();
-            downstream.resume();
-        }
+        racePauseResuming(downstream, 100);
 
         producer.cancel();
 
         Assertions.assertThat(cancellationLatch.await(10, TimeUnit.SECONDS)).isTrue();
-
         Assertions.assertThat(downstream.done.getCount()).isEqualTo(1);
         Assertions.assertThat(downstream.e).isNull();
+        Assertions.assertThat(requested.get()).isEqualTo(produced.get());
         Assertions.assertThat(producer).hasFieldOrPropertyWithValue("sourceMode", 0);
         Assertions.assertThat(downstream.collected)
                   .isSubsetOf(integers);
@@ -421,17 +620,15 @@ public class AbstractSubscriberAndProducerTest {
                                                                    cancellationLatch.countDown();
                                                                }
                                                            })
-                                                           .observeOn(Schedulers.computation())
+                                                           .subscribeOn(Schedulers.io())
+                                                           .observeOn(Schedulers.io())
                                                            .subscribeWith(new TestSubscriberProducer<Integer>());
 
         TestCallStreamObserver<Integer> downstream = new TestCallStreamObserver<Integer>(
             executorService);
         producer.subscribe(downstream);
 
-        for (int i = 0; i < 100; i++) {
-            downstream.pause();
-            downstream.resume();
-        }
+        racePauseResuming(downstream, 100);
 
         producer.cancel();
 
@@ -449,12 +646,12 @@ public class AbstractSubscriberAndProducerTest {
     public void syncModeWithRacingAndCancellationTest() throws InterruptedException {
         final CountDownLatch cancellationLatch = new CountDownLatch(1);
 
-        List<Integer> integers = Flowable.range(0, 10000000)
+        List<Integer> integers = Flowable.range(0, 100000)
                                          .toList()
                                          .blockingGet();
 
         final CountDownLatch startedLatch = new CountDownLatch(1);
-        final TestSubscriberProducer<Integer> producer = Flowable.fromIterable(integers)
+        final TestSubscriberProducer<Integer> producer = Flowable.fromIterable(new SlowingIterable<Integer>(integers))
                                                                  .subscribeWith(new TestSubscriberProducer<Integer>() {
                                                                      @Override
                                                                      public void cancel() {
@@ -475,10 +672,7 @@ public class AbstractSubscriberAndProducerTest {
 
         startedLatch.await();
 
-        for (int i = 0; i < 100; i++) {
-            downstream.pause();
-            downstream.resume();
-        }
+        racePauseResuming(downstream, 100);
 
         producer.cancel();
 
@@ -490,6 +684,83 @@ public class AbstractSubscriberAndProducerTest {
         Assertions.assertThat(downstream.collected)
                   .isSubsetOf(integers);
         Assertions.assertThat(unhandledThrowable).isEmpty();
+    }
+
+    static void racePauseResuming(final TestCallStreamObserver<?> downstream, int times) {
+        Observable.range(0, times)
+                  .concatMapCompletable(new Function<Integer, CompletableSource>() {
+                      @Override
+                      public CompletableSource apply(Integer i) {
+                          return Completable
+                              .fromAction(new Action() {
+                                  @Override
+                                  public void run() {
+                                      downstream.resume();
+                                  }
+                              })
+                              .subscribeOn(Schedulers.computation())
+                              .andThen(Completable
+                                  .fromAction(
+                                      new Action() {
+                                          @Override
+                                          public void run() {
+                                              downstream.pause();
+                                          }
+                                      }
+                                  )
+                                  .subscribeOn(Schedulers.computation())
+                              );
+                      }
+                  })
+                  .blockingAwait();
+
+        downstream.pause();
+        executorService.execute(new Runnable() {
+            @Override
+            public void run() {
+                downstream.resume();
+            }
+        });
+    }
+
+    static class SlowingIterable<T> implements Iterable<T> {
+
+        private final Iterable<T> iterable;
+
+        SlowingIterable(Iterable<T> iterable) {
+
+            this.iterable = iterable;
+        }
+
+        @Override
+        public Iterator<T> iterator() {
+            return new SlowingIterator<T>(iterable.iterator());
+        }
+
+        static class SlowingIterator<T> implements Iterator<T> {
+
+            private final Iterator<T> delegate;
+
+            SlowingIterator(Iterator<T> delegate) {
+                this.delegate = delegate;
+            }
+
+            @Override
+            public boolean hasNext() {
+                return delegate.hasNext();
+            }
+
+            @Override
+            public T next() {
+                LockSupport.parkNanos(100);
+                return delegate.next();
+            }
+
+            @Override
+            public void remove() {
+                delegate.remove();
+            }
+        }
     }
 
     static class OnNextTestException extends RuntimeException {

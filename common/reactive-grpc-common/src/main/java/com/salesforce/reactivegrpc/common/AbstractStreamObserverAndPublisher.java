@@ -21,6 +21,8 @@ import org.reactivestreams.Publisher;
 import org.reactivestreams.Subscriber;
 import org.reactivestreams.Subscription;
 
+import static com.google.common.base.Preconditions.checkNotNull;
+
 // TODO FIX DOCS
 /**
  * ReactiveStreamObserverPublisher bridges the manual flow control idioms of gRPC and Reactive Streams. This class takes
@@ -149,7 +151,7 @@ public abstract class AbstractStreamObserverAndPublisher<T>
             return;
         }
 
-        throw new IllegalStateException(getClass() + " can be subscribed only once");
+        throw new IllegalStateException(getClass().getSimpleName() + " supports only a single subscription");
     }
 
     void doTerminate() {
@@ -159,16 +161,17 @@ public abstract class AbstractStreamObserverAndPublisher<T>
         }
     }
 
-    void drainRegular(Subscriber<? super T> a) {
+    void drainRegular(final Subscriber<? super T> a) {
         int missed = 1;
 
+        final CallStreamObserver<?> s = subscription;
         final Queue<T> q = queue;
         int sent = produced;
+        long r;
 
         for (;;) {
-            long requested = this.requested;
-
-            while (requested != sent) {
+            r = requested;
+            while (r != sent) {
                 boolean d = done;
 
                 T t = q.poll();
@@ -185,20 +188,21 @@ public abstract class AbstractStreamObserverAndPublisher<T>
                 a.onNext(t);
 
                 sent++;
+
+                if (sent == prefetch) {
+                    if (r != Long.MAX_VALUE) {
+                        r = REQUESTED.addAndGet(this, -sent);
+                    }
+
+                    s.request(sent);
+                    sent = 0;
+                }
             }
 
-            if (requested == sent) {
+            if (r == sent) {
                 if (checkTerminated(done, q.isEmpty(), a, q)) {
                     return;
                 }
-            }
-
-            if (sent == prefetch) {
-                if (requested != Long.MAX_VALUE) {
-                    REQUESTED.addAndGet(this, -sent);
-                }
-                subscription.request(sent);
-                sent = 0;
             }
 
             int w = wip;
@@ -214,7 +218,7 @@ public abstract class AbstractStreamObserverAndPublisher<T>
         }
     }
 
-    void drainFused(Subscriber<? super T> a) {
+    void drainFused(final Subscriber<? super T> a) {
         int missed = 1;
 
         final Queue<T> q = queue;
@@ -258,9 +262,8 @@ public abstract class AbstractStreamObserverAndPublisher<T>
         int missed = 1;
 
         for (;;) {
-            Subscriber<? super T> a = downstream;
+            final Subscriber<? super T> a = downstream;
             if (a != null) {
-
                 if (outputFused) {
                     drainFused(a);
                 } else {
@@ -282,6 +285,7 @@ public abstract class AbstractStreamObserverAndPublisher<T>
             downstream = null;
             return true;
         }
+
         if (d && empty) {
             Throwable e = error;
             downstream = null;
@@ -302,7 +306,7 @@ public abstract class AbstractStreamObserverAndPublisher<T>
             return;
         }
 
-        Queue<T> q = this.queue;
+        final Queue<T> q = this.queue;
 
         while (!q.offer(t)) {
             LockSupport.parkNanos(SPIN_LOCK_PARK_NANOS);
@@ -340,8 +344,9 @@ public abstract class AbstractStreamObserverAndPublisher<T>
 
     @Override
     public void subscribe(Subscriber<? super T> actual) {
-        if (state == UNSUBSCRIBED_STATE && STATE.compareAndSet(this, UNSUBSCRIBED_STATE, SUBSCRIBED_ONCE_STATE)) {
+        checkNotNull(actual);
 
+        if (state == UNSUBSCRIBED_STATE && STATE.compareAndSet(this, UNSUBSCRIBED_STATE, SUBSCRIBED_ONCE_STATE)) {
             actual.onSubscribe(this);
             this.downstream = actual;
             if (cancelled) {

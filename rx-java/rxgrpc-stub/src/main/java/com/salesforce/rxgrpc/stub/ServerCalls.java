@@ -32,12 +32,13 @@ public final class ServerCalls {
      * Implements a unary -> unary call using {@link Single} -> {@link Single}.
      */
     public static <TRequest, TResponse> void oneToOne(
-            TRequest request, final StreamObserver<TResponse> responseObserver,
-            Function<Single<TRequest>, Single<TResponse>> delegate) {
+            final TRequest request,
+            final StreamObserver<TResponse> responseObserver,
+            final Function<Single<TRequest>, Single<TResponse>> delegate) {
         try {
-            Single<TRequest> rxRequest = Single.just(request);
+            final Single<TRequest> rxRequest = Single.just(request);
 
-            Single<TResponse> rxResponse = Preconditions.checkNotNull(delegate.apply(rxRequest));
+            final Single<TResponse> rxResponse = Preconditions.checkNotNull(delegate.apply(rxRequest));
             rxResponse.subscribe(
                     new Consumer<TResponse>() {
                         @Override
@@ -66,13 +67,14 @@ public final class ServerCalls {
      * stream of messages.
      */
     public static <TRequest, TResponse> void oneToMany(
-            TRequest request, StreamObserver<TResponse> responseObserver,
-            Function<Single<TRequest>, Flowable<TResponse>> delegate) {
+            final TRequest request,
+            final StreamObserver<TResponse> responseObserver,
+            final Function<Single<TRequest>, Flowable<TResponse>> delegate) {
         try {
-            Single<TRequest> rxRequest = Single.just(request);
+            final Single<TRequest> rxRequest = Single.just(request);
 
-            Flowable<TResponse> rxResponse = Preconditions.checkNotNull(delegate.apply(rxRequest));
-            RxSubscriberAndServerProducer<TResponse> serverProducer =
+            final Flowable<TResponse> rxResponse = Preconditions.checkNotNull(delegate.apply(rxRequest));
+            final RxSubscriberAndServerProducer<TResponse> serverProducer =
                     rxResponse.subscribeWith(new RxSubscriberAndServerProducer<TResponse>());
             serverProducer.subscribe((ServerCallStreamObserver<TResponse>) responseObserver);
         } catch (Throwable throwable) {
@@ -86,12 +88,12 @@ public final class ServerCalls {
      */
     public static <TRequest, TResponse> StreamObserver<TRequest> manyToOne(
             final StreamObserver<TResponse> responseObserver,
-            Function<Flowable<TRequest>, Single<TResponse>> delegate) {
+            final Function<Flowable<TRequest>, Single<TResponse>> delegate) {
         final RxServerStreamObserverAndPublisher<TRequest> streamObserverPublisher =
                 new RxServerStreamObserverAndPublisher<TRequest>((ServerCallStreamObserver<TResponse>) responseObserver, null);
 
         try {
-            Single<TResponse> rxResponse = Preconditions.checkNotNull(delegate.apply(Flowable.unsafeCreate(streamObserverPublisher)));
+            final Single<TResponse> rxResponse = Preconditions.checkNotNull(delegate.apply(Flowable.fromPublisher(streamObserverPublisher)));
             rxResponse.subscribe(
                     new Consumer<TResponse>() {
                         @Override
@@ -126,13 +128,13 @@ public final class ServerCalls {
      * and the server independently stream to each other.
      */
     public static <TRequest, TResponse> StreamObserver<TRequest> manyToMany(
-            StreamObserver<TResponse> responseObserver,
-            Function<Flowable<TRequest>, Flowable<TResponse>> delegate) {
+            final StreamObserver<TResponse> responseObserver,
+            final Function<Flowable<TRequest>, Flowable<TResponse>> delegate) {
         final RxServerStreamObserverAndPublisher<TRequest> streamObserverPublisher =
                 new RxServerStreamObserverAndPublisher<TRequest>((ServerCallStreamObserver<TResponse>) responseObserver, null);
 
         try {
-            Flowable<TResponse> rxResponse = Preconditions.checkNotNull(delegate.apply(Flowable.unsafeCreate(streamObserverPublisher)));
+            final Flowable<TResponse> rxResponse = Preconditions.checkNotNull(delegate.apply(Flowable.fromPublisher(streamObserverPublisher)));
             final RxSubscriberAndServerProducer<TResponse> subscriber = new RxSubscriberAndServerProducer<TResponse>();
             subscriber.subscribe((ServerCallStreamObserver<TResponse>) responseObserver);
             // Don't try to respond if the server has already canceled the request
