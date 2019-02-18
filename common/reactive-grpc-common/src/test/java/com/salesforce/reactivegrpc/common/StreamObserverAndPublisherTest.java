@@ -33,7 +33,7 @@ public class StreamObserverAndPublisherTest {
 
     @Parameterized.Parameters
     public static Object[][] data() {
-        return new Object[5][0];
+        return new Object[1][0];
     }
 
     static final ExecutorService executorService =
@@ -78,7 +78,7 @@ public class StreamObserverAndPublisherTest {
             });
         }
 
-        Assertions.assertThat(testSubscriber.awaitTerminalEvent(1, TimeUnit.MINUTES)).isTrue();
+        Assertions.assertThat(testSubscriber.awaitTerminalEvent(10, TimeUnit.MINUTES)).isTrue();
         testSubscriber.assertValueCount(countPerThread);
 
         Assertions.assertThat(processor.outputFused).isFalse();
