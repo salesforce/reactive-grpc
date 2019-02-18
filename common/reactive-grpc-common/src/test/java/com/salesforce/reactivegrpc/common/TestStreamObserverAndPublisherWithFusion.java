@@ -3,7 +3,6 @@
  *  Licensed under the BSD 3-Clause license.
  *  For full license text, see LICENSE.txt file in the repo root  or https://opensource.org/licenses/BSD-3-Clause
  */
-
 package com.salesforce.reactivegrpc.common;
 
 import java.util.Queue;
@@ -11,6 +10,11 @@ import java.util.Queue;
 import io.reactivex.internal.fuseable.QueueFuseable;
 import io.reactivex.internal.fuseable.QueueSubscription;
 
+/**
+ * This class is a test-purpose implementation of the
+ * {@link AbstractStreamObserverAndPublisher} class that supports fusion from RxJava 2
+ * @param <T>
+ */
 public class TestStreamObserverAndPublisherWithFusion<T> extends AbstractStreamObserverAndPublisher<T>
         implements QueueSubscription<T> {
 
