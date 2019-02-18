@@ -33,7 +33,7 @@ public class StreamObserverAndPublisherTest {
 
     @Parameterized.Parameters
     public static Object[][] data() {
-        return new Object[20][0];
+        return new Object[5][0];
     }
 
     static final ExecutorService executorService =
