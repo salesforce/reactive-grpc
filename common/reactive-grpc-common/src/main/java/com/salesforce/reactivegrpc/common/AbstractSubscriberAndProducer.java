@@ -7,6 +7,8 @@
 
 package com.salesforce.reactivegrpc.common;
 
+import java.util.Collection;
+import java.util.Iterator;
 import java.util.Queue;
 import java.util.concurrent.atomic.AtomicIntegerFieldUpdater;
 import java.util.concurrent.atomic.AtomicReferenceFieldUpdater;
@@ -67,17 +69,7 @@ public abstract class AbstractSubscriberAndProducer<T> implements Subscriber<T>,
      */
     private static final int THREAD_BARRIER = 4;
 
-    private static final Subscription CANCELLED_SUBSCRIPTION = new Subscription() {
-        @Override
-        public void cancel() {
-            // deliberately no op
-        }
-
-        @Override
-        public void request(long n) {
-            // deliberately no op
-        }
-    };
+    private static final Subscription CANCELLED_SUBSCRIPTION = new CancelledQueueSubscription();
 
     private Throwable throwable;
     private boolean   done;
@@ -106,7 +98,10 @@ public abstract class AbstractSubscriberAndProducer<T> implements Subscriber<T>,
 
         if (this.downstream == null && DOWNSTREAM.compareAndSet(this, null, downstream)) {
             downstream.setOnReadyHandler(this);
+            return;
         }
+
+        throw new IllegalStateException(getClass().getSimpleName() + " does not support multiple subscribers");
     }
 
     @Override
@@ -152,7 +147,7 @@ public abstract class AbstractSubscriberAndProducer<T> implements Subscriber<T>,
 
     @Override
     public void onNext(T t) {
-        if (sourceMode == ASYNC) {
+        if (sourceMode == ASYNC || sourceMode == NOT_FUSED) {
             drain();
             return;
         }
@@ -160,15 +155,17 @@ public abstract class AbstractSubscriberAndProducer<T> implements Subscriber<T>,
         if (!isCanceled()) {
             checkNotNull(t);
 
-            final CallStreamObserver<T> stream = downstream;
+            final CallStreamObserver<T> subscriber = downstream;
 
             try {
-                stream.onNext(t);
+                subscriber.onNext(t);
                 isRequested = false;
                 drain();
             } catch (Throwable throwable) {
                 cancel();
-                stream.onError(prepareError(throwable));
+                try {
+                    subscriber.onError(prepareError(throwable));
+                } catch (Throwable ignore) { }
             }
         }
     }
@@ -204,7 +201,7 @@ public abstract class AbstractSubscriberAndProducer<T> implements Subscriber<T>,
         int mode = sourceMode;
 
         int missed = 1;
-        final CallStreamObserver<? super T> a = downstream;
+        final CallStreamObserver<? super T> subscriber = downstream;
 
 
         if (mode == NOT_FUSED) {
@@ -212,6 +209,7 @@ public abstract class AbstractSubscriberAndProducer<T> implements Subscriber<T>,
 
             if (s instanceof FusionModeAwareSubscription) {
                 mode = ((FusionModeAwareSubscription) s).mode();
+                sourceMode = mode;
 
                 if (mode == SYNC) {
                     done = true;
@@ -220,14 +218,13 @@ public abstract class AbstractSubscriberAndProducer<T> implements Subscriber<T>,
                 }
             } else {
                 mode = NONE;
+                sourceMode = mode;
             }
-
-            sourceMode = mode;
         }
 
 
         for (;;) {
-            if (a != null) {
+            if (subscriber != null) {
                 if (mode == SYNC) {
                     drainSync();
                 } else if (mode == ASYNC) {
@@ -249,23 +246,23 @@ public abstract class AbstractSubscriberAndProducer<T> implements Subscriber<T>,
     void drainSync() {
         int missed = 1;
 
-        final CallStreamObserver<? super T> a = downstream;
+        final CallStreamObserver<? super T> subscriber = downstream;
         @SuppressWarnings("unchecked")
         final Queue<T> q = (Queue<T>) subscription;
 
         for (;;) {
 
-            while (a.isReady()) {
+            while (subscriber.isReady()) {
                 T v;
 
                 try {
                     v = q.poll();
                 } catch (Throwable ex) {
+                    cancel();
+                    q.clear();
                     try {
-                        a.onError(prepareError(ex));
-                    } catch (Throwable ignore) {
-                        cancel();
-                    }
+                        subscriber.onError(prepareError(ex));
+                    } catch (Throwable ignore) { }
                     return;
                 }
 
@@ -273,17 +270,24 @@ public abstract class AbstractSubscriberAndProducer<T> implements Subscriber<T>,
                     q.clear();
                     return;
                 }
+
                 if (v == null) {
                     try {
-                        a.onCompleted();
-                    } catch (Throwable throwable) {
-                        cancel();
-                        a.onError(prepareError(throwable));
-                    }
+                        subscriber.onCompleted();
+                    } catch (Throwable ignore) { }
                     return;
                 }
 
-                a.onNext(v);
+                try {
+                    subscriber.onNext(v);
+                } catch (Throwable ex) {
+                    cancel();
+                    q.clear();
+                    try {
+                        subscriber.onError(prepareError(ex));
+                    } catch (Throwable ignore) { }
+                    return;
+                }
             }
 
             if (isCanceled()) {
@@ -293,11 +297,8 @@ public abstract class AbstractSubscriberAndProducer<T> implements Subscriber<T>,
 
             if (q.isEmpty()) {
                 try {
-                    a.onCompleted();
-                } catch (Throwable throwable) {
-                    cancel();
-                    a.onError(prepareError(throwable));
-                }
+                    subscriber.onCompleted();
+                } catch (Throwable ignore) { }
                 return;
             }
 
@@ -316,8 +317,8 @@ public abstract class AbstractSubscriberAndProducer<T> implements Subscriber<T>,
     void drainAsync() {
         int missed = 1;
 
+        final CallStreamObserver<? super T> subscriber = downstream;
         final Subscription s = subscription;
-        final CallStreamObserver<? super T> a = downstream;
         @SuppressWarnings("unchecked")
         final Queue<T> q = (Queue<T>) subscription;
 
@@ -325,26 +326,24 @@ public abstract class AbstractSubscriberAndProducer<T> implements Subscriber<T>,
 
         for (;;) {
 
-            while (a.isReady()) {
+            while (subscriber.isReady()) {
                 boolean d = done;
                 T v;
 
                 try {
                     v = q.poll();
                 } catch (Throwable ex) {
-                    s.cancel();
+                    cancel();
                     q.clear();
-
                     try {
-                        a.onError(prepareError(ex));
+                        subscriber.onError(prepareError(ex));
                     } catch (Throwable ignore) { }
-
                     return;
                 }
 
                 boolean empty = v == null;
 
-                if (checkTerminated(d, empty, a, q)) {
+                if (checkTerminated(d, empty, subscriber, q)) {
                     return;
                 }
 
@@ -352,12 +351,21 @@ public abstract class AbstractSubscriberAndProducer<T> implements Subscriber<T>,
                     break;
                 }
 
-                a.onNext(v);
+                try {
+                    subscriber.onNext(v);
+                } catch (Throwable ex) {
+                    cancel();
+                    q.clear();
+                    try {
+                        subscriber.onError(prepareError(ex));
+                    } catch (Throwable ignore) { }
+                    return;
+                }
 
                 sent++;
             }
 
-            if (checkTerminated(done, q.isEmpty(), a, q)) {
+            if (checkTerminated(done, q.isEmpty(), subscriber, q)) {
                 return;
             }
 
@@ -389,16 +397,11 @@ public abstract class AbstractSubscriberAndProducer<T> implements Subscriber<T>,
                 if (t != null) {
                     try {
                         a.onError(prepareError(t));
-                    } catch (Throwable ignore) {
-                        cancel();
-                    }
+                    } catch (Throwable ignore) { }
                 } else {
                     try {
                         a.onCompleted();
-                    } catch (Throwable throwable) {
-                        cancel();
-                        a.onError(prepareError(throwable));
-                    }
+                    } catch (Throwable ignore) { }
                 }
 
                 return;
@@ -433,17 +436,12 @@ public abstract class AbstractSubscriberAndProducer<T> implements Subscriber<T>,
                 q.clear();
                 try {
                     a.onError(prepareError(t));
-                } catch (Throwable ignore) {
-                    cancel();
-                }
+                } catch (Throwable ignore) { }
                 return true;
             } else if (empty) {
                 try {
                     a.onCompleted();
-                } catch (Throwable throwable) {
-                    cancel();
-                    a.onError(prepareError(throwable));
-                }
+                } catch (Throwable ignore) { }
                 return true;
             }
         }
@@ -459,4 +457,114 @@ public abstract class AbstractSubscriberAndProducer<T> implements Subscriber<T>,
         }
     }
 
+    /**
+     * Implementation of Cancelled Queue Subscription which is used as a marker of
+     * cancelled {@link AbstractSubscriberAndProducer} instance.
+     */
+    private static class CancelledQueueSubscription implements Subscription, Queue {
+
+        static final String NOT_SUPPORTED_MESSAGE = "Although CancelledQueueSubscription implements Queue it is" +
+            " purely internal and only guarantees support for poll/clear/size/isEmpty." +
+            " Instances shouldn't be used/exposed as Queue outside of RxGrpc operators.";
+
+        @Override
+        public void cancel() {
+            // deliberately no op
+        }
+
+        @Override
+        public void request(long n) {
+            // deliberately no op
+        }
+
+        @Override
+        public Object poll() {
+            return null;
+        }
+
+        @Override
+        public boolean isEmpty() {
+            return true;
+        }
+
+        @Override
+        public void clear() {
+            // deliberately no op
+        }
+
+        @Override
+        public boolean offer(Object t) {
+            throw new UnsupportedOperationException(NOT_SUPPORTED_MESSAGE);
+        }
+
+        @Override
+        public int size() {
+            throw new UnsupportedOperationException(NOT_SUPPORTED_MESSAGE);
+        }
+
+        @Override
+        public Object peek() {
+            throw new UnsupportedOperationException(NOT_SUPPORTED_MESSAGE);
+        }
+
+        @Override
+        public boolean add(Object t) {
+            throw new UnsupportedOperationException(NOT_SUPPORTED_MESSAGE);
+        }
+
+        @Override
+        public Object remove() {
+            throw new UnsupportedOperationException(NOT_SUPPORTED_MESSAGE);
+        }
+
+        @Override
+        public Object element() {
+            throw new UnsupportedOperationException(NOT_SUPPORTED_MESSAGE);
+        }
+
+        @Override
+        public boolean contains(Object o) {
+            throw new UnsupportedOperationException(NOT_SUPPORTED_MESSAGE);
+        }
+
+        @Override
+        public Iterator iterator() {
+            throw new UnsupportedOperationException(NOT_SUPPORTED_MESSAGE);
+        }
+
+        @Override
+        public Object[] toArray() {
+            throw new UnsupportedOperationException(NOT_SUPPORTED_MESSAGE);
+        }
+
+        @Override
+        public Object[] toArray(Object[] a) {
+            throw new UnsupportedOperationException(NOT_SUPPORTED_MESSAGE);
+        }
+
+        @Override
+        public boolean remove(Object o) {
+            throw new UnsupportedOperationException(NOT_SUPPORTED_MESSAGE);
+        }
+
+        @Override
+        public boolean containsAll(Collection c) {
+            throw new UnsupportedOperationException(NOT_SUPPORTED_MESSAGE);
+        }
+
+        @Override
+        public boolean addAll(Collection c) {
+            throw new UnsupportedOperationException(NOT_SUPPORTED_MESSAGE);
+        }
+
+        @Override
+        public boolean removeAll(Collection c) {
+            throw new UnsupportedOperationException(NOT_SUPPORTED_MESSAGE);
+        }
+
+        @Override
+        public boolean retainAll(Collection c) {
+            throw new UnsupportedOperationException(NOT_SUPPORTED_MESSAGE);
+        }
+    }
 }

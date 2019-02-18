@@ -21,6 +21,8 @@ import org.reactivestreams.Publisher;
 import org.reactivestreams.Subscriber;
 import org.reactivestreams.Subscription;
 
+import static com.google.common.base.Preconditions.checkNotNull;
+
 // TODO FIX DOCS
 /**
  * ReactiveStreamObserverPublisher bridges the manual flow control idioms of gRPC and Reactive Streams. This class takes
@@ -42,7 +44,8 @@ import org.reactivestreams.Subscription;
 public abstract class AbstractStreamObserverAndPublisher<T>
         implements Publisher<T>, StreamObserver<T>, Subscription, Queue<T>  {
 
-    static final String NOT_SUPPORTED_MESSAGE = "Although AbstractStreamObserverAndPublisher implements Queue it is" +
+    private static final String NOT_SUPPORTED_MESSAGE = "Although " +
+        "AbstractStreamObserverAndPublisher implements Queue it is" +
             " purely internal and only guarantees support for poll/clear/size/isEmpty." +
             " Instances shouldn't be used/exposed as Queue outside of RxGrpc operators.";
 
@@ -149,7 +152,7 @@ public abstract class AbstractStreamObserverAndPublisher<T>
             return;
         }
 
-        throw new IllegalStateException(getClass() + " can be subscribed only once");
+        throw new IllegalStateException(getClass().getSimpleName() + " supports only a single subscription");
     }
 
     void doTerminate() {
@@ -159,22 +162,23 @@ public abstract class AbstractStreamObserverAndPublisher<T>
         }
     }
 
-    void drainRegular(Subscriber<? super T> a) {
+    void drainRegular(final Subscriber<? super T> subscriber) {
         int missed = 1;
 
+        final CallStreamObserver<?> s = subscription;
         final Queue<T> q = queue;
         int sent = produced;
+        long r;
 
         for (;;) {
-            long requested = this.requested;
-
-            while (requested != sent) {
+            r = requested;
+            while (r != sent) {
                 boolean d = done;
 
                 T t = q.poll();
                 boolean empty = t == null;
 
-                if (checkTerminated(d, empty, a, q)) {
+                if (checkTerminated(d, empty, subscriber, q)) {
                     return;
                 }
 
@@ -182,23 +186,24 @@ public abstract class AbstractStreamObserverAndPublisher<T>
                     break;
                 }
 
-                a.onNext(t);
+                subscriber.onNext(t);
 
                 sent++;
+
+                if (sent == prefetch) {
+                    if (r != Long.MAX_VALUE) {
+                        r = REQUESTED.addAndGet(this, -sent);
+                    }
+
+                    s.request(sent);
+                    sent = 0;
+                }
             }
 
-            if (requested == sent) {
-                if (checkTerminated(done, q.isEmpty(), a, q)) {
+            if (r == sent) {
+                if (checkTerminated(done, q.isEmpty(), subscriber, q)) {
                     return;
                 }
-            }
-
-            if (sent == prefetch) {
-                if (requested != Long.MAX_VALUE) {
-                    REQUESTED.addAndGet(this, -sent);
-                }
-                subscription.request(sent);
-                sent = 0;
             }
 
             int w = wip;
@@ -214,7 +219,7 @@ public abstract class AbstractStreamObserverAndPublisher<T>
         }
     }
 
-    void drainFused(Subscriber<? super T> a) {
+    void drainFused(final Subscriber<? super T> subscriber) {
         int missed = 1;
 
         final Queue<T> q = queue;
@@ -229,16 +234,16 @@ public abstract class AbstractStreamObserverAndPublisher<T>
 
             boolean d = done;
 
-            a.onNext(null);
+            subscriber.onNext(null);
 
             if (d) {
                 downstream = null;
 
                 Throwable ex = error;
                 if (ex != null) {
-                    a.onError(ex);
+                    subscriber.onError(ex);
                 } else {
-                    a.onComplete();
+                    subscriber.onComplete();
                 }
                 return;
             }
@@ -258,13 +263,12 @@ public abstract class AbstractStreamObserverAndPublisher<T>
         int missed = 1;
 
         for (;;) {
-            Subscriber<? super T> a = downstream;
-            if (a != null) {
-
+            final Subscriber<? super T> subscriber = downstream;
+            if (subscriber != null) {
                 if (outputFused) {
-                    drainFused(a);
+                    drainFused(subscriber);
                 } else {
-                    drainRegular(a);
+                    drainRegular(subscriber);
                 }
                 return;
             }
@@ -276,19 +280,20 @@ public abstract class AbstractStreamObserverAndPublisher<T>
         }
     }
 
-    boolean checkTerminated(boolean d, boolean empty, Subscriber<? super T> a, Queue<T> q) {
+    boolean checkTerminated(boolean d, boolean empty, Subscriber<? super T> subscriber, Queue<T> q) {
         if (cancelled) {
             q.clear();
             downstream = null;
             return true;
         }
+
         if (d && empty) {
             Throwable e = error;
             downstream = null;
             if (e != null) {
-                a.onError(e);
+                subscriber.onError(e);
             } else {
-                a.onComplete();
+                subscriber.onComplete();
             }
             return true;
         }
@@ -302,7 +307,7 @@ public abstract class AbstractStreamObserverAndPublisher<T>
             return;
         }
 
-        Queue<T> q = this.queue;
+        final Queue<T> q = this.queue;
 
         while (!q.offer(t)) {
             LockSupport.parkNanos(SPIN_LOCK_PARK_NANOS);
@@ -340,8 +345,9 @@ public abstract class AbstractStreamObserverAndPublisher<T>
 
     @Override
     public void subscribe(Subscriber<? super T> actual) {
-        if (state == UNSUBSCRIBED_STATE && STATE.compareAndSet(this, UNSUBSCRIBED_STATE, SUBSCRIBED_ONCE_STATE)) {
+        checkNotNull(actual);
 
+        if (state == UNSUBSCRIBED_STATE && STATE.compareAndSet(this, UNSUBSCRIBED_STATE, SUBSCRIBED_ONCE_STATE)) {
             actual.onSubscribe(this);
             this.downstream = actual;
             if (cancelled) {
