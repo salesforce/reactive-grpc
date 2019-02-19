@@ -67,6 +67,8 @@ public abstract class AbstractServerStreamObserverAndPublisher<T>
                         AbstractServerStreamObserverAndPublisher.super.cancel();
                         observer.onError(Status.CANCELLED.withDescription("Server canceled request").asRuntimeException());
                     }
+                } catch (IllegalStateException ex) {
+                    // Do nothing
                 } catch (Throwable ex) {
                     ex.printStackTrace();
                 }
