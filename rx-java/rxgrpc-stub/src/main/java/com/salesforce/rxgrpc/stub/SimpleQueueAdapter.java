@@ -6,17 +6,14 @@
  */
 package com.salesforce.rxgrpc.stub;
 
+import com.salesforce.reactivegrpc.common.AbstractUnimplementedQueue;
 import io.reactivex.internal.fuseable.SimplePlainQueue;
 
-import java.util.Collection;
-import java.util.Iterator;
-import java.util.Queue;
-
 /**
- * Adapts the RxJava {@code SimpleQueue} interface to a common java {@link Queue}.
+ * Adapts the RxJava {@code SimpleQueue} interface to a common java {@link java.util.Queue}.
  * @param <T>
  */
-final class SimpleQueueAdapter<T> implements Queue<T>, SimplePlainQueue<T> {
+final class SimpleQueueAdapter<T> extends AbstractUnimplementedQueue<T> implements SimplePlainQueue<T> {
 
     private final SimplePlainQueue<T> simpleQueue;
 
@@ -57,75 +54,5 @@ final class SimpleQueueAdapter<T> implements Queue<T>, SimplePlainQueue<T> {
     @Override
     public int hashCode() {
         return simpleQueue.hashCode();
-    }
-
-    @Override
-    public T peek() {
-        throw new UnsupportedOperationException();
-    }
-
-    @Override
-    public boolean add(T t) {
-        throw new UnsupportedOperationException();
-    }
-
-    @Override
-    public T remove() {
-        throw new UnsupportedOperationException();
-    }
-
-    @Override
-    public T element() {
-        throw new UnsupportedOperationException();
-    }
-
-    @Override
-    public boolean contains(Object o) {
-        throw new UnsupportedOperationException();
-    }
-
-    @Override
-    public Iterator<T> iterator() {
-        throw new UnsupportedOperationException();
-    }
-
-    @Override
-    public Object[] toArray() {
-        throw new UnsupportedOperationException();
-    }
-
-    @Override
-    public <T1> T1[] toArray(T1[] a) {
-        throw new UnsupportedOperationException();
-    }
-
-    @Override
-    public boolean remove(Object o) {
-        throw new UnsupportedOperationException();
-    }
-
-    @Override
-    public boolean containsAll(Collection<?> c) {
-        throw new UnsupportedOperationException();
-    }
-
-    @Override
-    public boolean addAll(Collection<? extends T> c) {
-        throw new UnsupportedOperationException();
-    }
-
-    @Override
-    public boolean removeAll(Collection<?> c) {
-        throw new UnsupportedOperationException();
-    }
-
-    @Override
-    public boolean retainAll(Collection<?> c) {
-        throw new UnsupportedOperationException();
-    }
-
-    @Override
-    public int size() {
-        throw new UnsupportedOperationException();
     }
 }

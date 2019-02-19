@@ -7,8 +7,6 @@
 
 package com.salesforce.reactivegrpc.common;
 
-import java.util.Collection;
-import java.util.Iterator;
 import java.util.Queue;
 import java.util.concurrent.atomic.AtomicIntegerFieldUpdater;
 import java.util.concurrent.atomic.AtomicReferenceFieldUpdater;
@@ -79,17 +77,14 @@ public abstract class AbstractSubscriberAndProducer<T> implements Subscriber<T>,
     private int sourceMode = NOT_FUSED;
 
     private volatile Subscription subscription;
-    @SuppressWarnings("rawtypes")
     private static final AtomicReferenceFieldUpdater<AbstractSubscriberAndProducer, Subscription> SUBSCRIPTION =
         AtomicReferenceFieldUpdater.newUpdater(AbstractSubscriberAndProducer.class, Subscription.class, "subscription");
 
     protected volatile CallStreamObserver<T> downstream;
-    @SuppressWarnings("rawtypes")
     private static final AtomicReferenceFieldUpdater<AbstractSubscriberAndProducer, CallStreamObserver> DOWNSTREAM =
         AtomicReferenceFieldUpdater.newUpdater(AbstractSubscriberAndProducer.class, CallStreamObserver.class, "downstream");
 
     private volatile int wip;
-    @SuppressWarnings("rawtypes")
     private static final AtomicIntegerFieldUpdater<AbstractSubscriberAndProducer> WIP =
             AtomicIntegerFieldUpdater.newUpdater(AbstractSubscriberAndProducer.class, "wip");
 
@@ -193,7 +188,7 @@ public abstract class AbstractSubscriberAndProducer<T> implements Subscriber<T>,
 
     protected abstract Subscription fuse(Subscription subscription);
 
-    void drain() {
+    private void drain() {
         if (WIP.getAndIncrement(this) != 0) {
             return;
         }
@@ -237,13 +232,14 @@ public abstract class AbstractSubscriberAndProducer<T> implements Subscriber<T>,
             }
 
             missed = WIP.addAndGet(this, -missed);
+
             if (missed == 0) {
                 break;
             }
         }
     }
 
-    void drainSync() {
+    private void drainSync() {
         int missed = 1;
 
         final CallStreamObserver<? super T> subscriber = downstream;
@@ -251,7 +247,6 @@ public abstract class AbstractSubscriberAndProducer<T> implements Subscriber<T>,
         final Queue<T> q = (Queue<T>) subscription;
 
         for (;;) {
-
             while (subscriber.isReady()) {
                 T v;
 
@@ -314,7 +309,7 @@ public abstract class AbstractSubscriberAndProducer<T> implements Subscriber<T>,
         }
     }
 
-    void drainAsync() {
+    private void drainAsync() {
         int missed = 1;
 
         final CallStreamObserver<? super T> subscriber = downstream;
@@ -325,7 +320,6 @@ public abstract class AbstractSubscriberAndProducer<T> implements Subscriber<T>,
         long sent = 0;
 
         for (;;) {
-
             while (subscriber.isReady()) {
                 boolean d = done;
                 T v;
@@ -385,7 +379,7 @@ public abstract class AbstractSubscriberAndProducer<T> implements Subscriber<T>,
         }
     }
 
-    void drainRegular() {
+    private void drainRegular() {
         int missed = 1;
         final CallStreamObserver<? super T> a = downstream;
 
@@ -424,7 +418,7 @@ public abstract class AbstractSubscriberAndProducer<T> implements Subscriber<T>,
         }
     }
 
-    boolean checkTerminated(boolean d, boolean empty, CallStreamObserver<?> a, Queue<T> q) {
+    private boolean checkTerminated(boolean d, boolean empty, CallStreamObserver<?> a, Queue<T> q) {
         if (isCanceled()) {
             q.clear();
             return true;
@@ -461,11 +455,7 @@ public abstract class AbstractSubscriberAndProducer<T> implements Subscriber<T>,
      * Implementation of Cancelled Queue Subscription which is used as a marker of
      * cancelled {@link AbstractSubscriberAndProducer} instance.
      */
-    private static class CancelledQueueSubscription implements Subscription, Queue {
-
-        static final String NOT_SUPPORTED_MESSAGE = "Although CancelledQueueSubscription implements Queue it is" +
-            " purely internal and only guarantees support for poll/clear/size/isEmpty." +
-            " Instances shouldn't be used/exposed as Queue outside of RxGrpc operators.";
+    private static class CancelledQueueSubscription extends AbstractUnimplementedQueue<Object> implements Subscription {
 
         @Override
         public void cancel() {
@@ -490,81 +480,6 @@ public abstract class AbstractSubscriberAndProducer<T> implements Subscriber<T>,
         @Override
         public void clear() {
             // deliberately no op
-        }
-
-        @Override
-        public boolean offer(Object t) {
-            throw new UnsupportedOperationException(NOT_SUPPORTED_MESSAGE);
-        }
-
-        @Override
-        public int size() {
-            throw new UnsupportedOperationException(NOT_SUPPORTED_MESSAGE);
-        }
-
-        @Override
-        public Object peek() {
-            throw new UnsupportedOperationException(NOT_SUPPORTED_MESSAGE);
-        }
-
-        @Override
-        public boolean add(Object t) {
-            throw new UnsupportedOperationException(NOT_SUPPORTED_MESSAGE);
-        }
-
-        @Override
-        public Object remove() {
-            throw new UnsupportedOperationException(NOT_SUPPORTED_MESSAGE);
-        }
-
-        @Override
-        public Object element() {
-            throw new UnsupportedOperationException(NOT_SUPPORTED_MESSAGE);
-        }
-
-        @Override
-        public boolean contains(Object o) {
-            throw new UnsupportedOperationException(NOT_SUPPORTED_MESSAGE);
-        }
-
-        @Override
-        public Iterator iterator() {
-            throw new UnsupportedOperationException(NOT_SUPPORTED_MESSAGE);
-        }
-
-        @Override
-        public Object[] toArray() {
-            throw new UnsupportedOperationException(NOT_SUPPORTED_MESSAGE);
-        }
-
-        @Override
-        public Object[] toArray(Object[] a) {
-            throw new UnsupportedOperationException(NOT_SUPPORTED_MESSAGE);
-        }
-
-        @Override
-        public boolean remove(Object o) {
-            throw new UnsupportedOperationException(NOT_SUPPORTED_MESSAGE);
-        }
-
-        @Override
-        public boolean containsAll(Collection c) {
-            throw new UnsupportedOperationException(NOT_SUPPORTED_MESSAGE);
-        }
-
-        @Override
-        public boolean addAll(Collection c) {
-            throw new UnsupportedOperationException(NOT_SUPPORTED_MESSAGE);
-        }
-
-        @Override
-        public boolean removeAll(Collection c) {
-            throw new UnsupportedOperationException(NOT_SUPPORTED_MESSAGE);
-        }
-
-        @Override
-        public boolean retainAll(Collection c) {
-            throw new UnsupportedOperationException(NOT_SUPPORTED_MESSAGE);
         }
     }
 }

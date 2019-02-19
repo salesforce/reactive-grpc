@@ -36,21 +36,6 @@ public abstract class AbstractClientStreamObserverAndPublisher<T>
         super(queue, onSubscribe, onTerminate);
     }
 
-    public AbstractClientStreamObserverAndPublisher(
-            Queue<T> queue,
-            int prefetch,
-            Consumer<CallStreamObserver<?>> onSubscribe) {
-        super(queue, prefetch, onSubscribe);
-    }
-
-    public AbstractClientStreamObserverAndPublisher(
-            Queue<T> queue,
-            int prefetch,
-            Consumer<CallStreamObserver<?>> onSubscribe,
-            Runnable onTerminate) {
-        super(queue, prefetch, onSubscribe, onTerminate);
-    }
-
     @Override
     public void beforeStart(ClientCallStreamObserver<T> requestStream) {
         super.onSubscribe(requestStream);

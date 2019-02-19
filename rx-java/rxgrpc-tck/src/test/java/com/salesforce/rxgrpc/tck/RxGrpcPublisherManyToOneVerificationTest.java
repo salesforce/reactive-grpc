@@ -46,8 +46,8 @@ public class RxGrpcPublisherManyToOneVerificationTest extends PublisherVerificat
 
     @AfterClass
     public static void tearDown() throws Exception {
-        channel.shutdown();
-        server.shutdown();
+        channel.shutdownNow();
+        server.shutdownNow();
 
         server = null;
         channel = null;

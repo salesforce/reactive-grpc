@@ -17,14 +17,14 @@ import reactor.util.concurrent.Queues;
  * TODO: Explain what this class does.
  * @param <T>
  */
-public class ReactorClientStreamObserverAndPublisher<T>
+class ReactorClientStreamObserverAndPublisher<T>
         extends AbstractClientStreamObserverAndPublisher<T> implements Fuseable.QueueSubscription<T>, Fuseable {
 
-    public ReactorClientStreamObserverAndPublisher(Consumer<CallStreamObserver<?>> onSubscribe) {
+    ReactorClientStreamObserverAndPublisher(Consumer<CallStreamObserver<?>> onSubscribe) {
         super(Queues.<T>get(DEFAULT_CHUNK_SIZE).get(), onSubscribe);
     }
 
-    public ReactorClientStreamObserverAndPublisher(
+    ReactorClientStreamObserverAndPublisher(
             Consumer<CallStreamObserver<?>> onSubscribe,
             Runnable onTerminate) {
         super(Queues.<T>get(DEFAULT_CHUNK_SIZE).get(), onSubscribe, onTerminate);
