@@ -1,5 +1,5 @@
 /*
- *  Copyright (c) 2017, salesforce.com, inc.
+ *  Copyright (c) 2019, Salesforce.com, Inc.
  *  All rights reserved.
  *  Licensed under the BSD 3-Clause license.
  *  For full license text, see LICENSE.txt file in the repo root  or https://opensource.org/licenses/BSD-3-Clause
@@ -34,21 +34,6 @@ public abstract class AbstractClientStreamObserverAndPublisher<T>
             Consumer<CallStreamObserver<?>> onSubscribe,
             Runnable onTerminate) {
         super(queue, onSubscribe, onTerminate);
-    }
-
-    public AbstractClientStreamObserverAndPublisher(
-            Queue<T> queue,
-            int prefetch,
-            Consumer<CallStreamObserver<?>> onSubscribe) {
-        super(queue, prefetch, onSubscribe);
-    }
-
-    public AbstractClientStreamObserverAndPublisher(
-            Queue<T> queue,
-            int prefetch,
-            Consumer<CallStreamObserver<?>> onSubscribe,
-            Runnable onTerminate) {
-        super(queue, prefetch, onSubscribe, onTerminate);
     }
 
     @Override

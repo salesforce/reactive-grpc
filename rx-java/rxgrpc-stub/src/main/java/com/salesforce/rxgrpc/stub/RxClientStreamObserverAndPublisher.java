@@ -1,5 +1,5 @@
 /*
- *  Copyright (c) 2017, salesforce.com, inc.
+ *  Copyright (c) 2019, Salesforce.com, Inc.
  *  All rights reserved.
  *  Licensed under the BSD 3-Clause license.
  *  For full license text, see LICENSE.txt file in the repo root  or https://opensource.org/licenses/BSD-3-Clause
@@ -18,15 +18,15 @@ import io.reactivex.internal.queue.SpscArrayQueue;
  * TODO: Explain what this class does.
  * @param <T>
  */
-public class RxClientStreamObserverAndPublisher<T>
+class RxClientStreamObserverAndPublisher<T>
         extends AbstractClientStreamObserverAndPublisher<T>
         implements QueueSubscription<T> {
 
-    public RxClientStreamObserverAndPublisher(Consumer<CallStreamObserver<?>> onSubscribe) {
+    RxClientStreamObserverAndPublisher(Consumer<CallStreamObserver<?>> onSubscribe) {
         super(new SimpleQueueAdapter<T>(new SpscArrayQueue<T>(DEFAULT_CHUNK_SIZE)), onSubscribe);
     }
 
-    public RxClientStreamObserverAndPublisher(
+    RxClientStreamObserverAndPublisher(
             Consumer<CallStreamObserver<?>> onSubscribe,
             Runnable onTerminate) {
         super(new SimpleQueueAdapter<T>(new SpscArrayQueue<T>(DEFAULT_CHUNK_SIZE)), onSubscribe, onTerminate);
@@ -39,10 +39,5 @@ public class RxClientStreamObserverAndPublisher<T>
             return QueueFuseable.ASYNC;
         }
         return QueueFuseable.NONE;
-    }
-
-    @Override
-    public boolean offer(T t, T t1) {
-        throw new UnsupportedOperationException();
     }
 }

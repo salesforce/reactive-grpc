@@ -1,5 +1,5 @@
 /*
- *  Copyright (c) 2017, salesforce.com, inc.
+ *  Copyright (c) 2019, Salesforce.com, Inc.
  *  All rights reserved.
  *  Licensed under the BSD 3-Clause license.
  *  For full license text, see LICENSE.txt file in the repo root  or https://opensource.org/licenses/BSD-3-Clause
@@ -18,11 +18,11 @@ import reactor.util.concurrent.Queues;
  * TODO: Explain what this class does.
  * @param <T>
  */
-public class ReactorServerStreamObserverAndPublisher<T>
+class ReactorServerStreamObserverAndPublisher<T>
         extends AbstractServerStreamObserverAndPublisher<T>
         implements Fuseable.QueueSubscription<T>, Fuseable {
 
-    public ReactorServerStreamObserverAndPublisher(
+    ReactorServerStreamObserverAndPublisher(
             ServerCallStreamObserver<?> serverCallStreamObserver,
             Consumer<CallStreamObserver<?>> onSubscribe) {
         super(serverCallStreamObserver, Queues.<T>get(DEFAULT_CHUNK_SIZE).get(), onSubscribe);

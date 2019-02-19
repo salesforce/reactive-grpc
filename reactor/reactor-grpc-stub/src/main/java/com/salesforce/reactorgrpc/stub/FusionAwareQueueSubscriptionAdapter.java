@@ -1,5 +1,5 @@
 /*
- *  Copyright (c) 2017, salesforce.com, inc.
+ *  Copyright (c) 2019, Salesforce.com, Inc.
  *  All rights reserved.
  *  Licensed under the BSD 3-Clause license.
  *  For full license text, see LICENSE.txt file in the repo root  or https://opensource.org/licenses/BSD-3-Clause
@@ -16,12 +16,12 @@ import reactor.core.Fuseable;
  *
  * @param <T> generic type
  */
-public class FusionAwareQueueSubscriptionAdapter<T> implements Fuseable.QueueSubscription<T>, FusionModeAwareSubscription {
+class FusionAwareQueueSubscriptionAdapter<T> implements Fuseable.QueueSubscription<T>, FusionModeAwareSubscription {
 
     private final Fuseable.QueueSubscription<T> delegate;
     private final int                           mode;
 
-    public FusionAwareQueueSubscriptionAdapter(Fuseable.QueueSubscription<T> delegate, int mode) {
+    FusionAwareQueueSubscriptionAdapter(Fuseable.QueueSubscription<T> delegate, int mode) {
         this.delegate = delegate;
         this.mode = mode;
     }

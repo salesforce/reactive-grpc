@@ -1,5 +1,5 @@
 /*
- *  Copyright (c) 2017, salesforce.com, inc.
+ *  Copyright (c) 2019, Salesforce.com, Inc.
  *  All rights reserved.
  *  Licensed under the BSD 3-Clause license.
  *  For full license text, see LICENSE.txt file in the repo root  or https://opensource.org/licenses/BSD-3-Clause
@@ -30,34 +30,6 @@ public abstract class AbstractServerStreamObserverAndPublisher<T>
             Queue<T> queue,
             Consumer<CallStreamObserver<?>> onSubscribe) {
         super(queue, onSubscribe);
-        super.onSubscribe(serverCallStreamObserver);
-    }
-
-    public AbstractServerStreamObserverAndPublisher(
-            ServerCallStreamObserver<?> serverCallStreamObserver,
-            Queue<T> queue,
-            Consumer<CallStreamObserver<?>> onSubscribe,
-            Runnable onTerminate) {
-        super(queue, onSubscribe, onTerminate);
-        super.onSubscribe(serverCallStreamObserver);
-    }
-
-    public AbstractServerStreamObserverAndPublisher(
-            ServerCallStreamObserver<?> serverCallStreamObserver,
-            Queue<T> queue,
-            int prefetch,
-            Consumer<CallStreamObserver<?>> onSubscribe) {
-        super(queue, prefetch, onSubscribe);
-        super.onSubscribe(serverCallStreamObserver);
-    }
-
-    public AbstractServerStreamObserverAndPublisher(
-            ServerCallStreamObserver<?> serverCallStreamObserver,
-            Queue<T> queue,
-            int prefetch,
-            Consumer<CallStreamObserver<?>> onSubscribe,
-            Runnable onTerminate) {
-        super(queue, prefetch, onSubscribe, onTerminate);
         super.onSubscribe(serverCallStreamObserver);
     }
 
@@ -94,12 +66,11 @@ public abstract class AbstractServerStreamObserverAndPublisher<T>
                     if (!abandonDelayedCancel) {
                         AbstractServerStreamObserverAndPublisher.super.cancel();
                         observer.onError(Status.CANCELLED.withDescription("Server canceled request").asRuntimeException());
-
-                        // Release the subscriber, we don't need a reference to it anymore
-//                        AbstractReactiveStreamObserverPublisherServer.super.freeSubscriber();
                     }
+                } catch (IllegalStateException ex) {
+                    // Do nothing
                 } catch (Throwable ex) {
-
+                    ex.printStackTrace();
                 }
             }
         }.start();
