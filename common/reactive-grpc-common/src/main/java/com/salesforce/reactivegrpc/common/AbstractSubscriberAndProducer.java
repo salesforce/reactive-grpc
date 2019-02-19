@@ -79,17 +79,14 @@ public abstract class AbstractSubscriberAndProducer<T> implements Subscriber<T>,
     private int sourceMode = NOT_FUSED;
 
     private volatile Subscription subscription;
-    @SuppressWarnings("rawtypes")
     private static final AtomicReferenceFieldUpdater<AbstractSubscriberAndProducer, Subscription> SUBSCRIPTION =
         AtomicReferenceFieldUpdater.newUpdater(AbstractSubscriberAndProducer.class, Subscription.class, "subscription");
 
     protected volatile CallStreamObserver<T> downstream;
-    @SuppressWarnings("rawtypes")
     private static final AtomicReferenceFieldUpdater<AbstractSubscriberAndProducer, CallStreamObserver> DOWNSTREAM =
         AtomicReferenceFieldUpdater.newUpdater(AbstractSubscriberAndProducer.class, CallStreamObserver.class, "downstream");
 
     private volatile int wip;
-    @SuppressWarnings("rawtypes")
     private static final AtomicIntegerFieldUpdater<AbstractSubscriberAndProducer> WIP =
             AtomicIntegerFieldUpdater.newUpdater(AbstractSubscriberAndProducer.class, "wip");
 
@@ -193,7 +190,7 @@ public abstract class AbstractSubscriberAndProducer<T> implements Subscriber<T>,
 
     protected abstract Subscription fuse(Subscription subscription);
 
-    void drain() {
+    private void drain() {
         if (WIP.getAndIncrement(this) != 0) {
             return;
         }
@@ -223,7 +220,7 @@ public abstract class AbstractSubscriberAndProducer<T> implements Subscriber<T>,
         }
 
 
-        for (;;) {
+        do {
             if (subscriber != null) {
                 if (mode == SYNC) {
                     drainSync();
@@ -237,13 +234,10 @@ public abstract class AbstractSubscriberAndProducer<T> implements Subscriber<T>,
             }
 
             missed = WIP.addAndGet(this, -missed);
-            if (missed == 0) {
-                break;
-            }
-        }
+        } while (missed != 0);
     }
 
-    void drainSync() {
+    private void drainSync() {
         int missed = 1;
 
         final CallStreamObserver<? super T> subscriber = downstream;
@@ -251,7 +245,6 @@ public abstract class AbstractSubscriberAndProducer<T> implements Subscriber<T>,
         final Queue<T> q = (Queue<T>) subscription;
 
         for (;;) {
-
             while (subscriber.isReady()) {
                 T v;
 
@@ -314,7 +307,7 @@ public abstract class AbstractSubscriberAndProducer<T> implements Subscriber<T>,
         }
     }
 
-    void drainAsync() {
+    private void drainAsync() {
         int missed = 1;
 
         final CallStreamObserver<? super T> subscriber = downstream;
@@ -325,7 +318,6 @@ public abstract class AbstractSubscriberAndProducer<T> implements Subscriber<T>,
         long sent = 0;
 
         for (;;) {
-
             while (subscriber.isReady()) {
                 boolean d = done;
                 T v;
@@ -385,7 +377,7 @@ public abstract class AbstractSubscriberAndProducer<T> implements Subscriber<T>,
         }
     }
 
-    void drainRegular() {
+    private void drainRegular() {
         int missed = 1;
         final CallStreamObserver<? super T> a = downstream;
 
@@ -424,7 +416,7 @@ public abstract class AbstractSubscriberAndProducer<T> implements Subscriber<T>,
         }
     }
 
-    boolean checkTerminated(boolean d, boolean empty, CallStreamObserver<?> a, Queue<T> q) {
+    private boolean checkTerminated(boolean d, boolean empty, CallStreamObserver<?> a, Queue<T> q) {
         if (isCanceled()) {
             q.clear();
             return true;

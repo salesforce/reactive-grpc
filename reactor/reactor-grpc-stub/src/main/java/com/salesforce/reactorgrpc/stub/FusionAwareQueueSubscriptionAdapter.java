@@ -16,12 +16,12 @@ import reactor.core.Fuseable;
  *
  * @param <T> generic type
  */
-public class FusionAwareQueueSubscriptionAdapter<T> implements Fuseable.QueueSubscription<T>, FusionModeAwareSubscription {
+class FusionAwareQueueSubscriptionAdapter<T> implements Fuseable.QueueSubscription<T>, FusionModeAwareSubscription {
 
     private final Fuseable.QueueSubscription<T> delegate;
     private final int                           mode;
 
-    public FusionAwareQueueSubscriptionAdapter(Fuseable.QueueSubscription<T> delegate, int mode) {
+    FusionAwareQueueSubscriptionAdapter(Fuseable.QueueSubscription<T> delegate, int mode) {
         this.delegate = delegate;
         this.mode = mode;
     }

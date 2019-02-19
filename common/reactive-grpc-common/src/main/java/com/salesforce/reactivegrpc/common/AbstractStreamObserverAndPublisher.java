@@ -86,53 +86,48 @@ public abstract class AbstractStreamObserverAndPublisher<T>
     private volatile boolean cancelled;
 
     protected volatile CallStreamObserver<?> subscription;
-    @SuppressWarnings("rawtypes")
     private static final AtomicReferenceFieldUpdater<AbstractStreamObserverAndPublisher, CallStreamObserver> SUBSCRIPTION =
         AtomicReferenceFieldUpdater.newUpdater(AbstractStreamObserverAndPublisher.class, CallStreamObserver.class, "subscription");
 
     private volatile Runnable onTerminate;
-    @SuppressWarnings("rawtypes")
     private static final AtomicReferenceFieldUpdater<AbstractStreamObserverAndPublisher, Runnable> ON_TERMINATE =
             AtomicReferenceFieldUpdater.newUpdater(AbstractStreamObserverAndPublisher.class, Runnable.class, "onTerminate");
 
     private volatile int state;
-    @SuppressWarnings("rawtypes")
     private static final AtomicIntegerFieldUpdater<AbstractStreamObserverAndPublisher> STATE =
             AtomicIntegerFieldUpdater.newUpdater(AbstractStreamObserverAndPublisher.class, "state");
 
     private volatile int wip;
-    @SuppressWarnings("rawtypes")
     private static final AtomicIntegerFieldUpdater<AbstractStreamObserverAndPublisher> WIP =
             AtomicIntegerFieldUpdater.newUpdater(AbstractStreamObserverAndPublisher.class, "wip");
 
     private volatile long requested;
-    @SuppressWarnings("rawtypes")
     private static final AtomicLongFieldUpdater<AbstractStreamObserverAndPublisher> REQUESTED =
             AtomicLongFieldUpdater.newUpdater(AbstractStreamObserverAndPublisher.class, "requested");
 
     private int produced;
 
-    public AbstractStreamObserverAndPublisher(
+    AbstractStreamObserverAndPublisher(
             Queue<T> queue,
             Consumer<CallStreamObserver<?>> onSubscribe) {
         this(queue, DEFAULT_CHUNK_SIZE, onSubscribe);
     }
 
-    public AbstractStreamObserverAndPublisher(
+    AbstractStreamObserverAndPublisher(
             Queue<T> queue,
             Consumer<CallStreamObserver<?>> onSubscribe,
             Runnable onTerminate) {
         this(queue, DEFAULT_CHUNK_SIZE, onSubscribe, onTerminate);
     }
 
-    public AbstractStreamObserverAndPublisher(
+    AbstractStreamObserverAndPublisher(
             Queue<T> queue,
             int prefetch,
             Consumer<CallStreamObserver<?>> onSubscribe) {
         this(queue, prefetch, onSubscribe, null);
     }
 
-    public AbstractStreamObserverAndPublisher(
+    AbstractStreamObserverAndPublisher(
             Queue<T> queue,
             int prefetch,
             Consumer<CallStreamObserver<?>> onSubscribe,
@@ -155,14 +150,14 @@ public abstract class AbstractStreamObserverAndPublisher<T>
         throw new IllegalStateException(getClass().getSimpleName() + " supports only a single subscription");
     }
 
-    void doTerminate() {
+    private void doTerminate() {
         Runnable r = onTerminate;
         if (r != null && ON_TERMINATE.compareAndSet(this, r, null)) {
             r.run();
         }
     }
 
-    void drainRegular(final Subscriber<? super T> subscriber) {
+    private void drainRegular(final Subscriber<? super T> subscriber) {
         int missed = 1;
 
         final CallStreamObserver<?> s = subscription;
@@ -219,15 +214,12 @@ public abstract class AbstractStreamObserverAndPublisher<T>
         }
     }
 
-    void drainFused(final Subscriber<? super T> subscriber) {
+    private void drainFused(final Subscriber<? super T> subscriber) {
         int missed = 1;
 
-        final Queue<T> q = queue;
-
-        for (;;) {
-
+        do {
             if (cancelled) {
-                q.clear();
+                queue.clear();
                 downstream = null;
                 return;
             }
@@ -249,20 +241,17 @@ public abstract class AbstractStreamObserverAndPublisher<T>
             }
 
             missed = WIP.addAndGet(this, -missed);
-            if (missed == 0) {
-                break;
-            }
-        }
+        } while (missed != 0);
     }
 
-    void drain() {
+    private void drain() {
         if (WIP.getAndIncrement(this) != 0) {
             return;
         }
 
         int missed = 1;
 
-        for (;;) {
+        do {
             final Subscriber<? super T> subscriber = downstream;
             if (subscriber != null) {
                 if (outputFused) {
@@ -274,13 +263,10 @@ public abstract class AbstractStreamObserverAndPublisher<T>
             }
 
             missed = WIP.addAndGet(this, -missed);
-            if (missed == 0) {
-                break;
-            }
-        }
+        } while (missed != 0);
     }
 
-    boolean checkTerminated(boolean d, boolean empty, Subscriber<? super T> subscriber, Queue<T> q) {
+    private boolean checkTerminated(boolean d, boolean empty, Subscriber<? super T> subscriber, Queue<T> q) {
         if (cancelled) {
             q.clear();
             downstream = null;
@@ -307,9 +293,7 @@ public abstract class AbstractStreamObserverAndPublisher<T>
             return;
         }
 
-        final Queue<T> q = this.queue;
-
-        while (!q.offer(t)) {
+        while (!queue.offer(t)) {
             LockSupport.parkNanos(SPIN_LOCK_PARK_NANOS);
         }
 

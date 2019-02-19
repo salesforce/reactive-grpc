@@ -38,7 +38,7 @@ public class ReactorGrpcSubscriberWhiteboxVerificationTest extends SubscriberWhi
 
     @Override
     public Subscriber<Message> createSubscriber(WhiteboxSubscriberProbe<Message> probe) {
-        ReactorSubscriberAndClientProducer producer = new ReactorSubscriberAndClientProducer<Message>() {
+        ReactorSubscriberAndClientProducer<Message> producer = new ReactorSubscriberAndClientProducer<Message>() {
             @Override
             public void onSubscribe(final Subscription s) {
                 super.onSubscribe(s);

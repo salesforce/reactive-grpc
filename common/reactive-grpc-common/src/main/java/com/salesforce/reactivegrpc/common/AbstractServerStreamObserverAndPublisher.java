@@ -33,34 +33,6 @@ public abstract class AbstractServerStreamObserverAndPublisher<T>
         super.onSubscribe(serverCallStreamObserver);
     }
 
-    public AbstractServerStreamObserverAndPublisher(
-            ServerCallStreamObserver<?> serverCallStreamObserver,
-            Queue<T> queue,
-            Consumer<CallStreamObserver<?>> onSubscribe,
-            Runnable onTerminate) {
-        super(queue, onSubscribe, onTerminate);
-        super.onSubscribe(serverCallStreamObserver);
-    }
-
-    public AbstractServerStreamObserverAndPublisher(
-            ServerCallStreamObserver<?> serverCallStreamObserver,
-            Queue<T> queue,
-            int prefetch,
-            Consumer<CallStreamObserver<?>> onSubscribe) {
-        super(queue, prefetch, onSubscribe);
-        super.onSubscribe(serverCallStreamObserver);
-    }
-
-    public AbstractServerStreamObserverAndPublisher(
-            ServerCallStreamObserver<?> serverCallStreamObserver,
-            Queue<T> queue,
-            int prefetch,
-            Consumer<CallStreamObserver<?>> onSubscribe,
-            Runnable onTerminate) {
-        super(queue, prefetch, onSubscribe, onTerminate);
-        super.onSubscribe(serverCallStreamObserver);
-    }
-
     @Override
     public void onError(Throwable throwable) {
         // This condition is not an error and is safe to ignore. If the client dies unexpectedly, the server calls cancel.
@@ -94,12 +66,9 @@ public abstract class AbstractServerStreamObserverAndPublisher<T>
                     if (!abandonDelayedCancel) {
                         AbstractServerStreamObserverAndPublisher.super.cancel();
                         observer.onError(Status.CANCELLED.withDescription("Server canceled request").asRuntimeException());
-
-                        // Release the subscriber, we don't need a reference to it anymore
-//                        AbstractReactiveStreamObserverPublisherServer.super.freeSubscriber();
                     }
                 } catch (Throwable ex) {
-
+                    ex.printStackTrace();
                 }
             }
         }.start();

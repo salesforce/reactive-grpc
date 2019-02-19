@@ -18,15 +18,15 @@ import io.reactivex.internal.queue.SpscArrayQueue;
  * TODO: Explain what this class does.
  * @param <T>
  */
-public class RxClientStreamObserverAndPublisher<T>
+class RxClientStreamObserverAndPublisher<T>
         extends AbstractClientStreamObserverAndPublisher<T>
         implements QueueSubscription<T> {
 
-    public RxClientStreamObserverAndPublisher(Consumer<CallStreamObserver<?>> onSubscribe) {
+    RxClientStreamObserverAndPublisher(Consumer<CallStreamObserver<?>> onSubscribe) {
         super(new SimpleQueueAdapter<T>(new SpscArrayQueue<T>(DEFAULT_CHUNK_SIZE)), onSubscribe);
     }
 
-    public RxClientStreamObserverAndPublisher(
+    RxClientStreamObserverAndPublisher(
             Consumer<CallStreamObserver<?>> onSubscribe,
             Runnable onTerminate) {
         super(new SimpleQueueAdapter<T>(new SpscArrayQueue<T>(DEFAULT_CHUNK_SIZE)), onSubscribe, onTerminate);

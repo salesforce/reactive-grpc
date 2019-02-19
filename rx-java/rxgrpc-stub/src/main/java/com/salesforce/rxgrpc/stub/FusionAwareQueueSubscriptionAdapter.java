@@ -20,16 +20,16 @@ import io.reactivex.internal.fuseable.QueueSubscription;
  *
  * @param <T> generic type
  */
-public class FusionAwareQueueSubscriptionAdapter<T> implements Queue<T>, QueueSubscription<T>, FusionModeAwareSubscription {
+class FusionAwareQueueSubscriptionAdapter<T> implements Queue<T>, QueueSubscription<T>, FusionModeAwareSubscription {
 
-    static final String NOT_SUPPORTED_MESSAGE = "Although FusionAwareQueueSubscriptionAdapter implements Queue it is" +
+    private static final String NOT_SUPPORTED_MESSAGE = "Although FusionAwareQueueSubscriptionAdapter implements Queue it is" +
         " purely internal and only guarantees support for poll/clear/size/isEmpty." +
         " Instances shouldn't be used/exposed as Queue outside of RxGrpc operators.";
 
     private final QueueSubscription<T> delegate;
     private final int                  mode;
 
-    public FusionAwareQueueSubscriptionAdapter(QueueSubscription<T> delegate, int mode) {
+    FusionAwareQueueSubscriptionAdapter(QueueSubscription<T> delegate, int mode) {
         this.delegate = delegate;
         this.mode = mode;
     }

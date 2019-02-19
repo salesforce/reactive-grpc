@@ -41,7 +41,7 @@ import org.reactivestreams.Subscription;
 @RunWith(Parameterized.class)
 public class AbstractSubscriberAndProducerTest {
 
-    final Queue<Throwable> unhandledThrowable = new ConcurrentLinkedQueue<Throwable>();
+    private final Queue<Throwable> unhandledThrowable = new ConcurrentLinkedQueue<Throwable>();
 
     @Parameterized.Parameters
     public static Object[][] data() {
@@ -52,7 +52,7 @@ public class AbstractSubscriberAndProducerTest {
     }
 
 
-    static final ExecutorService executorService  =
+    private static final ExecutorService executorService  =
         Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors());
 
 
@@ -68,10 +68,10 @@ public class AbstractSubscriberAndProducerTest {
 
     @Test
     public void shouldSupportOnlySingleSubscribersTest() throws InterruptedException {
-        final TestCallStreamObserver downstream = new TestCallStreamObserver(executorService);
+        final TestCallStreamObserver<Integer> downstream = new TestCallStreamObserver<Integer>(executorService);
         for (int i = 0; i < 1000; i++) {
             final AtomicReference<Throwable> throwableAtomicReference = new AtomicReference<Throwable>();
-            final TestSubscriberProducer producer = new TestSubscriberProducer();
+            final TestSubscriberProducer<Integer> producer = new TestSubscriberProducer<Integer>();
             final CountDownLatch latch = new CountDownLatch(1);
             final CountDownLatch throwingLatch = new CountDownLatch(1);
             executorService.execute(new Runnable() {
@@ -691,7 +691,7 @@ public class AbstractSubscriberAndProducerTest {
         Assertions.assertThat(unhandledThrowable).isEmpty();
     }
 
-    static void racePauseResuming(final TestCallStreamObserver<?> downstream, int times) {
+    private static void racePauseResuming(final TestCallStreamObserver<?> downstream, int times) {
         Observable.range(0, times)
                   .concatMapCompletable(new Function<Integer, CompletableSource>() {
                       @Override
@@ -768,11 +768,11 @@ public class AbstractSubscriberAndProducerTest {
         }
     }
 
-    static class OnNextTestException extends RuntimeException {
+    private static class OnNextTestException extends RuntimeException {
 
     }
 
-    static class TestCallStreamObserver<T> extends CallStreamObserver<T> {
+    private static class TestCallStreamObserver<T> extends CallStreamObserver<T> {
         final ExecutorService executorService;
         List<T> collected = new ArrayList<T>();
         Throwable e;

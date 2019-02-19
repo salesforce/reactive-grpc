@@ -15,8 +15,9 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.Mockito.*;
 
 public class SubscribeOnlyOnceTest {
+    @SuppressWarnings("unchecked")
     @Test
-    public void subscribeOnlyOnceLifterErrorsWhenMultipleSubscribe() throws Exception {
+    public void subscribeOnlyOnceLifterErrorsWhenMultipleSubscribe() {
         SubscribeOnlyOnceLifter<Object> op = new SubscribeOnlyOnceLifter<>();
         CoreSubscriber<Object> innerSub = mock(CoreSubscriber.class);
         Subscription subscription = mock(Subscription.class);
