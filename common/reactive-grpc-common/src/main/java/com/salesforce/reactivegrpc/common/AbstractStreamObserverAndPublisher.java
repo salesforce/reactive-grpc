@@ -7,8 +7,6 @@
 
 package com.salesforce.reactivegrpc.common;
 
-import java.util.Collection;
-import java.util.Iterator;
 import java.util.Queue;
 import java.util.concurrent.atomic.AtomicIntegerFieldUpdater;
 import java.util.concurrent.atomic.AtomicLongFieldUpdater;
@@ -41,13 +39,8 @@ import static com.google.common.base.Preconditions.checkNotNull;
  *
  * @param <T>
  */
-public abstract class AbstractStreamObserverAndPublisher<T>
+public abstract class AbstractStreamObserverAndPublisher<T> extends AbstractUnimplementedQueue<T>
         implements Publisher<T>, StreamObserver<T>, Subscription, Queue<T>  {
-
-    private static final String NOT_SUPPORTED_MESSAGE = "Although " +
-        "AbstractStreamObserverAndPublisher implements Queue it is" +
-            " purely internal and only guarantees support for poll/clear/size/isEmpty." +
-            " Instances shouldn't be used/exposed as Queue outside of RxGrpc operators.";
 
     private static final Subscription EMPTY_SUBSCRIPTION = new Subscription() {
         @Override
@@ -440,75 +433,5 @@ public abstract class AbstractStreamObserverAndPublisher<T>
     @Override
     public void clear() {
         queue.clear();
-    }
-
-    @Override
-    public T peek() {
-        throw new UnsupportedOperationException(NOT_SUPPORTED_MESSAGE);
-    }
-
-    @Override
-    public boolean add(T t) {
-        throw new UnsupportedOperationException(NOT_SUPPORTED_MESSAGE);
-    }
-
-    @Override
-    public boolean offer(T t) {
-        throw new UnsupportedOperationException(NOT_SUPPORTED_MESSAGE);
-    }
-
-    @Override
-    public T remove() {
-        throw new UnsupportedOperationException(NOT_SUPPORTED_MESSAGE);
-    }
-
-    @Override
-    public T element() {
-        throw new UnsupportedOperationException(NOT_SUPPORTED_MESSAGE);
-    }
-
-    @Override
-    public boolean contains(Object o) {
-        throw new UnsupportedOperationException(NOT_SUPPORTED_MESSAGE);
-    }
-
-    @Override
-    public Iterator<T> iterator() {
-        throw new UnsupportedOperationException(NOT_SUPPORTED_MESSAGE);
-    }
-
-    @Override
-    public Object[] toArray() {
-        throw new UnsupportedOperationException(NOT_SUPPORTED_MESSAGE);
-    }
-
-    @Override
-    public <T1> T1[] toArray(T1[] a) {
-        throw new UnsupportedOperationException(NOT_SUPPORTED_MESSAGE);
-    }
-
-    @Override
-    public boolean remove(Object o) {
-        throw new UnsupportedOperationException(NOT_SUPPORTED_MESSAGE);
-    }
-
-    @Override
-    public boolean containsAll(Collection<?> c) {
-        throw new UnsupportedOperationException(NOT_SUPPORTED_MESSAGE);
-    }
-
-    @Override
-    public boolean addAll(Collection<? extends T> c) {
-        throw new UnsupportedOperationException(NOT_SUPPORTED_MESSAGE);
-    }
-
-    @Override
-    public boolean removeAll(Collection<?> c) {
-        throw new UnsupportedOperationException(NOT_SUPPORTED_MESSAGE);
-    }
-
-    @Override
-    public boolean retainAll(Collection<?> c) {
-        throw new UnsupportedOperationException(NOT_SUPPORTED_MESSAGE);
     }
 }

@@ -40,9 +40,4 @@ class RxClientStreamObserverAndPublisher<T>
         }
         return QueueFuseable.NONE;
     }
-
-    @Override
-    public boolean offer(T t, T t1) {
-        throw new UnsupportedOperationException();
-    }
 }

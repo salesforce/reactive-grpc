@@ -7,8 +7,6 @@
 
 package com.salesforce.reactivegrpc.common;
 
-import java.util.Collection;
-import java.util.Iterator;
 import java.util.Queue;
 import java.util.concurrent.atomic.AtomicIntegerFieldUpdater;
 import java.util.concurrent.atomic.AtomicReferenceFieldUpdater;
@@ -453,11 +451,7 @@ public abstract class AbstractSubscriberAndProducer<T> implements Subscriber<T>,
      * Implementation of Cancelled Queue Subscription which is used as a marker of
      * cancelled {@link AbstractSubscriberAndProducer} instance.
      */
-    private static class CancelledQueueSubscription implements Subscription, Queue {
-
-        static final String NOT_SUPPORTED_MESSAGE = "Although CancelledQueueSubscription implements Queue it is" +
-            " purely internal and only guarantees support for poll/clear/size/isEmpty." +
-            " Instances shouldn't be used/exposed as Queue outside of RxGrpc operators.";
+    private static class CancelledQueueSubscription extends AbstractUnimplementedQueue<Object> implements Subscription {
 
         @Override
         public void cancel() {
@@ -482,81 +476,6 @@ public abstract class AbstractSubscriberAndProducer<T> implements Subscriber<T>,
         @Override
         public void clear() {
             // deliberately no op
-        }
-
-        @Override
-        public boolean offer(Object t) {
-            throw new UnsupportedOperationException(NOT_SUPPORTED_MESSAGE);
-        }
-
-        @Override
-        public int size() {
-            throw new UnsupportedOperationException(NOT_SUPPORTED_MESSAGE);
-        }
-
-        @Override
-        public Object peek() {
-            throw new UnsupportedOperationException(NOT_SUPPORTED_MESSAGE);
-        }
-
-        @Override
-        public boolean add(Object t) {
-            throw new UnsupportedOperationException(NOT_SUPPORTED_MESSAGE);
-        }
-
-        @Override
-        public Object remove() {
-            throw new UnsupportedOperationException(NOT_SUPPORTED_MESSAGE);
-        }
-
-        @Override
-        public Object element() {
-            throw new UnsupportedOperationException(NOT_SUPPORTED_MESSAGE);
-        }
-
-        @Override
-        public boolean contains(Object o) {
-            throw new UnsupportedOperationException(NOT_SUPPORTED_MESSAGE);
-        }
-
-        @Override
-        public Iterator iterator() {
-            throw new UnsupportedOperationException(NOT_SUPPORTED_MESSAGE);
-        }
-
-        @Override
-        public Object[] toArray() {
-            throw new UnsupportedOperationException(NOT_SUPPORTED_MESSAGE);
-        }
-
-        @Override
-        public Object[] toArray(Object[] a) {
-            throw new UnsupportedOperationException(NOT_SUPPORTED_MESSAGE);
-        }
-
-        @Override
-        public boolean remove(Object o) {
-            throw new UnsupportedOperationException(NOT_SUPPORTED_MESSAGE);
-        }
-
-        @Override
-        public boolean containsAll(Collection c) {
-            throw new UnsupportedOperationException(NOT_SUPPORTED_MESSAGE);
-        }
-
-        @Override
-        public boolean addAll(Collection c) {
-            throw new UnsupportedOperationException(NOT_SUPPORTED_MESSAGE);
-        }
-
-        @Override
-        public boolean removeAll(Collection c) {
-            throw new UnsupportedOperationException(NOT_SUPPORTED_MESSAGE);
-        }
-
-        @Override
-        public boolean retainAll(Collection c) {
-            throw new UnsupportedOperationException(NOT_SUPPORTED_MESSAGE);
         }
     }
 }

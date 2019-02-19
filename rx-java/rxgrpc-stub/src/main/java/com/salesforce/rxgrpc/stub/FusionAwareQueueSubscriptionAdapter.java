@@ -6,25 +6,18 @@
  */
 package com.salesforce.rxgrpc.stub;
 
-import java.util.Collection;
-import java.util.Iterator;
-import java.util.Queue;
-
 import com.salesforce.reactivegrpc.common.FusionModeAwareSubscription;
+import com.salesforce.reactivegrpc.common.AbstractUnimplementedQueue;
 import io.reactivex.exceptions.Exceptions;
 import io.reactivex.internal.fuseable.QueueSubscription;
 
 /**
  * Implementation of FusionModeAwareSubscription which encapsulate
- * {@link QueueSubscription} from RxJava internals and allows treat it as a {@link Queue}.
+ * {@link QueueSubscription} from RxJava internals and allows treat it as a {@link java.util.Queue}.
  *
  * @param <T> generic type
  */
-class FusionAwareQueueSubscriptionAdapter<T> implements Queue<T>, QueueSubscription<T>, FusionModeAwareSubscription {
-
-    private static final String NOT_SUPPORTED_MESSAGE = "Although FusionAwareQueueSubscriptionAdapter implements Queue it is" +
-        " purely internal and only guarantees support for poll/clear/size/isEmpty." +
-        " Instances shouldn't be used/exposed as Queue outside of RxGrpc operators.";
+class FusionAwareQueueSubscriptionAdapter<T> extends AbstractUnimplementedQueue<T> implements QueueSubscription<T>, FusionModeAwareSubscription {
 
     private final QueueSubscription<T> delegate;
     private final int                  mode;
@@ -81,76 +74,5 @@ class FusionAwareQueueSubscriptionAdapter<T> implements Queue<T>, QueueSubscript
     @Override
     public void clear() {
         delegate.clear();
-    }
-
-    @Override
-    public int size() {
-        throw new UnsupportedOperationException(NOT_SUPPORTED_MESSAGE);
-    }
-
-
-    @Override
-    public T peek() {
-        throw new UnsupportedOperationException(NOT_SUPPORTED_MESSAGE);
-    }
-
-    @Override
-    public boolean add(T t) {
-        throw new UnsupportedOperationException(NOT_SUPPORTED_MESSAGE);
-    }
-
-    @Override
-    public T remove() {
-        throw new UnsupportedOperationException(NOT_SUPPORTED_MESSAGE);
-    }
-
-    @Override
-    public T element() {
-        throw new UnsupportedOperationException(NOT_SUPPORTED_MESSAGE);
-    }
-
-    @Override
-    public boolean contains(Object o) {
-        throw new UnsupportedOperationException(NOT_SUPPORTED_MESSAGE);
-    }
-
-    @Override
-    public Iterator<T> iterator() {
-        throw new UnsupportedOperationException(NOT_SUPPORTED_MESSAGE);
-    }
-
-    @Override
-    public Object[] toArray() {
-        throw new UnsupportedOperationException(NOT_SUPPORTED_MESSAGE);
-    }
-
-    @Override
-    public <T1> T1[] toArray(T1[] a) {
-        throw new UnsupportedOperationException(NOT_SUPPORTED_MESSAGE);
-    }
-
-    @Override
-    public boolean remove(Object o) {
-        throw new UnsupportedOperationException(NOT_SUPPORTED_MESSAGE);
-    }
-
-    @Override
-    public boolean containsAll(Collection<?> c) {
-        throw new UnsupportedOperationException(NOT_SUPPORTED_MESSAGE);
-    }
-
-    @Override
-    public boolean addAll(Collection<? extends T> c) {
-        throw new UnsupportedOperationException(NOT_SUPPORTED_MESSAGE);
-    }
-
-    @Override
-    public boolean removeAll(Collection<?> c) {
-        throw new UnsupportedOperationException(NOT_SUPPORTED_MESSAGE);
-    }
-
-    @Override
-    public boolean retainAll(Collection<?> c) {
-        throw new UnsupportedOperationException(NOT_SUPPORTED_MESSAGE);
     }
 }
