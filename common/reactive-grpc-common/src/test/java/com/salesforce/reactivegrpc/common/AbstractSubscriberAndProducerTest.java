@@ -238,7 +238,6 @@ public class AbstractSubscriberAndProducerTest {
 
     @Test
     public void regularModeWithRacingAndOnErrorTest() {
-        final AtomicLong requested = new AtomicLong();
         final AtomicBoolean pingPing = new AtomicBoolean();
         List<Integer> integers = Flowable.range(0, 10000000)
                                          .toList()
@@ -255,7 +254,6 @@ public class AbstractSubscriberAndProducerTest {
                                                            .doOnRequest(new LongConsumer() {
                                                                @Override
                                                                public void accept(long r) {
-                                                                   requested.addAndGet(r);
                                                                    boolean state = pingPing.getAndSet(true);
                                                                    Assertions.assertThat(state).isFalse();
                                                                }
@@ -282,7 +280,6 @@ public class AbstractSubscriberAndProducerTest {
                   .hasCauseInstanceOf(NullPointerException.class);
         Assertions.assertThat(producer).hasFieldOrPropertyWithValue("sourceMode", 0);
         Assertions.assertThat(unhandledThrowable).isEmpty();
-        Assertions.assertThat(requested.get()).isEqualTo(10000000 + 1);
         Assertions.assertThat(downstream.collected)
                   .isEqualTo(integers);
     }
