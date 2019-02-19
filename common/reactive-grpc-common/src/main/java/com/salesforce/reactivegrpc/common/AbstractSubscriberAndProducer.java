@@ -218,7 +218,7 @@ public abstract class AbstractSubscriberAndProducer<T> implements Subscriber<T>,
         }
 
 
-        do {
+        for (;;) {
             if (subscriber != null) {
                 if (mode == SYNC) {
                     drainSync();
@@ -232,7 +232,11 @@ public abstract class AbstractSubscriberAndProducer<T> implements Subscriber<T>,
             }
 
             missed = WIP.addAndGet(this, -missed);
-        } while (missed != 0);
+
+            if (missed == 0) {
+                break;
+            }
+        }
     }
 
     private void drainSync() {

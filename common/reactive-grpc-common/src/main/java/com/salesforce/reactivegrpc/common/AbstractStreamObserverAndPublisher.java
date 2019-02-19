@@ -210,7 +210,7 @@ public abstract class AbstractStreamObserverAndPublisher<T> extends AbstractUnim
     private void drainFused(final Subscriber<? super T> subscriber) {
         int missed = 1;
 
-        do {
+        for (;;) {
             if (cancelled) {
                 queue.clear();
                 downstream = null;
@@ -234,7 +234,11 @@ public abstract class AbstractStreamObserverAndPublisher<T> extends AbstractUnim
             }
 
             missed = WIP.addAndGet(this, -missed);
-        } while (missed != 0);
+
+            if (missed == 0) {
+                break;
+            }
+        }
     }
 
     private void drain() {
@@ -244,7 +248,7 @@ public abstract class AbstractStreamObserverAndPublisher<T> extends AbstractUnim
 
         int missed = 1;
 
-        do {
+        for (;;) {
             final Subscriber<? super T> subscriber = downstream;
             if (subscriber != null) {
                 if (outputFused) {
@@ -256,7 +260,11 @@ public abstract class AbstractStreamObserverAndPublisher<T> extends AbstractUnim
             }
 
             missed = WIP.addAndGet(this, -missed);
-        } while (missed != 0);
+
+            if (missed == 0) {
+                break;
+            }
+        }
     }
 
     private boolean checkTerminated(boolean d, boolean empty, Subscriber<? super T> subscriber, Queue<T> q) {
