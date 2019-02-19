@@ -1,5 +1,5 @@
 /*
- *  Copyright (c) 2017, salesforce.com, inc.
+ *  Copyright (c) 2019, Salesforce.com, Inc.
  *  All rights reserved.
  *  Licensed under the BSD 3-Clause license.
  *  For full license text, see LICENSE.txt file in the repo root  or https://opensource.org/licenses/BSD-3-Clause
@@ -34,13 +34,13 @@ public class ShareIntegrationTest {
         RxGreeterGrpc.GreeterImplBase svc = new RxGreeterGrpc.GreeterImplBase() {
             @Override
             public Single<HelloResponse> sayHelloReqStream(Flowable<HelloRequest> rxRequest) {
-//                ConnectableFlowable<HelloRequest> shared = rxRequest
-//                        .doOnSubscribe(x -> System.out.println("SUBSCRIBE"))
-//                        .publish();
-
-                Flowable<HelloRequest> shared = rxRequest
+                ConnectableFlowable<HelloRequest> shared = rxRequest
                         .doOnSubscribe(x -> System.out.println("SUBSCRIBE"))
-                        .share();
+                        .publish();
+
+//                Flowable<HelloRequest> shared = rxRequest
+//                        .doOnSubscribe(x -> System.out.println("SUBSCRIBE"))
+//                        .share();
 
                 Single<HelloRequest> first = shared.firstOrError();
                 Flowable<HelloRequest> rest = shared.skip(0);
@@ -57,7 +57,7 @@ public class ShareIntegrationTest {
                     ).doOnError(System.out::println)
                 );
 
-//                shared.connect();
+                shared.connect();
                 return resp;
             }
         };
@@ -90,13 +90,13 @@ public class ShareIntegrationTest {
         serverRule.getServiceRegistry().addService(svc);
         RxGreeterGrpc.RxGreeterStub stub = RxGreeterGrpc.newRxStub(serverRule.getChannel());
 
-//        ConnectableFlowable<HelloResponse> shared = stub.sayHelloRespStream(HelloRequest.getDefaultInstance())
-//                .doOnSubscribe(x -> System.out.println("SUBSCRIBE"))
-//                .publish();
-
-        Flowable<HelloResponse> shared = stub.sayHelloRespStream(HelloRequest.getDefaultInstance())
+        ConnectableFlowable<HelloResponse> shared = stub.sayHelloRespStream(HelloRequest.getDefaultInstance())
                 .doOnSubscribe(x -> System.out.println("SUBSCRIBE"))
-                .share();
+                .publish();
+
+//        Flowable<HelloResponse> shared = stub.sayHelloRespStream(HelloRequest.getDefaultInstance())
+//                .doOnSubscribe(x -> System.out.println("SUBSCRIBE"))
+//                .share();
 
         Single<HelloResponse> first = shared.firstOrError();
         Flowable<HelloResponse> rest = shared.skip(0);
@@ -115,7 +115,7 @@ public class ShareIntegrationTest {
                 .map(HelloResponse::getMessage)
                 .test();
 
-//        shared.connect();
+        shared.connect();
 
         resp.awaitTerminalEvent(5, TimeUnit.SECONDS);
         resp.assertComplete();
