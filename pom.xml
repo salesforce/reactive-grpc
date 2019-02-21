@@ -198,12 +198,12 @@
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-surefire-plugin</artifactId>
                 <version>3.0.0-M3</version>
-                <!--<configuration>-->
-                    <!--&lt;!&ndash; CircleCI build workaround &ndash;&gt;-->
-                    <!--<argLine>${surefireArgLine} -Xms1024m -Xmx2048m -XX:MaxPermSize=256m</argLine>-->
+                <configuration>
+                    <!-- CircleCI build workaround -->
+                    <argLine>-Xms1024m -Xmx2048m -XX:MaxPermSize=256m</argLine>
                     <!--<reuseForks>true</reuseForks>-->
                     <!--<useSystemClassLoader>false</useSystemClassLoader>-->
-                <!--</configuration>-->
+                </configuration>
             </plugin>
 
             <plugin>
