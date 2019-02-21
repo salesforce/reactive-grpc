@@ -1,0 +1,18 @@
+syntax = "proto3";
+
+package pkg.test;
+
+service TestService {
+    rpc test (InnerMessage.TestRequest) returns (InnerMessage.TestResponse);
+}
+
+message InnerMessage {
+    message TestRequest {
+        string data = 1;
+    }
+
+    message TestResponse {
+        string data = 1;
+        string error = 2;
+    }
+}
