@@ -21,4 +21,4 @@ jobs: # a collection of steps
       # Upload test results for display in Test Summary: https://circleci.com/docs/2.0/collect-test-data/
           path: target/surefire-reports
 
-      - codecov/upload
+      - run: bash <(curl -s https://codecov.io/bash)
