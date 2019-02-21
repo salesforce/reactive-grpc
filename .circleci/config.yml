@@ -1,5 +1,8 @@
 version: 2.1 # use CircleCI 2.0
 
+orbs:
+  codecov: codecov/codecov@1.0.4
+
 jobs: # a collection of steps
   build: # runs not using Workflows must have a `build` job as entry point
 
@@ -25,4 +28,4 @@ jobs: # a collection of steps
           path: ~/test-results
 
       # Upload code coverage
-      - run: bash <(curl -s https://codecov.io/bash) -s ~
+      - codecov/upload
