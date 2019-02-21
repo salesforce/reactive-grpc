@@ -1,0 +1,22 @@
+syntax = "proto3";
+
+package nested_overlap;
+
+option java_multiple_files = true;
+
+message Outer {  // Level 0
+     enum Foo {
+         FOO = 0;
+         BAR = 1;
+         CHEESE = 2;
+     }
+     Outer.Foo e = 1;
+}
+
+message Foo {
+    string bar = 1;
+}
+
+service Nested {
+    rpc doNested (Foo) returns (Outer) {}
+}
