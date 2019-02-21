@@ -24,4 +24,5 @@ jobs: # a collection of steps
       - store_test_results:
           path: ~/test-results
 
-      - run: bash <(curl -s https://codecov.io/bash)
+      # Upload code coverage
+      - run: bash <(curl -s https://codecov.io/bash) -s ~
