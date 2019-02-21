@@ -16,9 +16,7 @@
       <module name="reactive-grpc-gradle_test" target="1.8" />
     </bytecodeTargetLevel>
   </component>
-  <component name="CopyrightManager" default="">
-    <module2copyright />
-  </component>
+  <component name="CopyrightManager" default="" />
   <component name="DependencyValidationManager">
     <option name="SKIP_IMPORT_STATEMENTS" value="false" />
   </component>
@@ -32,6 +30,7 @@
             <option value="$PROJECT_DIR$" />
           </set>
         </option>
+        <option name="useAutoImport" value="true" />
       </GradleProjectSettings>
     </option>
   </component>
@@ -82,19 +81,23 @@
     <mapping directory="$PROJECT_DIR$/../.." vcs="Git" />
   </component>
   <component name="libraryTable">
-    <library name="Gradle: com.google.api.grpc:proto-google-common-protos:0.1.9">
+    <library name="Gradle: com.google.api.grpc:proto-google-common-protos:1.0.0">
       <CLASSES>
-        <root url="jar://$MAVEN_REPOSITORY$/com/google/api/grpc/proto-google-common-protos/0.1.9/proto-google-common-protos-0.1.9.jar!/" />
+        <root url="jar://$MAVEN_REPOSITORY$/com/google/api/grpc/proto-google-common-protos/1.0.0/proto-google-common-protos-1.0.0.jar!/" />
       </CLASSES>
       <JAVADOC />
-      <SOURCES />
+      <SOURCES>
+        <root url="jar://$MAVEN_REPOSITORY$/com/google/api/grpc/proto-google-common-protos/1.0.0/proto-google-common-protos-1.0.0-sources.jar!/" />
+      </SOURCES>
     </library>
     <library name="Gradle: com.google.code.findbugs:jsr305:3.0.0">
       <CLASSES>
         <root url="jar://$MAVEN_REPOSITORY$/com/google/code/findbugs/jsr305/3.0.0/jsr305-3.0.0.jar!/" />
       </CLASSES>
       <JAVADOC />
-      <SOURCES />
+      <SOURCES>
+        <root url="jar://$MAVEN_REPOSITORY$/com/google/code/findbugs/jsr305/3.0.0/jsr305-3.0.0-sources.jar!/" />
+      </SOURCES>
     </library>
     <library name="Gradle: com.google.code.gson:gson:2.7">
       <CLASSES>
@@ -110,7 +113,9 @@
         <root url="jar://$MAVEN_REPOSITORY$/com/google/errorprone/error_prone_annotations/2.1.2/error_prone_annotations-2.1.2.jar!/" />
       </CLASSES>
       <JAVADOC />
-      <SOURCES />
+      <SOURCES>
+        <root url="jar://$MAVEN_REPOSITORY$/com/google/errorprone/error_prone_annotations/2.1.2/error_prone_annotations-2.1.2-sources.jar!/" />
+      </SOURCES>
     </library>
     <library name="Gradle: com.google.guava:guava:20.0">
       <CLASSES>
@@ -121,50 +126,44 @@
         <root url="jar://$MAVEN_REPOSITORY$/com/google/guava/guava/20.0/guava-20.0-sources.jar!/" />
       </SOURCES>
     </library>
-    <library name="Gradle: com.google.protobuf:protobuf-java-util:3.4.0">
+    <library name="Gradle: com.google.protobuf:protobuf-java-util:3.5.1">
       <CLASSES>
-        <root url="jar://$MAVEN_REPOSITORY$/com/google/protobuf/protobuf-java-util/3.4.0/protobuf-java-util-3.4.0.jar!/" />
+        <root url="jar://$MAVEN_REPOSITORY$/com/google/protobuf/protobuf-java-util/3.5.1/protobuf-java-util-3.5.1.jar!/" />
       </CLASSES>
       <JAVADOC />
       <SOURCES>
-        <root url="jar://$MAVEN_REPOSITORY$/com/google/protobuf/protobuf-java-util/3.4.0/protobuf-java-util-3.4.0-sources.jar!/" />
+        <root url="jar://$MAVEN_REPOSITORY$/com/google/protobuf/protobuf-java-util/3.5.1/protobuf-java-util-3.5.1-sources.jar!/" />
       </SOURCES>
     </library>
-    <library name="Gradle: com.google.protobuf:protobuf-java:3.4.0">
+    <library name="Gradle: com.google.protobuf:protobuf-java:3.5.1">
       <CLASSES>
-        <root url="jar://$MAVEN_REPOSITORY$/com/google/protobuf/protobuf-java/3.4.0/protobuf-java-3.4.0.jar!/" />
+        <root url="jar://$MAVEN_REPOSITORY$/com/google/protobuf/protobuf-java/3.5.1/protobuf-java-3.5.1.jar!/" />
       </CLASSES>
       <JAVADOC />
       <SOURCES>
-        <root url="jar://$MAVEN_REPOSITORY$/com/google/protobuf/protobuf-java/3.4.0/protobuf-java-3.4.0-sources.jar!/" />
+        <root url="jar://$MAVEN_REPOSITORY$/com/google/protobuf/protobuf-java/3.5.1/protobuf-java-3.5.1-sources.jar!/" />
       </SOURCES>
     </library>
-    <library name="Gradle: com.salesforce.servicelibs:reactive-grpc-common:0.9.0">
+    <library name="Gradle: com.salesforce.servicelibs:reactive-grpc-common:0.9.1-SNAPSHOT">
       <CLASSES>
-        <root url="jar://$MAVEN_REPOSITORY$/com/salesforce/servicelibs/reactive-grpc-common/0.9.0/reactive-grpc-common-0.9.0.jar!/" />
+        <root url="jar://$MAVEN_REPOSITORY$/com/salesforce/servicelibs/reactive-grpc-common/0.9.1-SNAPSHOT/reactive-grpc-common-0.9.1-SNAPSHOT.jar!/" />
       </CLASSES>
       <JAVADOC />
-      <SOURCES>
-        <root url="jar://$MAVEN_REPOSITORY$/com/salesforce/servicelibs/reactive-grpc-common/0.9.0/reactive-grpc-common-0.9.0-sources.jar!/" />
-      </SOURCES>
+      <SOURCES />
     </library>
-    <library name="Gradle: com.salesforce.servicelibs:reactor-grpc-stub:0.9.0">
+    <library name="Gradle: com.salesforce.servicelibs:reactor-grpc-stub:0.9.1-SNAPSHOT">
       <CLASSES>
-        <root url="jar://$MAVEN_REPOSITORY$/com/salesforce/servicelibs/reactor-grpc-stub/0.9.0/reactor-grpc-stub-0.9.0.jar!/" />
+        <root url="jar://$MAVEN_REPOSITORY$/com/salesforce/servicelibs/reactor-grpc-stub/0.9.1-SNAPSHOT/reactor-grpc-stub-0.9.1-SNAPSHOT.jar!/" />
       </CLASSES>
       <JAVADOC />
-      <SOURCES>
-        <root url="jar://$MAVEN_REPOSITORY$/com/salesforce/servicelibs/reactor-grpc-stub/0.9.0/reactor-grpc-stub-0.9.0-sources.jar!/" />
-      </SOURCES>
+      <SOURCES />
     </library>
-    <library name="Gradle: com.salesforce.servicelibs:rxgrpc-stub:0.9.0">
+    <library name="Gradle: com.salesforce.servicelibs:rxgrpc-stub:0.9.1-SNAPSHOT">
       <CLASSES>
-        <root url="jar://$MAVEN_REPOSITORY$/com/salesforce/servicelibs/rxgrpc-stub/0.9.0/rxgrpc-stub-0.9.0.jar!/" />
+        <root url="jar://$MAVEN_REPOSITORY$/com/salesforce/servicelibs/rxgrpc-stub/0.9.1-SNAPSHOT/rxgrpc-stub-0.9.1-SNAPSHOT.jar!/" />
       </CLASSES>
       <JAVADOC />
-      <SOURCES>
-        <root url="jar://$MAVEN_REPOSITORY$/com/salesforce/servicelibs/rxgrpc-stub/0.9.0/rxgrpc-stub-0.9.0-sources.jar!/" />
-      </SOURCES>
+      <SOURCES />
     </library>
     <library name="Gradle: io.grpc:grpc-context:1.12.0">
       <CLASSES>
@@ -184,22 +183,22 @@
         <root url="jar://$MAVEN_REPOSITORY$/io/grpc/grpc-core/1.12.0/grpc-core-1.12.0-sources.jar!/" />
       </SOURCES>
     </library>
-    <library name="Gradle: io.grpc:grpc-protobuf-lite:1.7.0">
+    <library name="Gradle: io.grpc:grpc-protobuf-lite:1.12.0">
       <CLASSES>
-        <root url="jar://$MAVEN_REPOSITORY$/io/grpc/grpc-protobuf-lite/1.7.0/grpc-protobuf-lite-1.7.0.jar!/" />
+        <root url="jar://$MAVEN_REPOSITORY$/io/grpc/grpc-protobuf-lite/1.12.0/grpc-protobuf-lite-1.12.0.jar!/" />
       </CLASSES>
       <JAVADOC />
       <SOURCES>
-        <root url="jar://$MAVEN_REPOSITORY$/io/grpc/grpc-protobuf-lite/1.7.0/grpc-protobuf-lite-1.7.0-sources.jar!/" />
+        <root url="jar://$MAVEN_REPOSITORY$/io/grpc/grpc-protobuf-lite/1.12.0/grpc-protobuf-lite-1.12.0-sources.jar!/" />
       </SOURCES>
     </library>
-    <library name="Gradle: io.grpc:grpc-protobuf:1.7.0">
+    <library name="Gradle: io.grpc:grpc-protobuf:1.12.0">
       <CLASSES>
-        <root url="jar://$MAVEN_REPOSITORY$/io/grpc/grpc-protobuf/1.7.0/grpc-protobuf-1.7.0.jar!/" />
+        <root url="jar://$MAVEN_REPOSITORY$/io/grpc/grpc-protobuf/1.12.0/grpc-protobuf-1.12.0.jar!/" />
       </CLASSES>
       <JAVADOC />
       <SOURCES>
-        <root url="jar://$MAVEN_REPOSITORY$/io/grpc/grpc-protobuf/1.7.0/grpc-protobuf-1.7.0-sources.jar!/" />
+        <root url="jar://$MAVEN_REPOSITORY$/io/grpc/grpc-protobuf/1.12.0/grpc-protobuf-1.12.0-sources.jar!/" />
       </SOURCES>
     </library>
     <library name="Gradle: io.grpc:grpc-stub:1.12.0">
@@ -229,9 +228,9 @@
         <root url="jar://$MAVEN_REPOSITORY$/io/opencensus/opencensus-contrib-grpc-metrics/0.11.0/opencensus-contrib-grpc-metrics-0.11.0-sources.jar!/" />
       </SOURCES>
     </library>
-    <library name="Gradle: io.projectreactor:reactor-core:3.1.5.RELEASE">
+    <library name="Gradle: io.projectreactor:reactor-core:3.1.14.RELEASE">
       <CLASSES>
-        <root url="jar://$MAVEN_REPOSITORY$/io/projectreactor/reactor-core/3.1.5.RELEASE/reactor-core-3.1.5.RELEASE.jar!/" />
+        <root url="jar://$MAVEN_REPOSITORY$/io/projectreactor/reactor-core/3.1.14.RELEASE/reactor-core-3.1.14.RELEASE.jar!/" />
       </CLASSES>
       <JAVADOC />
       <SOURCES />
