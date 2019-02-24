@@ -99,13 +99,13 @@ public class ReactiveClientStandardServerInteropTest {
             }
         };
 
-        server = ServerBuilder.forPort(0).addService(svc).build().start();
+        server = ServerBuilder.forPort(9000).addService(svc).build().start();
         channel = ManagedChannelBuilder.forAddress("localhost", server.getPort()).usePlaintext().build();
     }
 
     @Before
     public void init() {
-        StepVerifier.setDefaultTimeout(Duration.ofSeconds(1));
+        StepVerifier.setDefaultTimeout(Duration.ofSeconds(5));
     }
 
     @AfterClass
