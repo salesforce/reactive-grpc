@@ -45,6 +45,8 @@ are consumed by the consumer-side `Publisher`, signals are sent down through gRP
 
 An example of back-pressure in action can be found in [BackpressureIntegrationTest.java](https://github.com/salesforce/reactive-grpc/blob/master/rx-java/rxgrpc-test/src/test/java/com/salesforce/rxgrpc/BackpressureIntegrationTest.java).
 
+![backpressure](backpressure.png)
+
 ### Understanding Reactive gRPC Flow Control
 For simple unary request and response services, Reactive gRPC's flow control model is transparent. However, Reactive 
 gRPC is built on top of three different interacting flow control models, and, as a result, backpressure doesn't always 
@@ -78,6 +80,8 @@ infinite streams are involved.
 When reasoning about flow control with Reactive gRPC, you cannot assume everything works like Reactive Streams. A call to `request(1)` on the consuming side of the wire will not necessarially result in a `request(1)` call on the producing side. Zero or more messages may be requested from the producer based on the state of the HTTP/2 flow control window, and the serialized size of each protobuf message. Instead, you need to think about how each stage in processing interacts with the stage before and after it.
 
 `Reactive` ➜ `gRPC` ➜ `HTTP/2` ➜ `...` ➜ `HTTP/2` ➜ `gRPC` ➜ `Reactive`
+
+![flow control](flow-control.png)
 
 # Exception Handling
 Exception handling with Reactive gRPC is a little strange due to the way gRPC deals with errors. Servers that produce an error
