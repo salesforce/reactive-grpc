@@ -58,7 +58,7 @@ public class ConcurrentRequestIntegrationTest {
 
     @Before
     public void setupServer() throws Exception {
-        server = ServerBuilder.forPort(0).addService(service).build().start();
+        server = ServerBuilder.forPort(9000).addService(service).build().start();
         channel = ManagedChannelBuilder.forAddress("localhost", server.getPort()).usePlaintext().build();
     }
 

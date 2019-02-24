@@ -50,7 +50,7 @@ public class EndToEndIntegrationTest {
     @Before
     public void setupServer() throws Exception {
         StepVerifier.setDefaultTimeout(Duration.ofSeconds(3));
-        server = ServerBuilder.forPort(0).addService(service).build().start();
+        server = ServerBuilder.forPort(9000).addService(service).build().start();
         channel = ManagedChannelBuilder.forAddress("localhost", server.getPort()).usePlaintext().build();
     }
 

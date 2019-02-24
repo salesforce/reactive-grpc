@@ -51,7 +51,7 @@ public class ServerErrorIntegrationTest {
             }
         };
 
-        server = ServerBuilder.forPort(0).addService(svc).build().start();
+        server = ServerBuilder.forPort(9000).addService(svc).build().start();
         channel = ManagedChannelBuilder.forAddress("localhost", server.getPort()).usePlaintext().build();
     }
 
