@@ -21,6 +21,10 @@ public class RxGrpcGenerator extends ReactiveGrpcGenerator {
     }
 
     public static void main(String[] args) {
-        ProtocPlugin.generate(new RxGrpcGenerator());
+        if (args.length == 0) {
+            ProtocPlugin.generate(new RxGrpcGenerator());
+        } else {
+            ProtocPlugin.debug(new RxGrpcGenerator(), args[0]);
+        }
     }
 }
