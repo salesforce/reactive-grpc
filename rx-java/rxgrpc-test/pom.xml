@@ -131,6 +131,13 @@
                                     <version>${project.version}</version>
                                     <mainClass>com.salesforce.rxgrpc.RxGrpcGenerator</mainClass>
                                 </protocPlugin>
+                                <protocPlugin>
+                                    <id>dump</id>
+                                    <groupId>com.salesforce.servicelibs</groupId>
+                                    <artifactId>jprotoc</artifactId>
+                                    <version>${jprotoc.version}</version>
+                                    <mainClass>com.salesforce.jprotoc.dump.DumpGenerator</mainClass>
+                                </protocPlugin>
                             </protocPlugins>
                         </configuration>
                     </execution>
