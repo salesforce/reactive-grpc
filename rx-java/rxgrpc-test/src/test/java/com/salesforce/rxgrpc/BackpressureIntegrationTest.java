@@ -34,7 +34,7 @@ public class BackpressureIntegrationTest {
     @Rule
     public UnhandledRxJavaErrorRule errorRule = new UnhandledRxJavaErrorRule().autoVerifyNoError();
 
-    private static final int NUMBER_OF_STREAM_ELEMENTS = 512 + 512 / 2;
+    private static final int NUMBER_OF_STREAM_ELEMENTS = 512 + (512 * 3 / 4);
 
     private static AtomicLong lastValueTime;
     private static AtomicLong numberOfWaits;

@@ -145,7 +145,7 @@ public class AbstractSubscriberAndProducerTest {
         TestSubscriberProducer<Integer> producer = Flowable.fromIterable(integers)
                                                            .hide()
                                                            .subscribeOn(Schedulers.io())
-                                                           .observeOn(Schedulers.io())
+                                                           .observeOn(Schedulers.io(), true)
                                                            .doOnRequest(new LongConsumer() {
                                                                @Override
                                                                public void accept(long r) {
@@ -188,7 +188,7 @@ public class AbstractSubscriberAndProducerTest {
         TestSubscriberProducer<Integer> producer = Flowable.fromIterable(integers)
                                                            .hide()
                                                            .subscribeOn(Schedulers.io())
-                                                           .observeOn(Schedulers.io())
+                                                           .observeOn(Schedulers.io(), true)
                                                            .subscribeWith(new TestSubscriberProducer<Integer>());
 
         TestCallStreamObserver<Integer> downstream = new TestCallStreamObserver<Integer>(executorService);
@@ -250,7 +250,7 @@ public class AbstractSubscriberAndProducerTest {
         TestSubscriberProducer<Integer> producer = Flowable.fromIterable(copy)
                                                            .hide()
                                                            .subscribeOn(Schedulers.io())
-                                                           .observeOn(Schedulers.io())
+                                                           .observeOn(Schedulers.io(), true)
                                                            .doOnRequest(new LongConsumer() {
                                                                @Override
                                                                public void accept(long r) {
@@ -297,7 +297,7 @@ public class AbstractSubscriberAndProducerTest {
 
         TestSubscriberProducer<Integer> producer = Flowable.fromIterable(copy)
                                                            .hide()
-                                                           .observeOn(Schedulers.computation())
+                                                           .observeOn(Schedulers.computation(), true)
                                                            .subscribeWith(new TestSubscriberProducer<Integer>());
 
         TestCallStreamObserver<Integer> downstream = new TestCallStreamObserver<Integer>(
@@ -332,7 +332,7 @@ public class AbstractSubscriberAndProducerTest {
                                                            })
                                                            .hide()
                                                            .subscribeOn(Schedulers.io())
-                                                           .observeOn(Schedulers.io())
+                                                           .observeOn(Schedulers.io(), true)
                                                            .map(new Function<Integer, Integer>() {
                                                                @Override
                                                                public Integer apply(Integer i) {
@@ -435,7 +435,7 @@ public class AbstractSubscriberAndProducerTest {
                                                            })
                                                            .hide()
                                                            .subscribeOn(Schedulers.io())
-                                                           .observeOn(Schedulers.io())
+                                                           .observeOn(Schedulers.io(), true)
                                                            .doOnNext(new Consumer<Integer>() {
                                                                @Override
                                                                public void accept(Integer __) {
@@ -488,7 +488,7 @@ public class AbstractSubscriberAndProducerTest {
                                                            })
                                                            .hide()
                                                            .subscribeOn(Schedulers.io())
-                                                           .observeOn(Schedulers.io())
+                                                           .observeOn(Schedulers.io(), true)
                                                            .subscribeWith(new TestSubscriberProducer<Integer>());
 
         TestCallStreamObserver<Integer> downstream = new TestCallStreamObserver<Integer>(
@@ -566,7 +566,7 @@ public class AbstractSubscriberAndProducerTest {
         TestSubscriberProducer<Integer> producer = Flowable.fromIterable(integers)
                                                            .hide()
                                                            .subscribeOn(Schedulers.io())
-                                                           .observeOn(Schedulers.io())
+                                                           .observeOn(Schedulers.io(), true)
                                                            .doOnNext(new Consumer<Integer>() {
                                                                @Override
                                                                public void accept(Integer __) {
@@ -623,7 +623,7 @@ public class AbstractSubscriberAndProducerTest {
                                                                }
                                                            })
                                                            .subscribeOn(Schedulers.io())
-                                                           .observeOn(Schedulers.io())
+                                                           .observeOn(Schedulers.io(), true)
                                                            .subscribeWith(new TestSubscriberProducer<Integer>());
 
         TestCallStreamObserver<Integer> downstream = new TestCallStreamObserver<Integer>(
