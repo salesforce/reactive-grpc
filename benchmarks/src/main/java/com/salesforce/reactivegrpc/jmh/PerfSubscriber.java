@@ -12,12 +12,15 @@ import org.openjdk.jmh.infra.Blackhole;
 import org.reactivestreams.Subscriber;
 import org.reactivestreams.Subscription;
 
+/**
+ * PerfSubscriber is a sink for reactive requests that blackholes all messages.
+ */
 public final class PerfSubscriber implements Subscriber<Object> {
 
-    final Blackhole bh;
-    final CountDownLatch latch;
+    private final Blackhole bh;
+    protected final CountDownLatch latch;
 
-    Subscription subscription;
+    private Subscription subscription;
 
     public PerfSubscriber(Blackhole bh) {
         this.bh = bh;

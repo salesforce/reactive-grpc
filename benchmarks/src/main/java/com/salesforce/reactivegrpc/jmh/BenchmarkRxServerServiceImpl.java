@@ -13,11 +13,13 @@ import com.salesforce.reactivegrpc.jmh.proto.RxBenchmarkServiceGrpc;
 import io.reactivex.Flowable;
 import io.reactivex.Single;
 
-public class BenchmarkRxServerServiceImpl extends
-                                        RxBenchmarkServiceGrpc.BenchmarkServiceImplBase {
+/**
+ * RxJava benchmarking service.
+ */
+public class BenchmarkRxServerServiceImpl extends RxBenchmarkServiceGrpc.BenchmarkServiceImplBase {
 
-    final Single<Messages.SimpleResponse>   responseMono;
-    final Flowable<Messages.SimpleResponse> responseFlux;
+    private final Single<Messages.SimpleResponse>   responseMono;
+    private final Flowable<Messages.SimpleResponse> responseFlux;
 
     public BenchmarkRxServerServiceImpl(int times) {
         Messages.SimpleResponse[] array = new Messages.SimpleResponse[times];

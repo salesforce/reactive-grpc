@@ -13,11 +13,14 @@ import com.salesforce.reactivegrpc.jmh.proto.ReactorBenchmarkServiceGrpc;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
+/**
+ * Reactor benchmarking service.
+ */
 public class BenchmarkReactorServerServiceImpl extends
                                         ReactorBenchmarkServiceGrpc.BenchmarkServiceImplBase {
 
-    final Mono<Messages.SimpleResponse> responseMono;
-    final Flux<Messages.SimpleResponse> responseFlux;
+    private final Mono<Messages.SimpleResponse> responseMono;
+    private final Flux<Messages.SimpleResponse> responseFlux;
 
     public BenchmarkReactorServerServiceImpl(int times) {
         Messages.SimpleResponse[] array = new Messages.SimpleResponse[times];
