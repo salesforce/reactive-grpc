@@ -113,7 +113,7 @@ public abstract class AbstractSubscriberAndProducer<T> implements Subscriber<T>,
             s.cancel();
 
             if (WIP.getAndIncrement(this) == 0) {
-                if (s instanceof Queue) {
+                if (sourceMode != NONE) {
                     ((Queue) s).clear();
                 }
             }

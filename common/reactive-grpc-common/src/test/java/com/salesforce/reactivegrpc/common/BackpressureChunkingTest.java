@@ -17,15 +17,17 @@ import io.reactivex.subscribers.TestSubscriber;
 import org.junit.Test;
 import org.reactivestreams.Publisher;
 
+import static com.salesforce.reactivegrpc.common.AbstractStreamObserverAndPublisher.DEFAULT_CHUNK_SIZE;
+import static com.salesforce.reactivegrpc.common.AbstractStreamObserverAndPublisher.TWO_THIRDS_OF_DEFAULT_CHUNK_SIZE;
 import static org.assertj.core.api.Assertions.assertThat;
 
 public class BackpressureChunkingTest {
     @Test
     public void chunkOperatorCorrectlyChunksInfiniteRequest() {
-        int chunkSize = AbstractStreamObserverAndPublisher.DEFAULT_CHUNK_SIZE;
+        int chunkSize = DEFAULT_CHUNK_SIZE;
 
-        int halfChunk = chunkSize / 2;
-        int num = chunkSize * 2 + halfChunk;
+        int partOfChunk = TWO_THIRDS_OF_DEFAULT_CHUNK_SIZE;
+        int num = chunkSize * 2;
 
         AbstractStreamObserverAndPublisher<Long> source =
                 new TestStreamObserverAndPublisherWithFusion<Long>(new ConcurrentLinkedQueue<Long>(), null);
@@ -38,16 +40,16 @@ public class BackpressureChunkingTest {
         testSubscriber.awaitTerminalEvent();
         testSubscriber.assertComplete();
 
-        assertThat(observer.requestsQueue).containsExactly(chunkSize, chunkSize, chunkSize);
+        assertThat(observer.requestsQueue).containsExactly(chunkSize, partOfChunk, partOfChunk, partOfChunk);
         assertThat(source.outputFused).isFalse();
     }
 
     @Test
     public void chunkOperatorCorrectlyChunksFiniteRequest() {
-        int chunkSize = AbstractStreamObserverAndPublisher.DEFAULT_CHUNK_SIZE;
+        int chunkSize = DEFAULT_CHUNK_SIZE;
 
-        int halfChunk = chunkSize / 2;
-        int num = chunkSize * 2 + halfChunk;
+        int partOfChunk = TWO_THIRDS_OF_DEFAULT_CHUNK_SIZE;
+        int num = chunkSize * 2;
 
         AbstractStreamObserverAndPublisher<Long> source =
                 new TestStreamObserverAndPublisherWithFusion<Long>(new ConcurrentLinkedQueue<Long>(), null);
@@ -59,16 +61,16 @@ public class BackpressureChunkingTest {
         testSubscriber.awaitTerminalEvent();
         testSubscriber.assertComplete();
 
-        assertThat(observer.requestsQueue).containsExactly(chunkSize, chunkSize, chunkSize);
+        assertThat(observer.requestsQueue).containsExactly(chunkSize, partOfChunk, partOfChunk, partOfChunk);
         assertThat(source.outputFused).isFalse();
     }
 
     @Test
     public void chunkOperatorCorrectlyChunksInfiniteRequestFusion() {
-        int chunkSize = AbstractStreamObserverAndPublisher.DEFAULT_CHUNK_SIZE;
+        int chunkSize = DEFAULT_CHUNK_SIZE;
 
-        int halfChunk = chunkSize / 2;
-        int num = chunkSize * 2 + halfChunk;
+        int partOfChunk = TWO_THIRDS_OF_DEFAULT_CHUNK_SIZE;
+        int num = chunkSize * 2;
 
         AbstractStreamObserverAndPublisher<Long> source =
                 new TestStreamObserverAndPublisherWithFusion<Long>(new ConcurrentLinkedQueue<Long>(), null);
@@ -82,16 +84,16 @@ public class BackpressureChunkingTest {
         testSubscriber.awaitTerminalEvent();
         testSubscriber.assertComplete();
 
-        assertThat(observer.requestsQueue).containsExactly(chunkSize, chunkSize, chunkSize);
+        assertThat(observer.requestsQueue).containsExactly(chunkSize, partOfChunk, partOfChunk, partOfChunk);
         assertThat(source.outputFused).isTrue();
     }
 
     @Test
     public void chunkOperatorCorrectlyChunksFiniteRequestFusion() {
-        int chunkSize = AbstractStreamObserverAndPublisher.DEFAULT_CHUNK_SIZE;
+        int chunkSize = DEFAULT_CHUNK_SIZE;
 
-        int halfChunk = chunkSize / 2;
-        int num = chunkSize * 2 + halfChunk;
+        int partOfChunk = TWO_THIRDS_OF_DEFAULT_CHUNK_SIZE;
+        int num = chunkSize * 2;
 
         AbstractStreamObserverAndPublisher<Long> source =
                 new TestStreamObserverAndPublisherWithFusion<Long>(new ConcurrentLinkedQueue<Long>(), null);
@@ -104,7 +106,7 @@ public class BackpressureChunkingTest {
         testSubscriber.awaitTerminalEvent();
         testSubscriber.assertComplete();
 
-        assertThat(observer.requestsQueue).containsExactly(chunkSize, chunkSize, chunkSize);
+        assertThat(observer.requestsQueue).containsExactly(chunkSize, partOfChunk, partOfChunk, partOfChunk);
         assertThat(source.outputFused).isTrue();
     }
 
@@ -113,7 +115,7 @@ public class BackpressureChunkingTest {
      */
     @Test
     public void chunkOperatorWorksWithConcatMap() {
-        int chunkSize = AbstractStreamObserverAndPublisher.DEFAULT_CHUNK_SIZE;
+        int chunkSize = DEFAULT_CHUNK_SIZE;
 
         AbstractStreamObserverAndPublisher<Long> source =
                 new AbstractStreamObserverAndPublisher<Long>(new ConcurrentLinkedQueue<Long>(), null){};
@@ -131,6 +133,6 @@ public class BackpressureChunkingTest {
         testSubscriber.awaitTerminalEvent();
         testSubscriber.assertNoErrors();
 
-        assertThat(observer.requestsQueue).containsExactly(chunkSize, chunkSize);
+        assertThat(observer.requestsQueue).containsExactly(chunkSize);
     }
 }

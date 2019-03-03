@@ -28,8 +28,12 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
 
+import static com.salesforce.reactivegrpc.common.AbstractStreamObserverAndPublisher.DEFAULT_CHUNK_SIZE;
+
 @RunWith(Parameterized.class)
 public class StreamObserverAndPublisherTest {
+
+    static final int PART_OF_CHUNK = DEFAULT_CHUNK_SIZE * 2 / 3;
 
     @Parameterized.Parameters
     public static Object[][] data() {
@@ -82,10 +86,14 @@ public class StreamObserverAndPublisherTest {
         testSubscriber.assertValueCount(countPerThread);
 
         Assertions.assertThat(processor.outputFused).isFalse();
-        Assertions.assertThat(observer.requestsQueue.size()).isBetween(countPerThread / 16, countPerThread / 16 + 1);
-        Integer i;
+        Assertions.assertThat(observer.requestsQueue.size()).isBetween((countPerThread - DEFAULT_CHUNK_SIZE) / PART_OF_CHUNK + 1, (countPerThread - DEFAULT_CHUNK_SIZE) / PART_OF_CHUNK + 2);
+
+        Integer i = observer.requestsQueue.poll();
+
+        Assertions.assertThat(i).isEqualTo(DEFAULT_CHUNK_SIZE);
+
         while ((i = observer.requestsQueue.poll()) != null) {
-            Assertions.assertThat(i).isEqualTo(16);
+            Assertions.assertThat(i).isEqualTo(PART_OF_CHUNK);
         }
     }
 
@@ -116,10 +124,14 @@ public class StreamObserverAndPublisherTest {
         testSubscriber.assertValueCount(countPerThread);
 
         Assertions.assertThat(processor.outputFused).isTrue();
-        Assertions.assertThat(observer.requestsQueue.size()).isBetween(countPerThread / 16, countPerThread / 16 + 1);
-        Integer i;
+        Assertions.assertThat(observer.requestsQueue.size()).isBetween((countPerThread - DEFAULT_CHUNK_SIZE) / PART_OF_CHUNK + 1, (countPerThread - DEFAULT_CHUNK_SIZE) / PART_OF_CHUNK + 2);
+
+        Integer i = observer.requestsQueue.poll();
+
+        Assertions.assertThat(i).isEqualTo(DEFAULT_CHUNK_SIZE);
+
         while ((i = observer.requestsQueue.poll()) != null) {
-            Assertions.assertThat(i).isEqualTo(16);
+            Assertions.assertThat(i).isEqualTo(PART_OF_CHUNK);
         }
     }
 
@@ -221,7 +233,7 @@ public class StreamObserverAndPublisherTest {
 
             Assertions.assertThat(upstream.requestsQueue)
                       .hasSize(1)
-                      .containsOnly(16);
+                      .containsOnly(DEFAULT_CHUNK_SIZE);
         }
     }
 

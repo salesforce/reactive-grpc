@@ -34,7 +34,7 @@ public class BackpressureIntegrationTest {
     @Rule
     public UnhandledRxJavaErrorRule errorRule = new UnhandledRxJavaErrorRule().autoVerifyNoError();
 
-    private static final int NUMBER_OF_STREAM_ELEMENTS = 140;
+    private static final int NUMBER_OF_STREAM_ELEMENTS = 512 + 512 / 2;
 
     private static AtomicLong lastValueTime;
     private static AtomicLong numberOfWaits;
@@ -90,11 +90,11 @@ public class BackpressureIntegrationTest {
 
         TestObserver<NumberProto.Number> rxResponse = rxRequest.as(stub::requestPressure).test();
 
-        rxResponse.awaitTerminalEvent(5, TimeUnit.SECONDS);
+        rxResponse.awaitTerminalEvent(15, TimeUnit.SECONDS);
         rxResponse.assertComplete()
                 .assertValue(v -> v.getNumber(0) == NUMBER_OF_STREAM_ELEMENTS - 1);
 
-        assertThat(numberOfWaits.get()).isEqualTo(1);
+        assertThat(numberOfWaits.get()).isBetween(1L, 2L);
     }
 
     @Test
@@ -109,11 +109,11 @@ public class BackpressureIntegrationTest {
                 .doOnNext(n -> waitIfValuesAreEqual(n.getNumber(0), 3))
                 .test();
 
-        rxResponse.awaitTerminalEvent(5, TimeUnit.SECONDS);
+        rxResponse.awaitTerminalEvent(15, TimeUnit.SECONDS);
         rxResponse.assertComplete()
                 .assertValueCount(NUMBER_OF_STREAM_ELEMENTS);
 
-        assertThat(numberOfWaits.get()).isEqualTo(1);
+        assertThat(numberOfWaits.get()).isBetween(1L, 2L);
     }
 
     @Test
@@ -127,11 +127,11 @@ public class BackpressureIntegrationTest {
                 .doOnNext(n -> waitIfValuesAreEqual(n.getNumber(0), 3))
                 .test();
 
-        rxResponse.awaitTerminalEvent(5, TimeUnit.SECONDS);
+        rxResponse.awaitTerminalEvent(15, TimeUnit.SECONDS);
         rxResponse.assertComplete()
                 .assertValueCount(NUMBER_OF_STREAM_ELEMENTS);
 
-        assertThat(numberOfWaits.get()).isEqualTo(1);
+        assertThat(numberOfWaits.get()).isBetween(1L, 2L);
     }
 
     @Test
@@ -147,11 +147,11 @@ public class BackpressureIntegrationTest {
 
         TestSubscriber<NumberProto.Number> rxResponse = rxRequest.compose(stub::twoWayRequestPressure).test();
 
-        rxResponse.awaitTerminalEvent(5, TimeUnit.SECONDS);
+        rxResponse.awaitTerminalEvent(15, TimeUnit.SECONDS);
         rxResponse.assertComplete()
                 .assertValue(v -> v.getNumber(0) == NUMBER_OF_STREAM_ELEMENTS - 1);
 
-        assertThat(numberOfWaits.get()).isEqualTo(1);
+        assertThat(numberOfWaits.get()).isBetween(1L, 2L);
     }
 
 

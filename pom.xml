@@ -32,6 +32,11 @@
             <name>Christophe Bornet</name>
             <email>cbornet@hotmail.com</email>
         </developer>
+        <developer>
+            <id>olegdokuka</id>
+            <name>Oleh Dokuka</name>
+            <email>shadowgun@i.ua</email>
+        </developer>
     </developers>
 
     <modules>
@@ -46,16 +51,20 @@
         <module>reactor/reactor-grpc-tck</module>
         <module>reactor/reactor-grpc-test</module>
         <module>reactor/reactor-grpc-test-32</module>
+        <module>benchmarks</module>
     </modules>
 
     <properties>
         <!-- Dependency Versions -->
-        <grpc.version>1.12.0</grpc.version>
-        <protoc.version>3.5.1</protoc.version> <!-- Same version as grpc-proto -->
+        <reactive.streams.version>1.0.2</reactive.streams.version>
+        <grpc.version>1.19.0</grpc.version>
+        <protoc.version>3.6.1</protoc.version> <!-- Same version as grpc-proto -->
+        <protobuf.plugin.version>0.6.1</protobuf.plugin.version>
+        <compiler.plugin.version>3.8.0</compiler.plugin.version>
         <grpc.contrib.version>0.8.1</grpc.contrib.version>
         <jprotoc.version>0.9.1</jprotoc.version>
-        <rxjava.version>2.1.10</rxjava.version>
-        <reactor.version>3.1.14.RELEASE</reactor.version>
+        <rxjava.version>2.2.7</rxjava.version>
+        <reactor.version>3.1.15.RELEASE</reactor.version>
         <reactor.extra.version>3.1.9.RELEASE</reactor.extra.version>
 
         <!-- Test Dependency Versions -->
@@ -187,7 +196,7 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-compiler-plugin</artifactId>
-                <version>3.6.1</version>
+                <version>${compiler.plugin.version}</version>
                 <configuration>
                     <source>${maven.compiler.source}</source>
                     <target>${maven.compiler.target}</target>
@@ -225,7 +234,7 @@
             <plugin>
                 <groupId>org.jacoco</groupId>
                 <artifactId>jacoco-maven-plugin</artifactId>
-                <version>0.7.9</version>
+                <version>0.8.3</version>
                 <executions>
                     <execution>
                         <goals>
@@ -252,7 +261,7 @@
                     <plugin>
                         <groupId>org.apache.maven.plugins</groupId>
                         <artifactId>maven-javadoc-plugin</artifactId>
-                        <version>2.10.4</version>
+                        <version>3.0.1</version>
                         <configuration>
                             <additionalparam>-Xdoclint:none</additionalparam>
                         </configuration>
