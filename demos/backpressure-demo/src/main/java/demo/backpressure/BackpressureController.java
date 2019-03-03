@@ -100,7 +100,7 @@ public class BackpressureController extends RxBackpressureDemoGrpc.BackpressureD
 
     @FXML
     public void initialize() throws Exception {
-        Server server = ServerBuilder.forPort(0).addService(this).build().start();
+        Server server = ServerBuilder.forPort(9000).addService(this).build().start();
         Channel channel = ManagedChannelBuilder.forAddress("localhost", server.getPort()).usePlaintext().build();
         stub = RxBackpressureDemoGrpc.newRxStub(channel);
 
