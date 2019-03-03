@@ -127,6 +127,7 @@ public abstract class AbstractStreamObserverAndPublisher<T> extends AbstractUnim
             Consumer<CallStreamObserver<?>> onSubscribe,
             Runnable onTerminate) {
         this.prefetch = prefetch;
+        // CHECKSTYLE DISABLE MagicNumber FOR 1 LINES
         this.limit = (prefetch * 2) / 3;
         this.queue = queue;
         this.onSubscribe = onSubscribe;
