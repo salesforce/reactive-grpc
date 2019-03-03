@@ -47,19 +47,4 @@ public class BenchmarkRxServerServiceImpl extends
         request.subscribe();
         return responseFlux;
     }
-
-    //    @Override
-//    public Flux<Messages.SimpleResponse> streamingCall(Flux<Messages.SimpleRequest> request) {
-//        return request.map(__ -> Messages.SimpleResponse.getDefaultInstance());
-//    }
-//
-//    @Override
-//    public Mono<Messages.SimpleResponse> streamingFromClient(Flux<Messages.SimpleRequest> request) {
-//        return request.then(responseMono);
-//    }
-//
-//    @Override
-//    public Flux<Messages.SimpleResponse> streamingBothWays(Flux<Messages.SimpleRequest> request) {
-//        return request.map(__ -> Messages.SimpleResponse.getDefaultInstance());
-//    }
 }

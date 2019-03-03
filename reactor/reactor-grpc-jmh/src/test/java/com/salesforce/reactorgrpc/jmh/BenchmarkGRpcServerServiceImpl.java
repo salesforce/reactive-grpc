@@ -108,24 +108,4 @@ public class BenchmarkGRpcServerServiceImpl
             }
         };
     }
-
-    //    @Override
-//    public Flux<Messages.SimpleResponse> streamingCall(Flux<Messages.SimpleRequest> request) {
-//        return request.map(__ -> Messages.SimpleResponse.getDefaultInstance());
-//    }
-//
-//    @Override
-//    public Flux<Messages.SimpleResponse> streamingFromServer(Mono<Messages.SimpleRequest> request) {
-//        return request.thenMany(responseFlux);
-//    }
-//
-//    @Override
-//    public Mono<Messages.SimpleResponse> streamingFromClient(Flux<Messages.SimpleRequest> request) {
-//        return request.then(responseMono);
-//    }
-//
-//    @Override
-//    public Flux<Messages.SimpleResponse> streamingBothWays(Flux<Messages.SimpleRequest> request) {
-//        return request.map(__ -> Messages.SimpleResponse.getDefaultInstance());
-//    }
 }
