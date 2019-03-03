@@ -1,3 +1,1 @@
-This module contains tests from the Reactive Streams Technology Compatibility Kit for Reactor-Grpc.
-
-https://github.com/reactive-streams/reactive-streams-jvm/tree/master/tck
+This module contains Reference JMH tests which can be run in order to compare performance of Reactive-GRPC with the original library
