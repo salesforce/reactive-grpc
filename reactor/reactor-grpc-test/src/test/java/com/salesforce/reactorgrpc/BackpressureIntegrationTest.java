@@ -93,7 +93,7 @@ public class BackpressureIntegrationTest {
                     .expectComplete()
                     .verify(Duration.ofSeconds(15));
 
-        assertThat(numberOfWaits.get()).isEqualTo(1);
+        assertThat(numberOfWaits.get()).isBetween(1L, 2L);
     }
 
     @Test
@@ -119,7 +119,7 @@ public class BackpressureIntegrationTest {
                 .expectComplete()
                 .verify(Duration.ofSeconds(15));
 
-        assertThat(numberOfWaits.get()).isEqualTo(1);
+        assertThat(numberOfWaits.get()).isBetween(1L, 2L);
     }
 
     @Test
@@ -149,7 +149,7 @@ public class BackpressureIntegrationTest {
                 .expectComplete()
                 .verify(Duration.ofSeconds(15));
 
-        assertThat(numberOfWaits.get()).isEqualTo(1);
+        assertThat(numberOfWaits.get()).isBetween(1L, 2L);
     }
 
     @Test
@@ -181,7 +181,7 @@ public class BackpressureIntegrationTest {
                 .expectComplete()
                 .verify(Duration.ofSeconds(15));
 
-        assertThat(numberOfWaits.get()).isEqualTo(1);
+        assertThat(numberOfWaits.get()).isBetween(1L, 2L);
     }
 
 
