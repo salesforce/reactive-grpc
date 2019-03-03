@@ -17,14 +17,16 @@ import io.reactivex.subscribers.TestSubscriber;
 import org.junit.Test;
 import org.reactivestreams.Publisher;
 
+import static com.salesforce.reactivegrpc.common.AbstractStreamObserverAndPublisher.DEFAULT_CHUNK_SIZE;
+import static com.salesforce.reactivegrpc.common.AbstractStreamObserverAndPublisher.TWO_THIRDS_OF_DEFAULT_CHUNK_SIZE;
 import static org.assertj.core.api.Assertions.assertThat;
 
 public class BackpressureChunkingTest {
     @Test
     public void chunkOperatorCorrectlyChunksInfiniteRequest() {
-        int chunkSize = AbstractStreamObserverAndPublisher.DEFAULT_CHUNK_SIZE;
+        int chunkSize = DEFAULT_CHUNK_SIZE;
 
-        int partOfChunk = (chunkSize * 2) / 3;
+        int partOfChunk = TWO_THIRDS_OF_DEFAULT_CHUNK_SIZE;
         int num = chunkSize * 2;
 
         AbstractStreamObserverAndPublisher<Long> source =
@@ -44,9 +46,9 @@ public class BackpressureChunkingTest {
 
     @Test
     public void chunkOperatorCorrectlyChunksFiniteRequest() {
-        int chunkSize = AbstractStreamObserverAndPublisher.DEFAULT_CHUNK_SIZE;
+        int chunkSize = DEFAULT_CHUNK_SIZE;
 
-        int partOfChunk = (chunkSize * 2) / 3;
+        int partOfChunk = TWO_THIRDS_OF_DEFAULT_CHUNK_SIZE;
         int num = chunkSize * 2;
 
         AbstractStreamObserverAndPublisher<Long> source =
@@ -65,9 +67,9 @@ public class BackpressureChunkingTest {
 
     @Test
     public void chunkOperatorCorrectlyChunksInfiniteRequestFusion() {
-        int chunkSize = AbstractStreamObserverAndPublisher.DEFAULT_CHUNK_SIZE;
+        int chunkSize = DEFAULT_CHUNK_SIZE;
 
-        int partOfChunk = (chunkSize * 2) / 3;
+        int partOfChunk = TWO_THIRDS_OF_DEFAULT_CHUNK_SIZE;
         int num = chunkSize * 2;
 
         AbstractStreamObserverAndPublisher<Long> source =
@@ -88,9 +90,9 @@ public class BackpressureChunkingTest {
 
     @Test
     public void chunkOperatorCorrectlyChunksFiniteRequestFusion() {
-        int chunkSize = AbstractStreamObserverAndPublisher.DEFAULT_CHUNK_SIZE;
+        int chunkSize = DEFAULT_CHUNK_SIZE;
 
-        int partOfChunk = (chunkSize * 2) / 3;
+        int partOfChunk = TWO_THIRDS_OF_DEFAULT_CHUNK_SIZE;
         int num = chunkSize * 2;
 
         AbstractStreamObserverAndPublisher<Long> source =
@@ -113,7 +115,7 @@ public class BackpressureChunkingTest {
      */
     @Test
     public void chunkOperatorWorksWithConcatMap() {
-        int chunkSize = AbstractStreamObserverAndPublisher.DEFAULT_CHUNK_SIZE;
+        int chunkSize = DEFAULT_CHUNK_SIZE;
 
         AbstractStreamObserverAndPublisher<Long> source =
                 new AbstractStreamObserverAndPublisher<Long>(new ConcurrentLinkedQueue<Long>(), null){};

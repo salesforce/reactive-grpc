@@ -21,21 +21,30 @@ import org.reactivestreams.Subscription;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
-// TODO FIX DOCS
 /**
- * ReactiveStreamObserverPublisher bridges the manual flow control idioms of gRPC and Reactive Streams. This class takes
- * messages off of a {@link StreamObserver} and feeds them into a {@link Publisher} while respecting backpressure. This
- * class is the inverse of {@link AbstractSubscriberAndProducer}.
- * <p>
- * When a {@link Publisher} is subscribed to by a {@link Subscriber}, the {@code Publisher} hands the {@code Subscriber}
- * a {@link Subscription}. When the {@code Subscriber} wants more messages from the {@code Publisher}, the
- * {@code Subscriber} calls {@link Subscription#request(long)}.
- * <p>
- * gRPC also uses the {@link CallStreamObserver#request(int)} idiom to request more messages from the stream.
- * <p>
- * To bridge the two idioms: this class implements a {@code Publisher} which delegates calls to {@code request()} to
- * a {@link CallStreamObserver} set in the constructor. When a message is generated as a response, the message is
- * delegated in the reverse so the {@code Publisher} can announce it to the Reactive Streams implementation.
+ *
+ * {@link AbstractStreamObserverAndPublisher} bridges the manual flow control idioms of
+ * gRPC and Reactive Streams. This class takes messages off of a {@link CallStreamObserver}
+ * and feeds them into a {@link Publisher} while respecting backpressure.
+ *
+ * In order to keep backpressure working at the async boundary between
+ * {@link CallStreamObserver} as an upstream, the {@link AbstractSubscriberAndProducer}
+ * enable manual flow-control by calling
+ * {@link CallStreamObserver#disableAutoInboundFlowControl()} at subscription time and
+ * prefetch specified by {@link AbstractStreamObserverAndPublisher#prefetch} number of
+ * elements at first and then keeps the number of requested element on the same level
+ * once the upstream sent amount of elements reach the specified
+ * {@link AbstractStreamObserverAndPublisher#limit}.
+ *
+ * In addition, {@link AbstractStreamObserverAndPublisher} take an additional care for
+ * some exotic cases when upstream does not respect backpressure of the
+ * Reactive-Streams {@link Subscriber} as the downstream, so
+ * {@link AbstractStreamObserverAndPublisher} employees {@link Queue} that enqueue each
+ * incoming elements and in that way keeps excess of items. In turn, to avoid
+ * {@link Queue} overwhelming, it is recommended to uses {@link Queue} with a fixed
+ * size so in the case {@link Queue#offer(Object)} returns false the sender thread will
+ * be blocked with a busy spin using {@link LockSupport#parkNanos(long)} try to enqueue
+ * element into {@link Queue} until downstream deque element from it.
  *
  * @param <T>
  */
@@ -56,6 +65,7 @@ public abstract class AbstractStreamObserverAndPublisher<T> extends AbstractUnim
 
 
     protected static final int DEFAULT_CHUNK_SIZE = 512;
+    protected static final int TWO_THIRDS_OF_DEFAULT_CHUNK_SIZE = DEFAULT_CHUNK_SIZE * 2 / 3;
 
     private static final int UNSUBSCRIBED_STATE    = 0;
     private static final int SUBSCRIBED_ONCE_STATE = 1;
@@ -104,31 +114,32 @@ public abstract class AbstractStreamObserverAndPublisher<T> extends AbstractUnim
     AbstractStreamObserverAndPublisher(
             Queue<T> queue,
             Consumer<CallStreamObserver<?>> onSubscribe) {
-        this(queue, DEFAULT_CHUNK_SIZE, onSubscribe);
+        this(queue, DEFAULT_CHUNK_SIZE, TWO_THIRDS_OF_DEFAULT_CHUNK_SIZE, onSubscribe);
     }
 
     AbstractStreamObserverAndPublisher(
             Queue<T> queue,
             Consumer<CallStreamObserver<?>> onSubscribe,
             Runnable onTerminate) {
-        this(queue, DEFAULT_CHUNK_SIZE, onSubscribe, onTerminate);
+        this(queue, DEFAULT_CHUNK_SIZE, TWO_THIRDS_OF_DEFAULT_CHUNK_SIZE, onSubscribe, onTerminate);
     }
 
     AbstractStreamObserverAndPublisher(
             Queue<T> queue,
             int prefetch,
+            int lowTide,
             Consumer<CallStreamObserver<?>> onSubscribe) {
-        this(queue, prefetch, onSubscribe, null);
+        this(queue, prefetch, lowTide, onSubscribe, null);
     }
 
     AbstractStreamObserverAndPublisher(
             Queue<T> queue,
             int prefetch,
+            int lowTide,
             Consumer<CallStreamObserver<?>> onSubscribe,
             Runnable onTerminate) {
         this.prefetch = prefetch;
-        // CHECKSTYLE DISABLE MagicNumber FOR 1 LINES
-        this.limit = (prefetch * 2) / 3;
+        this.limit = lowTide;
         this.queue = queue;
         this.onSubscribe = onSubscribe;
         this.onTerminate = onTerminate;
