@@ -4,7 +4,7 @@
  *  Licensed under the BSD 3-Clause license.
  *  For full license text, see LICENSE.txt file in the repo root  or https://opensource.org/licenses/BSD-3-Clause
  */
-package com.salesforce.reactorgrpc.jmh;
+package com.salesforce.reactivegrpc.jmh;
 
 import java.io.IOException;
 import java.util.Arrays;
@@ -12,8 +12,8 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
-import com.salesforce.reactorgrpc.jmh.proto.Messages;
-import com.salesforce.reactorgrpc.jmh.proto.ReactorBenchmarkServiceGrpc;
+import com.salesforce.reactivegrpc.jmh.proto.Messages;
+import com.salesforce.reactivegrpc.jmh.proto.ReactorBenchmarkServiceGrpc;
 import io.grpc.ManagedChannel;
 import io.grpc.Server;
 import io.grpc.inprocess.InProcessChannelBuilder;
@@ -39,7 +39,7 @@ import reactor.core.publisher.Mono;
 @OutputTimeUnit(TimeUnit.SECONDS)
 @Fork(1)
 @State(Scope.Benchmark)
-public class ReactiveGRpcBenchmark {
+public class ReactorGRpcBenchmark {
 
     static final Mono<Messages.SimpleRequest> MONO_REQUEST =
         Mono.just(Messages.SimpleRequest.getDefaultInstance());

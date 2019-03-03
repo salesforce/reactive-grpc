@@ -9,8 +9,8 @@ package com.salesforce.rxgrpc.jmh;
 import java.util.Arrays;
 import java.util.List;
 
-import com.salesforce.rxgrpc.jmh.proto.BenchmarkServiceGrpc;
-import com.salesforce.rxgrpc.jmh.proto.Messages;
+import com.salesforce.reactivegrpc.jmh.proto.BenchmarkServiceGrpc;
+import com.salesforce.reactivegrpc.jmh.proto.Messages;
 import io.grpc.stub.ServerCallStreamObserver;
 import io.grpc.stub.StreamObserver;
 

@@ -4,7 +4,7 @@
  *  Licensed under the BSD 3-Clause license.
  *  For full license text, see LICENSE.txt file in the repo root  or https://opensource.org/licenses/BSD-3-Clause
  */
-package com.salesforce.rxgrpc.jmh;
+package com.salesforce.reactivegrpc.jmh;
 
 import java.io.IOException;
 import java.util.Arrays;
@@ -12,8 +12,8 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
-import com.salesforce.rxgrpc.jmh.proto.BenchmarkServiceGrpc;
-import com.salesforce.rxgrpc.jmh.proto.Messages;
+import com.salesforce.reactivegrpc.jmh.proto.BenchmarkServiceGrpc;
+import com.salesforce.reactivegrpc.jmh.proto.Messages;
 import io.grpc.ManagedChannel;
 import io.grpc.Server;
 import io.grpc.inprocess.InProcessChannelBuilder;
@@ -62,7 +62,7 @@ public class ReferenceGRpcBenchmark {
         gRpcServer =
             InProcessServerBuilder.forName("benchmark-gRpcServer")
                                   .scheduledExecutorService(scheduledExecutorService)
-                                  .addService(new BenchmarkGRpcServerServiceImpl(100000))
+                                  .addService(new com.salesforce.rxgrpc.jmh.BenchmarkGRpcServerServiceImpl(100000))
                                   .build()
                                   .start();
         gRpcChannel = InProcessChannelBuilder.forName("benchmark-gRpcServer")

@@ -32,6 +32,11 @@
             <name>Christophe Bornet</name>
             <email>cbornet@hotmail.com</email>
         </developer>
+        <developer>
+            <id>olegdokuka</id>
+            <name>Oleh Dokuka</name>
+            <email>shadowgun@i.ua</email>
+        </developer>
     </developers>
 
     <modules>
@@ -41,13 +46,12 @@
         <module>rx-java/rxgrpc-stub</module>
         <module>rx-java/rxgrpc-tck</module>
         <module>rx-java/rxgrpc-test</module>
-        <module>rx-java/rxgrpc-jmh</module>
         <module>reactor/reactor-grpc</module>
         <module>reactor/reactor-grpc-stub</module>
         <module>reactor/reactor-grpc-tck</module>
         <module>reactor/reactor-grpc-test</module>
         <module>reactor/reactor-grpc-test-32</module>
-        <module>reactor/reactor-grpc-jmh</module>
+        <module>benchmarks</module>
     </modules>
 
     <properties>

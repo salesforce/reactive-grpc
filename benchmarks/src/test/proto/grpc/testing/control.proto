@@ -24,7 +24,7 @@ import "grpc/testing/stats.proto";
 
 package grpc.testing;
 
-option java_package = "com.salesforce.rxgrpc.jmh.proto";
+option java_package = "com.salesforce.reactivegrpc.jmh.proto";
 option java_outer_classname = "Control";
 
 enum ClientType {

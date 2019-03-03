@@ -23,7 +23,7 @@ syntax = "proto3";
 
 package grpc.testing;
 
-option java_package = "com.salesforce.reactorgrpc.jmh.proto";
+option java_package = "com.salesforce.reactivegrpc.jmh.proto";
 option java_outer_classname = "Messages";
 
 // TODO(dgq): Go back to using well-known types once
