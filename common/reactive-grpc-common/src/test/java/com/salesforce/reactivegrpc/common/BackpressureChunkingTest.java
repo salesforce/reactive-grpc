@@ -24,8 +24,8 @@ public class BackpressureChunkingTest {
     public void chunkOperatorCorrectlyChunksInfiniteRequest() {
         int chunkSize = AbstractStreamObserverAndPublisher.DEFAULT_CHUNK_SIZE;
 
-        int halfChunk = chunkSize / 2;
-        int num = chunkSize * 2 + halfChunk;
+        int partOfChunk = (chunkSize * 2) / 3;
+        int num = chunkSize * 2;
 
         AbstractStreamObserverAndPublisher<Long> source =
                 new TestStreamObserverAndPublisherWithFusion<Long>(new ConcurrentLinkedQueue<Long>(), null);
@@ -38,7 +38,7 @@ public class BackpressureChunkingTest {
         testSubscriber.awaitTerminalEvent();
         testSubscriber.assertComplete();
 
-        assertThat(observer.requestsQueue).containsExactly(chunkSize, chunkSize, chunkSize);
+        assertThat(observer.requestsQueue).containsExactly(chunkSize, partOfChunk, partOfChunk, partOfChunk);
         assertThat(source.outputFused).isFalse();
     }
 
@@ -46,8 +46,8 @@ public class BackpressureChunkingTest {
     public void chunkOperatorCorrectlyChunksFiniteRequest() {
         int chunkSize = AbstractStreamObserverAndPublisher.DEFAULT_CHUNK_SIZE;
 
-        int halfChunk = chunkSize / 2;
-        int num = chunkSize * 2 + halfChunk;
+        int partOfChunk = (chunkSize * 2) / 3;
+        int num = chunkSize * 2;
 
         AbstractStreamObserverAndPublisher<Long> source =
                 new TestStreamObserverAndPublisherWithFusion<Long>(new ConcurrentLinkedQueue<Long>(), null);
@@ -59,7 +59,7 @@ public class BackpressureChunkingTest {
         testSubscriber.awaitTerminalEvent();
         testSubscriber.assertComplete();
 
-        assertThat(observer.requestsQueue).containsExactly(chunkSize, chunkSize, chunkSize);
+        assertThat(observer.requestsQueue).containsExactly(chunkSize, partOfChunk, partOfChunk, partOfChunk);
         assertThat(source.outputFused).isFalse();
     }
 
@@ -67,8 +67,8 @@ public class BackpressureChunkingTest {
     public void chunkOperatorCorrectlyChunksInfiniteRequestFusion() {
         int chunkSize = AbstractStreamObserverAndPublisher.DEFAULT_CHUNK_SIZE;
 
-        int halfChunk = chunkSize / 2;
-        int num = chunkSize * 2 + halfChunk;
+        int partOfChunk = (chunkSize * 2) / 3;
+        int num = chunkSize * 2;
 
         AbstractStreamObserverAndPublisher<Long> source =
                 new TestStreamObserverAndPublisherWithFusion<Long>(new ConcurrentLinkedQueue<Long>(), null);
@@ -82,7 +82,7 @@ public class BackpressureChunkingTest {
         testSubscriber.awaitTerminalEvent();
         testSubscriber.assertComplete();
 
-        assertThat(observer.requestsQueue).containsExactly(chunkSize, chunkSize, chunkSize);
+        assertThat(observer.requestsQueue).containsExactly(chunkSize, partOfChunk, partOfChunk, partOfChunk);
         assertThat(source.outputFused).isTrue();
     }
 
@@ -90,8 +90,8 @@ public class BackpressureChunkingTest {
     public void chunkOperatorCorrectlyChunksFiniteRequestFusion() {
         int chunkSize = AbstractStreamObserverAndPublisher.DEFAULT_CHUNK_SIZE;
 
-        int halfChunk = chunkSize / 2;
-        int num = chunkSize * 2 + halfChunk;
+        int partOfChunk = (chunkSize * 2) / 3;
+        int num = chunkSize * 2;
 
         AbstractStreamObserverAndPublisher<Long> source =
                 new TestStreamObserverAndPublisherWithFusion<Long>(new ConcurrentLinkedQueue<Long>(), null);
@@ -104,7 +104,7 @@ public class BackpressureChunkingTest {
         testSubscriber.awaitTerminalEvent();
         testSubscriber.assertComplete();
 
-        assertThat(observer.requestsQueue).containsExactly(chunkSize, chunkSize, chunkSize);
+        assertThat(observer.requestsQueue).containsExactly(chunkSize, partOfChunk, partOfChunk, partOfChunk);
         assertThat(source.outputFused).isTrue();
     }
 
@@ -131,6 +131,6 @@ public class BackpressureChunkingTest {
         testSubscriber.awaitTerminalEvent();
         testSubscriber.assertNoErrors();
 
-        assertThat(observer.requestsQueue).containsExactly(chunkSize, chunkSize);
+        assertThat(observer.requestsQueue).containsExactly(chunkSize);
     }
 }

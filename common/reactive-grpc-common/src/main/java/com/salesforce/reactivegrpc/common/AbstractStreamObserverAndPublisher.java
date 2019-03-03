@@ -55,7 +55,7 @@ public abstract class AbstractStreamObserverAndPublisher<T> extends AbstractUnim
     };
 
 
-    protected static final int DEFAULT_CHUNK_SIZE = 16;
+    protected static final int DEFAULT_CHUNK_SIZE = 512;
 
     private static final int UNSUBSCRIBED_STATE    = 0;
     private static final int SUBSCRIBED_ONCE_STATE = 1;
@@ -67,6 +67,7 @@ public abstract class AbstractStreamObserverAndPublisher<T> extends AbstractUnim
 
     private final Queue<T> queue;
     private final int prefetch;
+    private final int limit;
 
     private final Consumer<CallStreamObserver<?>> onSubscribe;
 
@@ -126,6 +127,7 @@ public abstract class AbstractStreamObserverAndPublisher<T> extends AbstractUnim
             Consumer<CallStreamObserver<?>> onSubscribe,
             Runnable onTerminate) {
         this.prefetch = prefetch;
+        this.limit = (prefetch * 2) / 3;
         this.queue = queue;
         this.onSubscribe = onSubscribe;
         this.onTerminate = onTerminate;
@@ -178,7 +180,7 @@ public abstract class AbstractStreamObserverAndPublisher<T> extends AbstractUnim
 
                 sent++;
 
-                if (sent == prefetch) {
+                if (sent == limit) {
                     if (r != Long.MAX_VALUE) {
                         r = REQUESTED.addAndGet(this, -sent);
                     }
@@ -418,7 +420,7 @@ public abstract class AbstractStreamObserverAndPublisher<T> extends AbstractUnim
         T v = queue.poll();
         if (v != null) {
             int p = produced + 1;
-            if (p == prefetch) {
+            if (p == limit) {
                 produced = 0;
                 subscription.request(p);
             } else {

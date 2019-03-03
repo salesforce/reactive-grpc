@@ -31,7 +31,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 @SuppressWarnings("Duplicates")
 @RunWith(Parameterized.class)
 public class BackpressureIntegrationTest {
-    private static final int NUMBER_OF_STREAM_ELEMENTS = 270;
+    private static final int NUMBER_OF_STREAM_ELEMENTS = 512 + 512 / 4;
 
 
     @Parameterized.Parameters
@@ -91,7 +91,7 @@ public class BackpressureIntegrationTest {
         stepVerifier
                     .expectNextMatches(v -> v.getNumber(0) == NUMBER_OF_STREAM_ELEMENTS - 1)
                     .expectComplete()
-                    .verify(Duration.ofSeconds(5));
+                    .verify(Duration.ofSeconds(15));
 
         assertThat(numberOfWaits.get()).isEqualTo(1);
     }
@@ -117,7 +117,7 @@ public class BackpressureIntegrationTest {
                 .create(reactorResponse)
                 .expectNextCount(NUMBER_OF_STREAM_ELEMENTS)
                 .expectComplete()
-                .verify(Duration.ofSeconds(5));
+                .verify(Duration.ofSeconds(15));
 
         assertThat(numberOfWaits.get()).isEqualTo(1);
     }
@@ -147,7 +147,7 @@ public class BackpressureIntegrationTest {
         stepVerifier
                 .expectNextCount(NUMBER_OF_STREAM_ELEMENTS)
                 .expectComplete()
-                .verify(Duration.ofSeconds(5));
+                .verify(Duration.ofSeconds(15));
 
         assertThat(numberOfWaits.get()).isEqualTo(1);
     }
@@ -179,7 +179,7 @@ public class BackpressureIntegrationTest {
         stepVerifier
                 .expectNextMatches(v -> v.getNumber(0) == NUMBER_OF_STREAM_ELEMENTS - 1)
                 .expectComplete()
-                .verify(Duration.ofSeconds(5));
+                .verify(Duration.ofSeconds(15));
 
         assertThat(numberOfWaits.get()).isEqualTo(1);
     }
