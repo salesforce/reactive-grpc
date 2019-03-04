@@ -12,10 +12,13 @@ import io.reactivex.SingleObserver;
 import io.reactivex.disposables.Disposable;
 import org.openjdk.jmh.infra.Blackhole;
 
+/**
+ * PerfSingleObserver is a sink for gRPC requests that blackholes all messages.
+ */
 public final class PerfSingleObserver implements SingleObserver<Object> {
 
-    final Blackhole bh;
-    final CountDownLatch latch;
+    private final Blackhole bh;
+    protected final CountDownLatch latch;
 
     public PerfSingleObserver(Blackhole bh) {
         this.bh = bh;

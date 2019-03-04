@@ -33,6 +33,10 @@ import org.openjdk.jmh.annotations.TearDown;
 import org.openjdk.jmh.annotations.Warmup;
 import org.openjdk.jmh.infra.Blackhole;
 
+/**
+ * Baseline benchmarks for gRPC calls.
+ */
+//CHECKSTYLE.OFF: MagicNumber
 @BenchmarkMode(Mode.Throughput)
 @Warmup(iterations = 10)
 @Measurement(iterations = 10, time = 10, timeUnit = TimeUnit.SECONDS)
@@ -48,10 +52,10 @@ public class ReferenceGRpcBenchmark {
         Arrays.fill(ARRAY_REQUEST, Messages.SimpleRequest.getDefaultInstance());
     }
 
-    Server         gRpcServer;
-    ManagedChannel gRpcChannel;
+    private Server         gRpcServer;
+    private ManagedChannel gRpcChannel;
 
-    BenchmarkServiceGrpc.BenchmarkServiceStub gRpcClient;
+    private BenchmarkServiceGrpc.BenchmarkServiceStub gRpcClient;
 
     @Setup
     public void setup() throws IOException {
@@ -62,7 +66,7 @@ public class ReferenceGRpcBenchmark {
         gRpcServer =
             InProcessServerBuilder.forName("benchmark-gRpcServer")
                                   .scheduledExecutorService(scheduledExecutorService)
-                                  .addService(new com.salesforce.rxgrpc.jmh.BenchmarkGRpcServerServiceImpl(100000))
+                                  .addService(new com.salesforce.reactivegrpc.jmh.BenchmarkGRpcServerServiceImpl(100000))
                                   .build()
                                   .start();
         gRpcChannel = InProcessChannelBuilder.forName("benchmark-gRpcServer")
@@ -120,7 +124,7 @@ public class ReferenceGRpcBenchmark {
     @Benchmark
     public Object gRpcBothWaysStreamingCall(Blackhole blackhole) throws InterruptedException {
         PerfObserver observer = new PerfObserver(blackhole) {
-            boolean done;
+            private boolean done;
             @Override
             public void beforeStart(ClientCallStreamObserver<Messages.SimpleRequest> sender) {
                 sender.setOnReadyHandler(() -> {

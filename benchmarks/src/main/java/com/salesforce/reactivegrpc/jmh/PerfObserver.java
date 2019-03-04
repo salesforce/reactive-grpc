@@ -13,12 +13,15 @@ import io.grpc.stub.ClientCallStreamObserver;
 import io.grpc.stub.ClientResponseObserver;
 import org.openjdk.jmh.infra.Blackhole;
 
+/**
+ * PerfObserver is a sink for gRPC requests that blackholes all messages.
+ */
 public class PerfObserver implements ClientResponseObserver<Messages.SimpleRequest, Messages.SimpleResponse> {
 
-    final Blackhole      blackhole;
-    final CountDownLatch latch;
+    private final Blackhole      blackhole;
+    protected final CountDownLatch latch;
 
-    ClientCallStreamObserver observer;
+    protected ClientCallStreamObserver observer;
 
     public PerfObserver(Blackhole blackhole) {
         this.blackhole = blackhole;

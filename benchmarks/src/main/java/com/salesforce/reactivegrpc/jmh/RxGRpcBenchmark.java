@@ -13,11 +13,13 @@ import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
 import com.salesforce.reactivegrpc.jmh.proto.Messages;
-import com.salesforce.reactivegrpc.jmh.proto.ReactorBenchmarkServiceGrpc;
+import com.salesforce.reactivegrpc.jmh.proto.RxBenchmarkServiceGrpc;
 import io.grpc.ManagedChannel;
 import io.grpc.Server;
 import io.grpc.inprocess.InProcessChannelBuilder;
 import io.grpc.inprocess.InProcessServerBuilder;
+import io.reactivex.Flowable;
+import io.reactivex.Single;
 import org.openjdk.jmh.annotations.Benchmark;
 import org.openjdk.jmh.annotations.BenchmarkMode;
 import org.openjdk.jmh.annotations.Fork;
@@ -30,34 +32,36 @@ import org.openjdk.jmh.annotations.State;
 import org.openjdk.jmh.annotations.TearDown;
 import org.openjdk.jmh.annotations.Warmup;
 import org.openjdk.jmh.infra.Blackhole;
-import reactor.core.publisher.Flux;
-import reactor.core.publisher.Mono;
 
+/**
+ * Benchmarks RxJava calls.
+ */
+//CHECKSTYLE.OFF: MagicNumber
 @BenchmarkMode(Mode.Throughput)
 @Warmup(iterations = 10)
 @Measurement(iterations = 10, time = 10, timeUnit = TimeUnit.SECONDS)
 @OutputTimeUnit(TimeUnit.SECONDS)
 @Fork(1)
 @State(Scope.Benchmark)
-public class ReactorGRpcBenchmark {
+public class RxGRpcBenchmark {
 
-    static final Mono<Messages.SimpleRequest> MONO_REQUEST =
-        Mono.just(Messages.SimpleRequest.getDefaultInstance());
+    static final Single<Messages.SimpleRequest> MONO_REQUEST =
+        Single.just(Messages.SimpleRequest.getDefaultInstance());
 
-    static final Flux<Messages.SimpleRequest> FLUX_REQUEST;
+    static final Flowable<Messages.SimpleRequest> FLUX_REQUEST;
 
     static {
         Messages.SimpleRequest[] array = new Messages.SimpleRequest[100000];
         Arrays.fill(array, Messages.SimpleRequest.getDefaultInstance());
 
-        FLUX_REQUEST = Flux.fromArray(array);
+        FLUX_REQUEST = Flowable.fromArray(array);
     }
 
 
-    Server         reactiveServer;
-    ManagedChannel reactiveChannel;
+    private Server         reactiveServer;
+    private ManagedChannel reactiveChannel;
 
-    ReactorBenchmarkServiceGrpc.ReactorBenchmarkServiceStub reactiveClient;
+    private RxBenchmarkServiceGrpc.RxBenchmarkServiceStub reactiveClient;
 
     @Setup
     public void setup() throws IOException {
@@ -68,13 +72,13 @@ public class ReactorGRpcBenchmark {
         reactiveServer =
             InProcessServerBuilder.forName("benchmark-reactiveServer")
                                   .scheduledExecutorService(scheduledExecutorService)
-                                  .addService(new BenchmarkReactorServerServiceImpl(100000))
+                                  .addService(new BenchmarkRxServerServiceImpl(100000))
                                   .build()
                                   .start();
 
         reactiveChannel = InProcessChannelBuilder.forName("benchmark-reactiveServer")
                                                  .build();
-        reactiveClient = ReactorBenchmarkServiceGrpc.newReactorStub(reactiveChannel);
+        reactiveClient = RxBenchmarkServiceGrpc.newRxStub(reactiveChannel);
     }
 
     @TearDown
@@ -88,7 +92,7 @@ public class ReactorGRpcBenchmark {
 
     @Benchmark
     public Object reactiveUnaryCall(Blackhole blackhole) throws InterruptedException {
-        PerfSubscriber actual = new PerfSubscriber(blackhole);
+        PerfSingleObserver actual = new PerfSingleObserver(blackhole);
 
         reactiveClient.unaryCall(MONO_REQUEST)
                       .subscribe(actual);
@@ -112,7 +116,7 @@ public class ReactorGRpcBenchmark {
 
     @Benchmark
     public Object reactiveClientStreamingCall(Blackhole blackhole) throws InterruptedException {
-        PerfSubscriber actual = new PerfSubscriber(blackhole);
+        PerfSingleObserver actual = new PerfSingleObserver(blackhole);
 
         reactiveClient.streamingFromClient(FLUX_REQUEST)
                       .subscribe(actual);

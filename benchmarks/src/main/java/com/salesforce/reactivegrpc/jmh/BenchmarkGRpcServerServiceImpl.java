@@ -4,7 +4,7 @@
  *  Licensed under the BSD 3-Clause license.
  *  For full license text, see LICENSE.txt file in the repo root  or https://opensource.org/licenses/BSD-3-Clause
  */
-package com.salesforce.rxgrpc.jmh;
+package com.salesforce.reactivegrpc.jmh;
 
 import java.util.Arrays;
 import java.util.List;
@@ -14,11 +14,14 @@ import com.salesforce.reactivegrpc.jmh.proto.Messages;
 import io.grpc.stub.ServerCallStreamObserver;
 import io.grpc.stub.StreamObserver;
 
+/**
+ * Baseline gRPC benchmarking service.
+ */
 public class BenchmarkGRpcServerServiceImpl
     extends BenchmarkServiceGrpc.BenchmarkServiceImplBase {
 
-    final Messages.SimpleResponse       response;
-    final List<Messages.SimpleResponse> responses;
+    private final Messages.SimpleResponse       response;
+    private final List<Messages.SimpleResponse> responses;
 
     public BenchmarkGRpcServerServiceImpl(int times) {
         Messages.SimpleResponse[] array = new Messages.SimpleResponse[times];
