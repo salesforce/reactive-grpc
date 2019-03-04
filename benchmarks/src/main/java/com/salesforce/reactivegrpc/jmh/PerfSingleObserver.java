@@ -32,6 +32,7 @@ public final class PerfSingleObserver implements SingleObserver<Object> {
     @Override
     public void onSuccess(Object item) {
         bh.consume(item);
+        latch.countDown();
     }
 
     @Override
