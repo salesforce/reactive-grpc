@@ -31,7 +31,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 @SuppressWarnings("Duplicates")
 @RunWith(Parameterized.class)
 public class BackpressureIntegrationTest {
-    private static final int NUMBER_OF_STREAM_ELEMENTS = 512 * 3;
+    private static final int NUMBER_OF_STREAM_ELEMENTS = 512 * 12;
 
 
     @Parameterized.Parameters
@@ -93,7 +93,7 @@ public class BackpressureIntegrationTest {
                     .expectComplete()
                     .verify(Duration.ofSeconds(15));
 
-        assertThat(numberOfWaits.get()).isBetween(1L, 2L);
+        assertThat(numberOfWaits.get()).isGreaterThan(0L);
     }
 
     @Test
@@ -119,7 +119,7 @@ public class BackpressureIntegrationTest {
                 .expectComplete()
                 .verify(Duration.ofSeconds(15));
 
-        assertThat(numberOfWaits.get()).isBetween(1L, 2L);
+        assertThat(numberOfWaits.get()).isGreaterThan(0L);
     }
 
     @Test
@@ -149,7 +149,7 @@ public class BackpressureIntegrationTest {
                 .expectComplete()
                 .verify(Duration.ofSeconds(15));
 
-        assertThat(numberOfWaits.get()).isBetween(1L, 2L);
+        assertThat(numberOfWaits.get()).isGreaterThan(0L);
     }
 
     @Test
@@ -181,7 +181,7 @@ public class BackpressureIntegrationTest {
                 .expectComplete()
                 .verify(Duration.ofSeconds(15));
 
-        assertThat(numberOfWaits.get()).isBetween(1L, 2L);
+        assertThat(numberOfWaits.get()).isGreaterThan(0L);
     }
 
 

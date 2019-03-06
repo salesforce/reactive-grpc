@@ -34,7 +34,7 @@ public class BackpressureIntegrationTest {
     @Rule
     public UnhandledRxJavaErrorRule errorRule = new UnhandledRxJavaErrorRule().autoVerifyNoError();
 
-    private static final int NUMBER_OF_STREAM_ELEMENTS = 512 * 3;
+    private static final int NUMBER_OF_STREAM_ELEMENTS = 512 * 12;
 
     private static AtomicLong lastValueTime;
     private static AtomicLong numberOfWaits;
@@ -94,7 +94,7 @@ public class BackpressureIntegrationTest {
         rxResponse.assertComplete()
                 .assertValue(v -> v.getNumber(0) == NUMBER_OF_STREAM_ELEMENTS - 1);
 
-        assertThat(numberOfWaits.get()).isBetween(1L, 2L);
+        assertThat(numberOfWaits.get()).isGreaterThan(0L);
     }
 
     @Test
@@ -113,7 +113,7 @@ public class BackpressureIntegrationTest {
         rxResponse.assertComplete()
                 .assertValueCount(NUMBER_OF_STREAM_ELEMENTS);
 
-        assertThat(numberOfWaits.get()).isBetween(1L, 2L);
+        assertThat(numberOfWaits.get()).isGreaterThan(0L);
     }
 
     @Test
@@ -131,7 +131,7 @@ public class BackpressureIntegrationTest {
         rxResponse.assertComplete()
                 .assertValueCount(NUMBER_OF_STREAM_ELEMENTS);
 
-        assertThat(numberOfWaits.get()).isBetween(1L, 2L);
+        assertThat(numberOfWaits.get()).isGreaterThan(0L);
     }
 
     @Test
@@ -151,7 +151,7 @@ public class BackpressureIntegrationTest {
         rxResponse.assertComplete()
                 .assertValue(v -> v.getNumber(0) == NUMBER_OF_STREAM_ELEMENTS - 1);
 
-        assertThat(numberOfWaits.get()).isBetween(1L, 2L);
+        assertThat(numberOfWaits.get()).isGreaterThan(0L);
     }
 
 
