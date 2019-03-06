@@ -68,15 +68,18 @@
         <reactor.extra.version>3.1.9.RELEASE</reactor.extra.version>
 
         <!-- Test Dependency Versions -->
-        <junit.version>4.12</junit.version>
+        <junit.jupiter.version>5.4.0</junit.jupiter.version>
         <assertj.version>3.6.2</assertj.version>
         <awaitility.version>2.0.0</awaitility.version>
         <mockito.version>2.7.5</mockito.version>
 
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <java.version>1.8</java.version>
+        <java.test.version>1.8</java.test.version>
         <maven.compiler.source>${java.version}</maven.compiler.source>
         <maven.compiler.target>${java.version}</maven.compiler.target>
+        <maven.compiler.test.source>${java.test.version}</maven.compiler.test.source>
+        <maven.compiler.test.target>${java.test.version}</maven.compiler.test.target>
     </properties>
 
     <scm>
@@ -165,9 +168,21 @@
                 <scope>test</scope>
             </dependency>
             <dependency>
-                <groupId>junit</groupId>
-                <artifactId>junit</artifactId>
-                <version>${junit.version}</version>
+                <groupId>org.junit.jupiter</groupId>
+                <artifactId>junit-jupiter-api</artifactId>
+                <version>${junit.jupiter.version}</version>
+                <scope>test</scope>
+            </dependency>
+            <dependency>
+                <groupId>org.junit.jupiter</groupId>
+                <artifactId>junit-jupiter-params</artifactId>
+                <version>${junit.jupiter.version}</version>
+                <scope>test</scope>
+            </dependency>
+            <dependency>
+                <groupId>org.junit.jupiter</groupId>
+                <artifactId>junit-jupiter-engine</artifactId>
+                <version>${junit.jupiter.version}</version>
                 <scope>test</scope>
             </dependency>
             <dependency>
@@ -200,6 +215,8 @@
                 <configuration>
                     <source>${maven.compiler.source}</source>
                     <target>${maven.compiler.target}</target>
+                    <testSource>${maven.compiler.test.source}</testSource>
+                    <testTarget>${maven.compiler.test.target}</testTarget>
                 </configuration>
             </plugin>
 
@@ -263,7 +280,7 @@
                         <artifactId>maven-javadoc-plugin</artifactId>
                         <version>3.0.1</version>
                         <configuration>
-                            <additionalparam>-Xdoclint:none</additionalparam>
+                            <additionalOptions>-Xdoclint:none</additionalOptions>
                         </configuration>
                         <executions>
                             <execution>

@@ -23,22 +23,15 @@ import io.reactivex.internal.fuseable.QueueSubscription;
 import io.reactivex.plugins.RxJavaPlugins;
 import io.reactivex.subscribers.TestSubscriber;
 import org.assertj.core.api.Assertions;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.junit.runners.Parameterized;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.RepeatedTest;
+import org.junit.jupiter.api.Test;
 
 import static com.salesforce.reactivegrpc.common.AbstractStreamObserverAndPublisher.DEFAULT_CHUNK_SIZE;
 
-@RunWith(Parameterized.class)
 public class StreamObserverAndPublisherTest {
 
     static final int PART_OF_CHUNK = DEFAULT_CHUNK_SIZE * 2 / 3;
-
-    @Parameterized.Parameters
-    public static Object[][] data() {
-        return new Object[1][0];
-    }
 
     static final ExecutorService executorService =
         Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors());
@@ -47,10 +40,8 @@ public class StreamObserverAndPublisherTest {
 
     final Queue<Throwable> unhandledThrowable = new ConcurrentLinkedQueue<Throwable>();
 
-    public StreamObserverAndPublisherTest() {
-    }
 
-    @Before
+    @BeforeEach
     public void setUp() {
         RxJavaPlugins.setErrorHandler(new Consumer<Throwable>() {
             @Override
@@ -61,6 +52,7 @@ public class StreamObserverAndPublisherTest {
     }
 
     @Test
+    @RepeatedTest(2)
     public void multithreadingRegularTest() {
         TestStreamObserverAndPublisher<Integer> processor =
             new TestStreamObserverAndPublisher<Integer>(null);
@@ -98,6 +90,7 @@ public class StreamObserverAndPublisherTest {
     }
 
     @Test
+    @RepeatedTest(2)
     public void multithreadingFussedTest() {
 
         TestStreamObserverAndPublisher<Integer> processor =
@@ -136,6 +129,7 @@ public class StreamObserverAndPublisherTest {
     }
 
     @Test
+    @RepeatedTest(2)
     public void shouldSupportOnlySingleSubscriberTest() throws InterruptedException {
         for (int i = 0; i < 1000; i++) {
             final TestSubscriber<Integer> downstream1 = new TestSubscriber<Integer>(0);
@@ -170,6 +164,7 @@ public class StreamObserverAndPublisherTest {
     }
 
     @Test
+    @RepeatedTest(2)
     public void shouldSupportOnlySingleSubscriptionTest() throws InterruptedException {
         for (int i = 0; i < 1000; i++) {
             final AtomicReference<Throwable> throwableAtomicReference = new AtomicReference<Throwable>();
@@ -208,6 +203,7 @@ public class StreamObserverAndPublisherTest {
     }
 
     @Test
+    @RepeatedTest(2)
     public void shouldSupportOnlySinglePrefetchTest() throws InterruptedException {
         for (int i = 0; i < 10; i++) {
             final TestSubscriber<Integer> downstream = new TestSubscriber<Integer>(0);

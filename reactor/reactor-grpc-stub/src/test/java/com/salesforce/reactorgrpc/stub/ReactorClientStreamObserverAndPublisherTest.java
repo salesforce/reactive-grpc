@@ -9,7 +9,7 @@ package com.salesforce.reactorgrpc.stub;
 import java.util.concurrent.ForkJoinPool;
 
 import org.assertj.core.api.Assertions;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import reactor.core.Fuseable;
 import reactor.core.publisher.Flux;
 import reactor.core.scheduler.Schedulers;

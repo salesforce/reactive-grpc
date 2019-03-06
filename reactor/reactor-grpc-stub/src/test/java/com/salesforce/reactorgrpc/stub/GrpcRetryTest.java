@@ -7,7 +7,7 @@
 package com.salesforce.reactorgrpc.stub;
 
 import com.salesforce.reactorgrpc.GrpcRetry;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.FluxSink;
 import reactor.core.publisher.Mono;

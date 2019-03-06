@@ -32,31 +32,20 @@ import io.reactivex.functions.LongConsumer;
 import io.reactivex.plugins.RxJavaPlugins;
 import io.reactivex.schedulers.Schedulers;
 import org.assertj.core.api.Assertions;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.junit.runners.Parameterized;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.RepeatedTest;
+import org.junit.jupiter.api.Test;
 import org.reactivestreams.Subscription;
 
-@RunWith(Parameterized.class)
 public class AbstractSubscriberAndProducerTest {
 
     private final Queue<Throwable> unhandledThrowable = new ConcurrentLinkedQueue<Throwable>();
-
-    @Parameterized.Parameters
-    public static Object[][] data() {
-        return new Object[5][0];
-    }
-
-    public AbstractSubscriberAndProducerTest() {
-    }
-
 
     private static final ExecutorService executorService  =
         Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors());
 
 
-    @Before
+    @BeforeEach
     public void setUp() {
         RxJavaPlugins.setErrorHandler(new Consumer<Throwable>() {
             @Override
@@ -67,6 +56,7 @@ public class AbstractSubscriberAndProducerTest {
     }
 
     @Test
+    @RepeatedTest(2)
     public void shouldSupportOnlySingleSubscribersTest() throws InterruptedException {
         final TestCallStreamObserver<Integer> downstream = new TestCallStreamObserver<Integer>(executorService);
         for (int i = 0; i < 1000; i++) {
@@ -104,6 +94,7 @@ public class AbstractSubscriberAndProducerTest {
     }
 
     @Test
+    @RepeatedTest(2)
     public void shouldSupportOnlySingleSubscriptionTest() throws InterruptedException {
         for (int i = 0; i < 1000; i++) {
             final CountDownLatch cancelLatch = new CountDownLatch(1);
@@ -135,6 +126,7 @@ public class AbstractSubscriberAndProducerTest {
     }
 
     @Test
+    @RepeatedTest(2)
     public void regularModeWithRacingTest() {
         final AtomicLong requested = new AtomicLong();
         final AtomicBoolean pingPing = new AtomicBoolean();
@@ -180,6 +172,7 @@ public class AbstractSubscriberAndProducerTest {
     }
 
     @Test
+    @RepeatedTest(2)
     public void asyncModeWithRacingTest() {
         List<Integer> integers = Flowable.range(0, 10000000)
                                          .toList()
@@ -205,6 +198,7 @@ public class AbstractSubscriberAndProducerTest {
     }
 
     @Test
+    @RepeatedTest(2)
     public void syncModeWithRacingTest() throws InterruptedException {
         List<Integer> integers = Flowable.range(0, 10000000)
                                          .toList()
@@ -237,6 +231,7 @@ public class AbstractSubscriberAndProducerTest {
     }
 
     @Test
+    @RepeatedTest(2)
     public void regularModeWithRacingAndOnErrorTest() {
         final AtomicBoolean pingPing = new AtomicBoolean();
         List<Integer> integers = Flowable.range(0, 10000000)
@@ -285,6 +280,7 @@ public class AbstractSubscriberAndProducerTest {
     }
 
     @Test
+    @RepeatedTest(2)
     public void asyncModeWithRacingAndOnErrorTest() {
 
         List<Integer> integers = Flowable.range(0, 10000000)
@@ -317,6 +313,7 @@ public class AbstractSubscriberAndProducerTest {
     }
 
     @Test
+    @RepeatedTest(2)
     public void asyncModeWithRacingAndErrorTest() throws InterruptedException {
         final CountDownLatch cancellationLatch = new CountDownLatch(1);
         List<Integer> integers = Flowable.range(0, 10000000)
@@ -364,6 +361,7 @@ public class AbstractSubscriberAndProducerTest {
     }
 
     @Test
+    @RepeatedTest(2)
     public void syncModeWithRacingAndErrorTest() throws InterruptedException {
         final CountDownLatch cancellationLatch = new CountDownLatch(1);
         List<Integer> integers = Flowable.range(0, 100000)
@@ -417,6 +415,7 @@ public class AbstractSubscriberAndProducerTest {
     }
 
     @Test
+    @RepeatedTest(2)
     public void regularModeWithRacingAndOnErrorOverOnNextTest()
         throws InterruptedException {
         final AtomicLong requested = new AtomicLong();
@@ -472,6 +471,7 @@ public class AbstractSubscriberAndProducerTest {
     }
 
     @Test
+    @RepeatedTest(2)
     public void asyncModeWithRacingAndOnErrorOverOnNextTest()
         throws InterruptedException {
         final CountDownLatch cancellationLatch = new CountDownLatch(1);
@@ -511,6 +511,7 @@ public class AbstractSubscriberAndProducerTest {
     }
 
     @Test
+    @RepeatedTest(2)
     public void syncModeWithRacingAndOnErrorOverOnNextTest() throws InterruptedException {
         final CountDownLatch cancellationLatch = new CountDownLatch(1);
         List<Integer> integers = Flowable.range(0, 100000)
@@ -555,6 +556,7 @@ public class AbstractSubscriberAndProducerTest {
     }
 
     @Test
+    @RepeatedTest(2)
     public void regularModeWithRacingAndCancellationTest() throws InterruptedException {
         final AtomicLong requested = new AtomicLong();
         final AtomicLong produced = new AtomicLong();
@@ -607,6 +609,7 @@ public class AbstractSubscriberAndProducerTest {
     }
 
     @Test
+    @RepeatedTest(2)
     public void asyncModeWithRacingAndCancellationTest() throws InterruptedException {
         final CountDownLatch cancellationLatch = new CountDownLatch(1);
 
@@ -645,6 +648,7 @@ public class AbstractSubscriberAndProducerTest {
     }
 
     @Test
+    @RepeatedTest(2)
     public void syncModeWithRacingAndCancellationTest() throws InterruptedException {
         final CountDownLatch cancellationLatch = new CountDownLatch(1);
 

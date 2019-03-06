@@ -15,9 +15,9 @@ import io.reactivex.functions.Consumer;
 import io.reactivex.plugins.RxJavaPlugins;
 import io.reactivex.schedulers.Schedulers;
 import org.awaitility.Duration;
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import java.util.concurrent.atomic.AtomicBoolean;
 
@@ -26,12 +26,12 @@ import static org.awaitility.Awaitility.await;
 
 
 public class GrpcContextOnScheduleHookTest {
-    @Before
+    @BeforeEach
     public void before() {
         RxJavaPlugins.setScheduleHandler(new GrpcContextOnScheduleHook());
     }
 
-    @After
+    @AfterEach
     public void after() {
         RxJavaPlugins.setScheduleHandler(null);
     }
