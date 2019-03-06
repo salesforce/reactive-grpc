@@ -31,7 +31,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 @SuppressWarnings("Duplicates")
 @RunWith(Parameterized.class)
 public class BackpressureIntegrationTest {
-    private static final int NUMBER_OF_STREAM_ELEMENTS = 512 + (512 * 3 / 4);
+    private static final int NUMBER_OF_STREAM_ELEMENTS = 512 * 3;
 
 
     @Parameterized.Parameters
