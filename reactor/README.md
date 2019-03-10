@@ -25,7 +25,7 @@ To use Reactor-gRPC with the `protobuf-maven-plugin`, add a [custom protoc plugi
 
 ### Gradle
 To use Reactor-gRPC with the `protobuf-gradle-plugin`, add the reactor-grpc plugin to the protobuf `plugins` section.
-```scala
+```groovy
 protobuf {
     protoc {
         // The artifact spec for the Protobuf Compiler
@@ -47,6 +47,8 @@ protobuf {
     }
 }
 ```
+And add the following dependency: `"com.salesforce.servicelibs:reactor-grpc-stub:${reactiveGrpcVersion}"`
+
 *At this time, Reactor-gRPC with Gradle only supports bash-based environments. Windows users will need to build using Windows Subsystem for Linux (win 10), Gitbash, or Cygwin.*
 
 Usage
