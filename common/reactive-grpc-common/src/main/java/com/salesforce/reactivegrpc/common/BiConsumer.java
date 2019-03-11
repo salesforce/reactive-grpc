@@ -10,8 +10,8 @@ package com.salesforce.reactivegrpc.common;
 /**
  * Java6 compatibility.
  *
- * @param <T>
- * @param <U>
+ * @param <T> T
+ * @param <U> U
  */
 public interface BiConsumer<T, U> {
 

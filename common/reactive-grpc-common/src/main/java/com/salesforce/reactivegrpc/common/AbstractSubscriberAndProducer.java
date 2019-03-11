@@ -38,10 +38,10 @@ import static com.google.common.base.Preconditions.checkNotNull;
  * Since this class is also registered as the {@code Publisher}'s {@code Subscriber}, the {@link #onNext(Object)}
  * method is called. {@code onNext()} passes the message to gRPC's {@link CallStreamObserver#onNext(Object)} method,
  * and then calls {@code request()} again if {@link CallStreamObserver#isReady()} is true. The loop of
- * request->pass->check is repeated until {@code isReady()} returns false, indicating that the outbound transmit buffer
+ * request→pass→check is repeated until {@code isReady()} returns false, indicating that the outbound transmit buffer
  * is full and that backpressure must be applied.
  *
- * @param <T>
+ * @param <T> T
  */
 public abstract class AbstractSubscriberAndProducer<T> implements Subscriber<T>, Runnable {
 

@@ -18,7 +18,7 @@ import io.grpc.stub.ServerCallStreamObserver;
  * The gRPC server-side implementation of
  * {@link AbstractStreamObserverAndPublisher}.
  *
- * @param <T>
+ * @param <T> T
  */
 public abstract class AbstractServerStreamObserverAndPublisher<T>
         extends AbstractStreamObserverAndPublisher<T> {

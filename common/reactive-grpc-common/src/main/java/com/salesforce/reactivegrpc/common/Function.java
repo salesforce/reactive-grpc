@@ -10,8 +10,8 @@ package com.salesforce.reactivegrpc.common;
 /**
  * Java6 compatibility.
  *
- * @param <T>
- * @param <R>
+ * @param <T> T
+ * @param <R> R
  */
 public interface Function<T, R> {
 

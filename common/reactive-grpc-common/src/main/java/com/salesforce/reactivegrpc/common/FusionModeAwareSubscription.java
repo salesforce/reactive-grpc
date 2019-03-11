@@ -15,8 +15,8 @@ import org.reactivestreams.Subscription;
  * {@link Subscription} setup in one atomic action by providing a specific
  * {@link Subscription} decorator
  *
- * @see {@link com.salesforce.rxgrpc.stub.FusionAwareQueueSubscriptionAdapter}
- * @see {@link com.salesforce.reactorgrpc.stub.FusionAwareQueueSubscriptionAdapter}
+ * See {@code com.salesforce.rxgrpc.stub.FusionAwareQueueSubscriptionAdapter}
+ * See {@code com.salesforce.reactorgrpc.stub.FusionAwareQueueSubscriptionAdapter}
  */
 public interface FusionModeAwareSubscription extends Subscription {
 

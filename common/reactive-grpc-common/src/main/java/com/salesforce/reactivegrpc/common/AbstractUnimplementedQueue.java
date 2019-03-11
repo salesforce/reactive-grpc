@@ -18,7 +18,7 @@ import java.util.Queue;
  *
  * <p>This class implements the unused (not "simple") parts {@code java.util.Queue} such that they throw
  * {@code UnsupportedOperationException} so that subclasses only have to implement the "simple" parts.
- * @param <T>
+ * @param <T> T
  */
 public abstract class AbstractUnimplementedQueue<T> implements Queue<T> {
     private final String NOT_SUPPORTED_MESSAGE = "Although " + getClass().getSimpleName() +
