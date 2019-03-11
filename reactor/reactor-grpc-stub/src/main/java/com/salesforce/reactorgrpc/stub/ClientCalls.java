@@ -27,7 +27,7 @@ public final class ClientCalls {
     }
 
     /**
-     * Implements a unary → unary call using {@link Mono} -> {@link Mono}.
+     * Implements a unary → unary call using {@link Mono} → {@link Mono}.
      */
     public static <TRequest, TResponse> Mono<TResponse> oneToOne(
             Mono<TRequest> monoSource,
@@ -60,7 +60,7 @@ public final class ClientCalls {
     }
 
     /**
-     * Implements a unary → stream call as {@link Mono} -> {@link Flux}, where the server responds with a
+     * Implements a unary → stream call as {@link Mono} → {@link Flux}, where the server responds with a
      * stream of messages.
      */
     public static <TRequest, TResponse> Flux<TResponse> oneToMany(
@@ -82,7 +82,7 @@ public final class ClientCalls {
     }
 
     /**
-     * Implements a stream → unary call as {@link Flux} -> {@link Mono}, where the client transits a stream of
+     * Implements a stream → unary call as {@link Flux} → {@link Mono}, where the client transits a stream of
      * messages.
      */
     @SuppressWarnings("unchecked")
@@ -107,7 +107,7 @@ public final class ClientCalls {
     }
 
     /**
-     * Implements a bidirectional stream → stream call as {@link Flux} -> {@link Flux}, where both the client
+     * Implements a bidirectional stream → stream call as {@link Flux} → {@link Flux}, where both the client
      * and the server independently stream to each other.
      */
     @SuppressWarnings("unchecked")
