@@ -12,7 +12,7 @@
     <parent>
         <groupId>com.salesforce.servicelibs</groupId>
         <artifactId>reactive-grpc</artifactId>
-        <version>0.9.1-SNAPSHOT</version>
+        <version>0.10.0-RC1</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
     <modelVersion>4.0.0</modelVersion>
