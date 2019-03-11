@@ -173,7 +173,7 @@ public abstract class ReactiveGrpcGenerator extends Generator {
             Arrays.stream(HtmlEscapers.htmlEscaper().escape(comments).split("\n"))
                     .forEach(line -> builder.append(prefix).append(" * ").append(line).append("\n"));
             builder
-                    .append(prefix).append(" * <pre>\n")
+                    .append(prefix).append(" * </pre>\n")
                     .append(prefix).append(" */");
             return builder.toString();
         }
