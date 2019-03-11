@@ -15,7 +15,7 @@ import reactor.util.concurrent.Queues;
 
 /**
  * TODO: Explain what this class does.
- * @param <T>
+ * @param <T> T
  */
 class ReactorClientStreamObserverAndPublisher<T>
         extends AbstractClientStreamObserverAndPublisher<T> implements Fuseable.QueueSubscription<T>, Fuseable {

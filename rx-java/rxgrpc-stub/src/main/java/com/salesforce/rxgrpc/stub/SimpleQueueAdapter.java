@@ -11,7 +11,7 @@ import io.reactivex.internal.fuseable.SimplePlainQueue;
 
 /**
  * Adapts the RxJava {@code SimpleQueue} interface to a common java {@link java.util.Queue}.
- * @param <T>
+ * @param <T> T
  */
 final class SimpleQueueAdapter<T> extends AbstractUnimplementedQueue<T> implements SimplePlainQueue<T> {
 

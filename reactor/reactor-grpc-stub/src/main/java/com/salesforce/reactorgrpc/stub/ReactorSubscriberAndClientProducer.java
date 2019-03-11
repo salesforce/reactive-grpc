@@ -15,7 +15,7 @@ import reactor.core.Fuseable;
 /**
  * The gRPC client-side implementation of {@link com.salesforce.reactivegrpc.common.AbstractSubscriberAndProducer}.
  *
- * @param <T>
+ * @param <T> T
  */
 public class ReactorSubscriberAndClientProducer<T>
         extends AbstractSubscriberAndClientProducer<T>

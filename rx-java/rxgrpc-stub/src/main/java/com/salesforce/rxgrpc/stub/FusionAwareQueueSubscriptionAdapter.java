@@ -15,7 +15,7 @@ import io.reactivex.internal.fuseable.QueueSubscription;
  * Implementation of FusionModeAwareSubscription which encapsulate
  * {@link QueueSubscription} from RxJava internals and allows treat it as a {@link java.util.Queue}.
  *
- * @param <T> generic type
+ * @param <T> T
  */
 class FusionAwareQueueSubscriptionAdapter<T> extends AbstractUnimplementedQueue<T> implements QueueSubscription<T>, FusionModeAwareSubscription {
 

@@ -15,7 +15,7 @@ import org.reactivestreams.Subscription;
 /**
  * The gRPC client-side implementation of {@link com.salesforce.reactivegrpc.common.AbstractSubscriberAndProducer}.
  *
- * @param <T>
+ * @param <T> T
  */
 public class RxSubscriberAndClientProducer<T>
         extends AbstractSubscriberAndClientProducer<T>

@@ -14,7 +14,7 @@ import reactor.core.Fuseable;
  * Implementation of FusionModeAwareSubscription which encapsulate
  * {@link Fuseable.QueueSubscription} from Reactor-Core internals and allows.
  *
- * @param <T> generic type
+ * @param <T> T
  */
 class FusionAwareQueueSubscriptionAdapter<T> implements Fuseable.QueueSubscription<T>, FusionModeAwareSubscription {
 

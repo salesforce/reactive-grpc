@@ -38,8 +38,8 @@ public final class GrpcRetry {
          *
          * @param operation the gRPC operation to retry, typically from a generated reactive-grpc stub class
          * @param whenFactory receives a Publisher of notifications with which a user can complete or error, aborting the retry
-         * @param <I>
-         * @param <O>
+         * @param <I> I
+         * @param <O> O
          *
          * @see Flux#retryWhen(Function)
          */
@@ -52,8 +52,8 @@ public final class GrpcRetry {
          *
          * @param operation the gRPC operation to retry, typically from a generated reactive-grpc stub class
          * @param delay the delay between retries
-         * @param <I>
-         * @param <O>
+         * @param <I> I
+         * @param <O> O
          */
         public static <I, O> Function<? super Mono<I>, Flux<O>> retryAfter(final Function<Mono<I>, Flux<O>> operation, final Duration delay) {
             return retryWhen(operation, errors -> errors.delayElements(delay));
@@ -63,8 +63,8 @@ public final class GrpcRetry {
          * Retries a streaming gRPC call immediately.
          *
          * @param operation the gRPC operation to retry, typically from a generated reactive-grpc stub class
-         * @param <I>
-         * @param <O>
+         * @param <I> I
+         * @param <O> O
          */
         public static <I, O> Function<? super Mono<I>, Flux<O>> retryImmediately(final Function<Mono<I>, Flux<O>> operation) {
             return retryWhen(operation, errors -> errors);
@@ -86,8 +86,8 @@ public final class GrpcRetry {
          *
          * @param operation the gRPC operation to retry, typically from a generated reactive-grpc stub class
          * @param whenFactory receives a Publisher of notifications with which a user can complete or error, aborting the retry
-         * @param <I>
-         * @param <O>
+         * @param <I> I
+         * @param <O> O
          *
          * @see Flux#retryWhen(Function)
          */
@@ -100,8 +100,8 @@ public final class GrpcRetry {
          *
          * @param operation the gRPC operation to retry, typically from a generated reactive-grpc stub class
          * @param delay the delay between retries
-         * @param <I>
-         * @param <O>
+         * @param <I> I
+         * @param <O> O
          */
         public static <I, O> Function<? super Flux<I>, ? extends Publisher<O>> retryAfter(final Function<Flux<I>, Flux<O>> operation, final Duration delay) {
             return retryWhen(operation, errors -> errors.delayElements(delay));
@@ -111,8 +111,8 @@ public final class GrpcRetry {
          * Retries a streaming gRPC call immediately.
          *
          * @param operation the gRPC operation to retry, typically from a generated reactive-grpc stub class
-         * @param <I>
-         * @param <O>
+         * @param <I> I
+         * @param <O> O
          */
         public static <I, O> Function<? super Flux<I>, ? extends Publisher<O>> retryImmediately(final Function<Flux<I>, Flux<O>> operation) {
             return retryWhen(operation, errors -> errors);
@@ -134,8 +134,8 @@ public final class GrpcRetry {
          *
          * @param operation the gRPC operation to retry, typically from a generated reactive-grpc stub class
          * @param whenFactory receives a Publisher of notifications with which a user can complete or error, aborting the retry
-         * @param <I>
-         * @param <O>
+         * @param <I> I
+         * @param <O> O
          *
          * @see Flux#retryWhen(Function)
          */
@@ -148,8 +148,8 @@ public final class GrpcRetry {
          *
          * @param operation the gRPC operation to retry, typically from a generated reactive-grpc stub class
          * @param delay the delay between retries
-         * @param <I>
-         * @param <O>
+         * @param <I> I
+         * @param <O> O
          */
         public static <I, O> Function<? super Flux<I>, Mono<O>> retryAfter(final Function<Flux<I>, Mono<O>> operation, final Duration delay) {
             return retryWhen(operation, errors -> errors.delayElements(delay));
@@ -159,8 +159,8 @@ public final class GrpcRetry {
          * Retries a streaming gRPC call immediately.
          *
          * @param operation the gRPC operation to retry, typically from a generated reactive-grpc stub class
-         * @param <I>
-         * @param <O>
+         * @param <I> I
+         * @param <O> O
          */
         public static <I, O> Function<? super Flux<I>, Mono<O>> retryImmediately(final Function<Flux<I>, Mono<O>> operation) {
             return retryWhen(operation, errors -> errors);
