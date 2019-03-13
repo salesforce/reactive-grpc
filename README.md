@@ -25,6 +25,9 @@ See the readme in each technology-specific sub-directory for usage details.
 
 * Lots of demos in the [demos directory](https://github.com/salesforce/reactive-grpc/tree/master/demos)
 
+# Spring Boot starter for Reactive gRPC
+[reactive-grpc-spring-boot-starter](https://github.com/linux-china/reactive-grpc-spring-boot-starter) could auto-configure and run the Reactive gRPC Service with @ReactiveGrpcService-enabled beans in your spring-boot application.
+
 # Android support
 Reactive gRPC supports Android to the same level of the underlying reactive technologies.
 
