@@ -37,8 +37,8 @@ public final class GrpcRetry {
          *
          * @param operation the gRPC operation to retry, typically from a generated reactive-grpc stub class
          * @param handler receives a Publisher of notifications with which a user can complete or error, aborting the retry
-         * @param <I>
-         * @param <O>
+         * @param <I> I
+         * @param <O> O
          *
          * @see Flowable#retryWhen(Function)
          */
@@ -62,8 +62,8 @@ public final class GrpcRetry {
          * @param operation the gRPC operation to retry, typically from a generated reactive-grpc stub class
          * @param delay the delay between retries
          * @param unit the units to use for {@code delay}
-         * @param <I>
-         * @param <O>
+         * @param <I> I
+         * @param <O> O
          */
         public static <I, O> SingleConverter<I, Flowable<O>> retryAfter(final Function<Single<I>, Flowable<O>> operation, final int delay, final TimeUnit unit) {
             return retryWhen(operation, new Function<Flowable<Throwable>, Publisher<?>>() {
@@ -83,8 +83,8 @@ public final class GrpcRetry {
          * Retries a streaming gRPC call immediately.
          *
          * @param operation the gRPC operation to retry, typically from a generated reactive-grpc stub class
-         * @param <I>
-         * @param <O>
+         * @param <I> I
+         * @param <O> O
          */
         public static <I, O> SingleConverter<I, Flowable<O>> retryImmediately(final Function<Single<I>, Flowable<O>> operation) {
             return retryWhen(operation, new Function<Flowable<Throwable>, Publisher<?>>() {
@@ -110,8 +110,8 @@ public final class GrpcRetry {
          *
          * @param operation the gRPC operation to retry, typically from a generated reactive-grpc stub class
          * @param handler receives a Publisher of notifications with which a user can complete or error, aborting the retry
-         * @param <I>
-         * @param <O>
+         * @param <I> I
+         * @param <O> O
          *
          * @see Flowable#retryWhen(Function)
          */
@@ -135,8 +135,8 @@ public final class GrpcRetry {
          * @param operation the gRPC operation to retry, typically from a generated reactive-grpc stub class
          * @param delay the delay between retries
          * @param unit the units to use for {@code delay}
-         * @param <I>
-         * @param <O>
+         * @param <I> I
+         * @param <O> O
          */
         public static <I, O> FlowableTransformer<I, O> retryAfter(final Function<Flowable<I>, Flowable<O>> operation, final int delay, final TimeUnit unit) {
             return retryWhen(operation, new Function<Flowable<Throwable>, Publisher<?>>() {
@@ -156,8 +156,8 @@ public final class GrpcRetry {
          * Retries a streaming gRPC call immediately.
          *
          * @param operation the gRPC operation to retry, typically from a generated reactive-grpc stub class
-         * @param <I>
-         * @param <O>
+         * @param <I> I
+         * @param <O> O
          */
         public static <I, O> FlowableTransformer<I, O> retryImmediately(final Function<Flowable<I>, Flowable<O>> operation) {
             return retryWhen(operation, new Function<Flowable<Throwable>, Publisher<?>>() {
@@ -183,8 +183,8 @@ public final class GrpcRetry {
          *
          * @param operation the gRPC operation to retry, typically from a generated reactive-grpc stub class
          * @param handler receives a Publisher of notifications with which a user can complete or error, aborting the retry
-         * @param <I>
-         * @param <O>
+         * @param <I> I
+         * @param <O> O
          *
          * @see Flowable#retryWhen(Function)
          */
@@ -208,8 +208,8 @@ public final class GrpcRetry {
          * @param operation the gRPC operation to retry, typically from a generated reactive-grpc stub class
          * @param delay the delay between retries
          * @param unit the units to use for {@code delay}
-         * @param <I>
-         * @param <O>
+         * @param <I> I
+         * @param <O> O
          */
         public static <I, O> FlowableConverter<I, Single<O>> retryAfter(final Function<Flowable<I>, Single<O>> operation, final int delay, final TimeUnit unit) {
             return retryWhen(operation, new Function<Flowable<Throwable>, Publisher<?>>() {
@@ -229,8 +229,8 @@ public final class GrpcRetry {
          * Retries a streaming gRPC call immediately.
          *
          * @param operation the gRPC operation to retry, typically from a generated reactive-grpc stub class
-         * @param <I>
-         * @param <O>
+         * @param <I> I
+         * @param <O> O
          */
         public static <I, O> FlowableConverter<I, Single<O>> retryImmediately(final Function<Flowable<I>, Single<O>> operation) {
             return retryWhen(operation, new Function<Flowable<Throwable>, Publisher<?>>() {

@@ -16,7 +16,7 @@ import reactor.util.concurrent.Queues;
 
 /**
  * TODO: Explain what this class does.
- * @param <T>
+ * @param <T> T
  */
 class ReactorServerStreamObserverAndPublisher<T>
         extends AbstractServerStreamObserverAndPublisher<T>

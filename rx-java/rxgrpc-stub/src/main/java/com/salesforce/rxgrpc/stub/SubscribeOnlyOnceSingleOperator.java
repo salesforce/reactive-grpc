@@ -17,7 +17,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
  * SubscribeOnlyOnceSingleOperator throws an exception if a user attempts to subscribe more than once to a
  * {@link io.reactivex.Single}.
  *
- * @param <T>
+ * @param <T> T
  */
 public class SubscribeOnlyOnceSingleOperator<T> implements SingleOperator<T, T> {
     private AtomicBoolean subscribedOnce = new AtomicBoolean(false);

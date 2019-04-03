@@ -17,7 +17,7 @@ import io.reactivex.internal.queue.SpscArrayQueue;
 
 /**
  * TODO: Explain what this class does.
- * @param <T>
+ * @param <T> T
  */
 class RxServerStreamObserverAndPublisher<T>
         extends AbstractServerStreamObserverAndPublisher<T>

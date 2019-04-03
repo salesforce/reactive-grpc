@@ -18,7 +18,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
  * SubscribeOnlyOnceFlowableOperator throws an exception if a user attempts to subscribe more than once to a
  * {@link io.reactivex.Flowable}.
  *
- * @param <T>
+ * @param <T> T
  */
 public class SubscribeOnlyOnceFlowableOperator<T> implements FlowableOperator<T, T> {
     private AtomicBoolean subscribedOnce = new AtomicBoolean(false);

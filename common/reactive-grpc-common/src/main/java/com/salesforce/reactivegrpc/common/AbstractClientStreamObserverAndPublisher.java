@@ -17,7 +17,7 @@ import io.grpc.stub.ClientResponseObserver;
  * The gRPC client-side implementation of
  * {@link AbstractStreamObserverAndPublisher}.
  *
- * @param <T>
+ * @param <T> T
  */
 public abstract class AbstractClientStreamObserverAndPublisher<T>
         extends AbstractStreamObserverAndPublisher<T>

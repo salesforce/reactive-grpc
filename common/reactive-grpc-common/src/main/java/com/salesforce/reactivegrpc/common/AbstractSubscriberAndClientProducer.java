@@ -13,7 +13,7 @@ import io.grpc.stub.ClientCallStreamObserver;
 /**
  * The gRPC client-side implementation of {@link AbstractSubscriberAndProducer}.
  *
- * @param <T>
+ * @param <T> T
  */
 public abstract class AbstractSubscriberAndClientProducer<T>
         extends AbstractSubscriberAndProducer<T> {

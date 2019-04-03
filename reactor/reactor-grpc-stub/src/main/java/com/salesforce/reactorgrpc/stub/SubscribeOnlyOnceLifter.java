@@ -18,7 +18,7 @@ import java.util.function.BiFunction;
  * SubscribeOnlyOnceLifter throws an exception if a user attempts to subscribe more than once to a
  * {@link reactor.core.publisher.Flux}.
  *
- * @param <T>
+ * @param <T> T
  */
 public class SubscribeOnlyOnceLifter<T> extends AtomicBoolean implements BiFunction<Scannable, CoreSubscriber<? super T>, CoreSubscriber<? super T>> {
 

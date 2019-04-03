@@ -46,7 +46,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
  * be blocked with a busy spin using {@link LockSupport#parkNanos(long)} try to enqueue
  * element into {@link Queue} until downstream deque element from it.
  *
- * @param <T>
+ * @param <T> T
  */
 public abstract class AbstractStreamObserverAndPublisher<T> extends AbstractUnimplementedQueue<T>
         implements Publisher<T>, StreamObserver<T>, Subscription, Queue<T>  {

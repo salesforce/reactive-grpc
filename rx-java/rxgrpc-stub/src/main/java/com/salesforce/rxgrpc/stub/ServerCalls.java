@@ -29,7 +29,7 @@ public final class ServerCalls {
     }
 
     /**
-     * Implements a unary -> unary call using {@link Single} -> {@link Single}.
+     * Implements a unary → unary call using {@link Single} → {@link Single}.
      */
     public static <TRequest, TResponse> void oneToOne(
             final TRequest request,
@@ -63,7 +63,7 @@ public final class ServerCalls {
     }
 
     /**
-     * Implements a unary -> stream call as {@link Single} -> {@link Flowable}, where the server responds with a
+     * Implements a unary → stream call as {@link Single} → {@link Flowable}, where the server responds with a
      * stream of messages.
      */
     public static <TRequest, TResponse> void oneToMany(
@@ -83,7 +83,7 @@ public final class ServerCalls {
     }
 
     /**
-     * Implements a stream -> unary call as {@link Flowable} -> {@link Single}, where the client transits a stream of
+     * Implements a stream → unary call as {@link Flowable} → {@link Single}, where the client transits a stream of
      * messages.
      */
     public static <TRequest, TResponse> StreamObserver<TRequest> manyToOne(
@@ -124,7 +124,7 @@ public final class ServerCalls {
     }
 
     /**
-     * Implements a bidirectional stream -> stream call as {@link Flowable} -> {@link Flowable}, where both the client
+     * Implements a bidirectional stream → stream call as {@link Flowable} → {@link Flowable}, where both the client
      * and the server independently stream to each other.
      */
     public static <TRequest, TResponse> StreamObserver<TRequest> manyToMany(
