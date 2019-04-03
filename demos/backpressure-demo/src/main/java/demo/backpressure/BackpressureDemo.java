@@ -8,7 +8,7 @@ import javafx.stage.Stage;
 
 public class BackpressureDemo extends Application {
 
-    public static void main(String[] args) {
+    public static void doMain(String[] args) {
         launch(args);
     }
 

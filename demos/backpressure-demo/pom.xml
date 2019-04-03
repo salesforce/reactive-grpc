@@ -10,7 +10,7 @@
 
     <properties>
         <rxjava.version>2.1.10</rxjava.version>
-        <reactive.grpc.version>0.9.0</reactive.grpc.version>
+        <reactive.grpc.version>0.10.0-SNAPSHOT</reactive.grpc.version>
         <grpc.contrib.version>0.8.0</grpc.contrib.version>
         <rxjavafx.version>2.2.2</rxjavafx.version>
         <grpc.version>1.12.0</grpc.version>
@@ -18,6 +18,16 @@
     </properties>
 
     <dependencies>
+        <dependency>
+            <groupId>org.openjfx</groupId>
+            <artifactId>javafx-controls</artifactId>
+            <version>11.0.2</version>
+        </dependency>
+        <dependency>
+            <groupId>org.openjfx</groupId>
+            <artifactId>javafx-fxml</artifactId>
+            <version>11.0.2</version>
+        </dependency>
         <dependency>
             <groupId>io.reactivex.rxjava2</groupId>
             <artifactId>rxjava</artifactId>
@@ -44,6 +54,51 @@
             <version>${rxjavafx.version}</version>
         </dependency>
     </dependencies>
+
+    <profiles>
+        <profile>
+            <id>mac</id>
+            <activation>
+                <os><family>mac</family></os>
+            </activation>
+            <dependencies>
+                <dependency>
+                    <groupId>org.openjfx</groupId>
+                    <artifactId>javafx-graphics </artifactId>
+                    <version>11.0.2</version>
+                    <classifier>mac</classifier>
+                </dependency>
+            </dependencies>
+        </profile>
+        <profile>
+            <id>windows</id>
+            <activation>
+                <os><family>windows</family></os>
+            </activation>
+            <dependencies>
+                <dependency>
+                    <groupId>org.openjfx</groupId>
+                    <artifactId>javafx-graphics </artifactId>
+                    <version>11.0.2</version>
+                    <classifier>windows</classifier>
+                </dependency>
+            </dependencies>
+        </profile>
+        <profile>
+            <id>linux</id>
+            <activation>
+                <os><family>unix</family></os>
+            </activation>
+            <dependencies>
+                <dependency>
+                    <groupId>org.openjfx</groupId>
+                    <artifactId>javafx-graphics </artifactId>
+                    <version>11.0.2</version>
+                    <classifier>linux</classifier>
+                </dependency>
+            </dependencies>
+        </profile>
+    </profiles>
 
     <build>
         <extensions>
@@ -107,7 +162,7 @@
                         <configuration>
                             <transformers>
                                 <transformer implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
-                                    <mainClass>demo.backpressure.BackpressureDemo</mainClass>
+                                    <mainClass>demo.backpressure.BackpressureDemoMain</mainClass>
                                 </transformer>
                             </transformers>
                         </configuration>
