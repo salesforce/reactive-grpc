@@ -16,6 +16,7 @@ import io.reactivex.Single;
 import io.reactivex.observers.TestObserver;
 import io.reactivex.subscribers.TestSubscriber;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Rule;
 import org.junit.Test;
 
@@ -27,6 +28,7 @@ import java.util.stream.IntStream;
 import static org.assertj.core.api.Assertions.assertThat;
 
 @SuppressWarnings("Duplicates")
+@Ignore
 public class BackpressureIntegrationTest {
     @Rule
     public GrpcServerRule serverRule = new GrpcServerRule();

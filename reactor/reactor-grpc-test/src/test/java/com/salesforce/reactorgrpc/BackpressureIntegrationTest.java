@@ -18,6 +18,7 @@ import com.salesforce.servicelibs.NumberProto;
 import com.salesforce.servicelibs.ReactorNumbersGrpc;
 import io.grpc.testing.GrpcServerRule;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -29,6 +30,7 @@ import reactor.test.StepVerifier;
 import static org.assertj.core.api.Assertions.assertThat;
 
 @SuppressWarnings("Duplicates")
+@Ignore
 @RunWith(Parameterized.class)
 public class BackpressureIntegrationTest {
     private static final int NUMBER_OF_STREAM_ELEMENTS = 512 * 12;
