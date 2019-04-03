@@ -6,35 +6,25 @@
  */
 package com.salesforce.reactivegrpc.jmh;
 
-import org.junit.Ignore;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.junit.runners.Parameterized;
+import java.util.Collections;
+import java.util.stream.Stream;
+
+import jdk.nashorn.internal.ir.annotations.Ignore;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
 import org.openjdk.jmh.results.RunResult;
 import org.openjdk.jmh.runner.BenchmarkList;
-import org.openjdk.jmh.runner.BenchmarkListEntry;
 import org.openjdk.jmh.runner.Runner;
 import org.openjdk.jmh.runner.RunnerException;
 import org.openjdk.jmh.runner.options.Options;
 import org.openjdk.jmh.runner.options.OptionsBuilder;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.List;
-
-@RunWith(Parameterized.class)
 public class BenchmarkTest {
-    private final String benchmark;
-
-
-    public BenchmarkTest(String benchmark, String name) {
-        this.benchmark = benchmark;
-    }
-
     @Test
     @Ignore
-    public void run() throws RunnerException {
+    @MethodSource("data")
+    public void run(String benchmark, String name) throws RunnerException {
         Options opt = new OptionsBuilder()
                 .include(benchmark)
                 .shouldFailOnError(true)
@@ -43,16 +33,18 @@ public class BenchmarkTest {
         RunResult result = runner.runSingle();
     }
 
-    @Parameterized.Parameters(name = "{1}")
-    public static Collection<Object[]> data() {
+    public static Stream<Arguments> data() {
         BenchmarkList benchmarkList = BenchmarkList.fromResource("META-INF/BenchmarkList");
 
-        List<Object[]> ret = new ArrayList<>();
-        for (BenchmarkListEntry benchmark : benchmarkList.getAll(null, Collections.emptyList())) {
-            String method = benchmark.getUsername();
-            ret.add(new Object[] {method, method.replace("com.salesforce.reactivegrpc.jmh.", "")});
-        }
-
-        return ret;
+        return benchmarkList
+            .getAll(null, Collections.emptyList())
+            .stream()
+            .map(benchmark1 -> {
+                String method = benchmark1.getUsername();
+                return Arguments.of(
+                    method,
+                    method.replace("com.salesforce.reactivegrpc.jmh.", "")
+                );
+            });
     }
 }

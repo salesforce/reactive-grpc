@@ -10,7 +10,7 @@ package com.salesforce.rxgrpc.stub;
 import io.reactivex.SingleObserver;
 import io.reactivex.disposables.Disposable;
 import org.assertj.core.api.ThrowableAssert;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.reactivestreams.Subscriber;
 import org.reactivestreams.Subscription;
 

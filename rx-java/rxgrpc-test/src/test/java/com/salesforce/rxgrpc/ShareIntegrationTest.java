@@ -164,7 +164,10 @@ public class ShareIntegrationTest {
             public Flowable<HelloResponse> sayHelloRespStream(Single<HelloRequest> request) {
                 return request
                         // Always return Alpha, Bravo, Charlie
-                        .flatMapPublisher(x -> Flowable.just("Alpha", "Bravo", "Charlie"))
+                        .flatMapPublisher(x -> {
+                            System.out.println("Flatten : " + x);
+                            return Flowable.just("Alpha", "Bravo", "Charlie");
+                        })
                         .map(n -> HelloResponse.newBuilder().setMessage(n).build());
             }
         };
