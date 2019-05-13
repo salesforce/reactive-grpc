@@ -13,11 +13,11 @@
         <groupId>com.salesforce.servicelibs</groupId>
         <artifactId>reactive-grpc</artifactId>
         <version>0.10.0-SNAPSHOT</version>
-        <relativePath>../pom.xml</relativePath>
+        <relativePath>../../pom.xml</relativePath>
     </parent>
     <modelVersion>4.0.0</modelVersion>
 
-    <artifactId>benchmarks</artifactId>
+    <artifactId>reactive-grpc-benchmarks</artifactId>
 
     <dependencies>
         <dependency>

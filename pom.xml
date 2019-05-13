@@ -51,7 +51,7 @@
         <module>reactor/reactor-grpc-tck</module>
         <module>reactor/reactor-grpc-test</module>
         <module>reactor/reactor-grpc-test-32</module>
-        <module>benchmarks</module>
+        <module>common/reactive-grpc-benchmarks</module>
     </modules>
 
     <properties>
