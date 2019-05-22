@@ -51,7 +51,6 @@ public class StreamObserverAndPublisherTest {
         });
     }
 
-    @Test
     @RepeatedTest(2)
     public void multithreadingRegularTest() {
         TestStreamObserverAndPublisher<Integer> processor =
@@ -89,7 +88,6 @@ public class StreamObserverAndPublisherTest {
         }
     }
 
-    @Test
     @RepeatedTest(2)
     public void multithreadingFussedTest() {
 
@@ -128,7 +126,6 @@ public class StreamObserverAndPublisherTest {
         }
     }
 
-    @Test
     @RepeatedTest(2)
     public void shouldSupportOnlySingleSubscriberTest() throws InterruptedException {
         for (int i = 0; i < 1000; i++) {
@@ -163,7 +160,6 @@ public class StreamObserverAndPublisherTest {
         }
     }
 
-    @Test
     @RepeatedTest(2)
     public void shouldSupportOnlySingleSubscriptionTest() throws InterruptedException {
         for (int i = 0; i < 1000; i++) {
@@ -202,7 +198,6 @@ public class StreamObserverAndPublisherTest {
         }
     }
 
-    @Test
     @RepeatedTest(2)
     public void shouldSupportOnlySinglePrefetchTest() throws InterruptedException {
         for (int i = 0; i < 10; i++) {
