@@ -55,7 +55,6 @@ public class AbstractSubscriberAndProducerTest {
         });
     }
 
-    @Test
     @RepeatedTest(2)
     public void shouldSupportOnlySingleSubscribersTest() throws InterruptedException {
         final TestCallStreamObserver<Integer> downstream = new TestCallStreamObserver<Integer>(executorService);
@@ -93,7 +92,6 @@ public class AbstractSubscriberAndProducerTest {
         }
     }
 
-    @Test
     @RepeatedTest(2)
     public void shouldSupportOnlySingleSubscriptionTest() throws InterruptedException {
         for (int i = 0; i < 1000; i++) {
@@ -125,7 +123,6 @@ public class AbstractSubscriberAndProducerTest {
         }
     }
 
-    @Test
     @RepeatedTest(2)
     public void regularModeWithRacingTest() {
         final AtomicLong requested = new AtomicLong();
@@ -171,7 +168,6 @@ public class AbstractSubscriberAndProducerTest {
                   .isEqualTo(integers);
     }
 
-    @Test
     @RepeatedTest(2)
     public void asyncModeWithRacingTest() {
         List<Integer> integers = Flowable.range(0, 10000000)
@@ -197,7 +193,6 @@ public class AbstractSubscriberAndProducerTest {
         Assertions.assertThat(unhandledThrowable).isEmpty();
     }
 
-    @Test
     @RepeatedTest(2)
     public void syncModeWithRacingTest() throws InterruptedException {
         List<Integer> integers = Flowable.range(0, 10000000)
@@ -230,7 +225,6 @@ public class AbstractSubscriberAndProducerTest {
         Assertions.assertThat(unhandledThrowable).isEmpty();
     }
 
-    @Test
     @RepeatedTest(2)
     public void regularModeWithRacingAndOnErrorTest() {
         final AtomicBoolean pingPing = new AtomicBoolean();
@@ -279,7 +273,6 @@ public class AbstractSubscriberAndProducerTest {
                   .isEqualTo(integers);
     }
 
-    @Test
     @RepeatedTest(2)
     public void asyncModeWithRacingAndOnErrorTest() {
 
@@ -312,7 +305,6 @@ public class AbstractSubscriberAndProducerTest {
         Assertions.assertThat(unhandledThrowable).isEmpty();
     }
 
-    @Test
     @RepeatedTest(2)
     public void asyncModeWithRacingAndErrorTest() throws InterruptedException {
         final CountDownLatch cancellationLatch = new CountDownLatch(1);
@@ -360,7 +352,6 @@ public class AbstractSubscriberAndProducerTest {
         Assertions.assertThat(unhandledThrowable).isEmpty();
     }
 
-    @Test
     @RepeatedTest(2)
     public void syncModeWithRacingAndErrorTest() throws InterruptedException {
         final CountDownLatch cancellationLatch = new CountDownLatch(1);
@@ -414,7 +405,6 @@ public class AbstractSubscriberAndProducerTest {
         Assertions.assertThat(unhandledThrowable).isEmpty();
     }
 
-    @Test
     @RepeatedTest(2)
     public void regularModeWithRacingAndOnErrorOverOnNextTest()
         throws InterruptedException {
@@ -470,7 +460,6 @@ public class AbstractSubscriberAndProducerTest {
         Assertions.assertThat(unhandledThrowable).isEmpty();
     }
 
-    @Test
     @RepeatedTest(2)
     public void asyncModeWithRacingAndOnErrorOverOnNextTest()
         throws InterruptedException {
@@ -510,7 +499,6 @@ public class AbstractSubscriberAndProducerTest {
         Assertions.assertThat(unhandledThrowable).isEmpty();
     }
 
-    @Test
     @RepeatedTest(2)
     public void syncModeWithRacingAndOnErrorOverOnNextTest() throws InterruptedException {
         final CountDownLatch cancellationLatch = new CountDownLatch(1);
@@ -555,7 +543,6 @@ public class AbstractSubscriberAndProducerTest {
         Assertions.assertThat(unhandledThrowable).isEmpty();
     }
 
-    @Test
     @RepeatedTest(2)
     public void regularModeWithRacingAndCancellationTest() throws InterruptedException {
         final AtomicLong requested = new AtomicLong();
@@ -608,7 +595,6 @@ public class AbstractSubscriberAndProducerTest {
         Assertions.assertThat(unhandledThrowable).isEmpty();
     }
 
-    @Test
     @RepeatedTest(2)
     public void asyncModeWithRacingAndCancellationTest() throws InterruptedException {
         final CountDownLatch cancellationLatch = new CountDownLatch(1);
@@ -647,7 +633,6 @@ public class AbstractSubscriberAndProducerTest {
         Assertions.assertThat(unhandledThrowable).isEmpty();
     }
 
-    @Test
     @RepeatedTest(2)
     public void syncModeWithRacingAndCancellationTest() throws InterruptedException {
         final CountDownLatch cancellationLatch = new CountDownLatch(1);
