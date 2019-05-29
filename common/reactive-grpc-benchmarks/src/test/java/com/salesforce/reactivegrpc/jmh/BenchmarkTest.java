@@ -9,8 +9,8 @@ package com.salesforce.reactivegrpc.jmh;
 import java.util.Collections;
 import java.util.stream.Stream;
 
-import jdk.nashorn.internal.ir.annotations.Ignore;
-import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.openjdk.jmh.results.RunResult;
@@ -21,8 +21,8 @@ import org.openjdk.jmh.runner.options.Options;
 import org.openjdk.jmh.runner.options.OptionsBuilder;
 
 public class BenchmarkTest {
-    @Test
-    @Ignore
+    @Disabled
+    @ParameterizedTest(name = "{1}")
     @MethodSource("data")
     public void run(String benchmark, String name) throws RunnerException {
         Options opt = new OptionsBuilder()

@@ -12,7 +12,7 @@
     <parent>
         <groupId>com.salesforce.servicelibs</groupId>
         <artifactId>reactive-grpc</artifactId>
-        <version>0.10.0-SNAPSHOT</version>
+        <version>0.11.0-SNAPSHOT</version>
         <relativePath>../../pom.xml</relativePath>
     </parent>
     <modelVersion>4.0.0</modelVersion>
@@ -21,6 +21,7 @@
 
     <properties>
         <java.version>1.7</java.version>
+        <java.test.version>1.8</java.test.version>
         <maven.compiler.source>${java.version}</maven.compiler.source>
         <maven.compiler.target>${java.version}</maven.compiler.target>
     </properties>
