@@ -1,7 +1,7 @@
 apply plugin: 'com.android.application'
 apply plugin: 'com.google.protobuf'
 
-def reactiveGrpcVersion = '0.10.0-SNAPSHOT'
+def reactiveGrpcVersion = '0.10.0'
 def grpcVersion = '1.13.1'
 def protobufVersion = '3.5.1'
 

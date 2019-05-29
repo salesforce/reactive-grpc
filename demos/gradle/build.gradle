@@ -1,5 +1,5 @@
 group 'com.salesforce.servicelibs'
-version '0.10.0-SNAPSHOT'
+version '0.10.0'
 
 apply plugin: 'java'
 apply plugin: "idea"
