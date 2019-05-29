@@ -63,7 +63,7 @@ public class BackpressureController extends RxBackpressureDemoGrpc.BackpressureD
                             consumedLabel.setText(i.toString());
                             consumedSeries.getData().add(new XYChart.Data<>(System.currentTimeMillis(), i));
                         },
-                        System.err::println,
+                        Throwable::printStackTrace,
                         () -> startButton.setDisable(false)
                 );
     }

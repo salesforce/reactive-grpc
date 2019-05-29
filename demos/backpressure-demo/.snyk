@@ -1,0 +1,21 @@
+# Snyk (https://snyk.io) policy file, patches or ignores known vulnerabilities.
+version: v1.13.5
+# ignores vulnerabilities until expiry date; change duration by modifying expiry date
+ignore:
+  'snyk:lic:maven:org.openjfx:javafx-graphics:GPL-2.0':
+    - '*':
+        reason: This module is only for testing
+        expires: 2029-06-16T00:28:34.715Z
+  'snyk:lic:maven:org.openjfx:javafx-fxml:GPL-2.0':
+    - '*':
+        reason: This module is only for testing
+        expires: 2029-06-16T00:29:25.488Z
+  'snyk:lic:maven:org.openjfx:javafx-controls:GPL-2.0':
+    - '*':
+        reason: This module is only for testing
+        expires: 2029-06-16T00:29:44.276Z
+  'snyk:lic:maven:org.openjfx:javafx-base:GPL-2.0':
+    - '*':
+        reason: This module is only for testing
+        expires: 2029-06-16T00:29:44.276Z
+patch: {}
