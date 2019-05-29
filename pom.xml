@@ -278,9 +278,14 @@
                     <plugin>
                         <groupId>org.apache.maven.plugins</groupId>
                         <artifactId>maven-javadoc-plugin</artifactId>
-                        <version>3.0.1</version>
+                        <version>3.1.0</version>
                         <configuration>
-                            <additionalOptions>-Xdoclint:none</additionalOptions>
+                            <author>false</author>
+                            <breakiterator>true</breakiterator>
+                            <doclint>accessibility,html,reference,syntax</doclint>
+                            <keywords>true</keywords>
+                            <version>false</version>
+                            <source>8</source>
                         </configuration>
                         <executions>
                             <execution>
