@@ -1,0 +1,7 @@
+java_test(
+    name = "reactivegrpc",
+    size = "small",
+    srcs = glob(["*.java"]),
+    test_class = "com.salesforce.servicelibs.reactivegrpc.BazelProofTest",
+    deps = ["//src/main/java/com/salesforce/servicelibs/reactivegrpc"],
+)

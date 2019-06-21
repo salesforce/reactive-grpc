@@ -1,0 +1,5 @@
+# Required because by default Bazel strips source code info from proto file descriptors
+# (see https://github.com/bazelbuild/bazel/issues/3971)
+# and com.salesforce.reactivegrpc.gen.ReactiveGrpcGenerator does not generate any
+# services without source code info present
+build --protocopt=--include_source_info

@@ -1,0 +1,15 @@
+java_library(
+    name = "reactor-grpc-stub",
+    srcs = glob(["src/main/**/*.java"]),
+    # Disable error prone build failure (triggered by unused return)
+    javacopts = ["-XepDisableAllChecks"],
+    visibility = ["//visibility:public"],
+    deps = [
+        "//common/reactive-grpc-common",
+        "@com_google_guava_guava",
+        "@io_grpc_grpc_java//core",
+        "@io_grpc_grpc_java//stub",
+        "@io_projectreactor_reactor_core",
+        "@org_reactivestreams_reactive_streams",
+    ],
+)

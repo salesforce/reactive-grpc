@@ -10,3 +10,5 @@ dependency-reduced-pom.xml
 .checkstyle
 .classpath
 .project
+bazel-*
+.ijwb/

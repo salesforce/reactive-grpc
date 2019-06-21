@@ -1,0 +1,69 @@
+load("@io_grpc_grpc_java//:java_grpc_library.bzl", "java_grpc_library")
+load("@com_salesforce_servicelibs_reactive_grpc//bazel:java_reactive_grpc_library.bzl", "reactor_grpc_library", "rx_grpc_library")
+
+proto_library(
+    name = "helloworld_proto",
+    srcs = ["helloworld.proto"],
+    visibility = ["//visibility:public"],
+)
+
+java_proto_library(
+    name = "helloworld_java_proto",
+    visibility = ["//visibility:public"],
+    deps = [":helloworld_proto"],
+)
+
+java_grpc_library(
+    name = "helloworld_java_grpc",
+    srcs = ["helloworld_proto"],
+    visibility = ["//visibility:public"],
+    deps = ["helloworld_java_proto"],
+)
+
+reactor_grpc_library(
+    name = "helloworld_reactor_grpc",
+    proto = ":helloworld_proto",
+    visibility = ["//visibility:public"],
+    deps = [":helloworld_java_grpc"],
+)
+
+rx_grpc_library(
+    name = "helloworld_rx_grpc",
+    proto = ":helloworld_proto",
+    visibility = ["//visibility:public"],
+    deps = [":helloworld_java_grpc"],
+)
+
+proto_library(
+    name = "nested_proto",
+    srcs = ["nested.proto"],
+    visibility = ["//visibility:public"],
+    deps = [":helloworld_proto"],
+)
+
+java_proto_library(
+    name = "nested_java_proto",
+    visibility = ["//visibility:public"],
+    deps = [":nested_proto"],
+)
+
+java_grpc_library(
+    name = "nested_java_grpc",
+    srcs = [":nested_proto"],
+    visibility = ["//visibility:public"],
+    deps = [":nested_java_proto"],
+)
+
+reactor_grpc_library(
+    name = "nested_reactor_grpc",
+    proto = ":nested_proto",
+    visibility = ["//visibility:public"],
+    deps = [":nested_java_grpc"],
+)
+
+rx_grpc_library(
+    name = "nested_rx_grpc",
+    proto = ":nested_proto",
+    visibility = ["//visibility:public"],
+    deps = [":nested_java_grpc"],
+)
