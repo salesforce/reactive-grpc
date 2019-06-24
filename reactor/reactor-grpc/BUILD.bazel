@@ -1,0 +1,16 @@
+java_library(
+    name = "reactor_grpc",
+    srcs = glob(["src/main/**/*.java"]),
+    resources = ["src/main/resources/ReactorStub.mustache"],
+    deps = [
+        "//common/reactive-grpc-gencommon",
+        "@com_salesforce_servicelibs_jprotoc",
+    ],
+)
+
+java_binary(
+    name = "reactor_grpc_bin",
+    main_class = "com.salesforce.reactorgrpc.ReactorGrpcGenerator",
+    visibility = ["//visibility:public"],
+    runtime_deps = [":reactor_grpc"],
+)

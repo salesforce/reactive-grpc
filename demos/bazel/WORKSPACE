@@ -1,0 +1,14 @@
+workspace(name = "com_salesforce_servicelibs_reactive_grpc_demos_bazel")
+
+local_repository(
+    name = "com_salesforce_servicelibs_reactive_grpc",
+    path = "../.."
+)
+
+load("@com_salesforce_servicelibs_reactive_grpc//bazel:repositories.bzl", "repositories")
+
+repositories()
+
+load("@io_grpc_grpc_java//:repositories.bzl", "grpc_java_repositories")
+
+grpc_java_repositories()

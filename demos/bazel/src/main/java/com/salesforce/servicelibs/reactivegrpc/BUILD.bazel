@@ -1,0 +1,21 @@
+java_library(
+    name = "reactivegrpc",
+    srcs = glob(["*.java"]),
+    visibility = ["//src/test:__subpackages__"],
+    deps = [
+        "//src/main/proto:helloworld_java_grpc",
+        "//src/main/proto:helloworld_java_proto",
+        "//src/main/proto:helloworld_rx_grpc",
+        "//src/main/proto:nested_java_proto",
+        "//src/main/proto:nested_rx_grpc",
+        "@io_grpc_grpc_java//core",
+        "@io_grpc_grpc_java//core:inprocess",
+        "@io_reactivex_rxjava2_rxjava",
+    ],
+)
+
+java_binary(
+    name = "reactivegrpc_bin",
+    main_class = "com.salesforce.servicelibs.reactivegrpc.BazelProof",
+    runtime_deps = [":reactivegrpc"],
+)

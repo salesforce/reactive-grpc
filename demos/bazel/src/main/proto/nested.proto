@@ -1,0 +1,24 @@
+syntax = "proto3";
+
+// When using Bazel protos must be imported using the path from workspace root to proto.
+// In the future, specifying a (strip_)import_prefix in the proto_library rule will make this less verbose.
+// For now this blocks on https://github.com/grpc/grpc-java/pull/5621
+import "src/main/proto/helloworld.proto";
+
+package pkg.test;
+
+service TestService {
+    rpc Test (InnerMessage.TestRequest) returns (InnerMessage.TestResponse);
+    rpc ImportTest (helloworld.HelloRequest) returns (helloworld.HelloResponse);
+}
+
+message InnerMessage {
+    message TestRequest {
+        string data = 1;
+    }
+
+    message TestResponse {
+        string data = 1;
+        string error = 2;
+    }
+}
