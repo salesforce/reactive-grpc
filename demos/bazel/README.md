@@ -4,10 +4,6 @@ This demo shows how to use the Reactive-gRPC Bazel rules.
 
 ## Setup
 
-Add `build --protocopt=--include_source_info` to your `.bazelrc` file.
-This needs to be done because by default Bazel strips source code info from proto file descriptors. 
-This information is required by the Reactive-gRPC generator, **it does not generate services without it**.
-
 Include this project as an external dependency in your `WORKSPACE`.
 
     load("@bazel_tools//tools/build_defs/repo:http.bzl", "http_archive")

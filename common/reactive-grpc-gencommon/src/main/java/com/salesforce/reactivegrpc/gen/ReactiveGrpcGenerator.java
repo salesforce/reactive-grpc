@@ -29,6 +29,7 @@ import java.util.stream.Collectors;
  */
 public abstract class ReactiveGrpcGenerator extends Generator {
 
+    private static final int SERVICE_NUMBER_OF_PATHS = 2;
     private static final int METHOD_NUMBER_OF_PATHS = 4;
 
     protected abstract String getClassPrefix();
@@ -57,17 +58,17 @@ public abstract class ReactiveGrpcGenerator extends Generator {
         List<ServiceContext> contexts = new ArrayList<>();
 
         protos.forEach(fileProto -> {
-            List<Location> locations = fileProto.getSourceCodeInfo().getLocationList();
-            locations.stream()
-                    .filter(location -> location.getPathCount() == 2 && location.getPath(0) == FileDescriptorProto.SERVICE_FIELD_NUMBER)
-                    .forEach(location -> {
-                        int serviceNumber = location.getPath(1);
-                        ServiceContext serviceContext = buildServiceContext(fileProto.getService(serviceNumber), typeMap, locations, serviceNumber);
-                        serviceContext.javaDoc = getJavaDoc(getComments(location), getServiceJavaDocPrefix());
-                        serviceContext.protoName = fileProto.getName();
-                        serviceContext.packageName = extractPackageName(fileProto);
-                        contexts.add(serviceContext);
-                    });
+            for (int serviceNumber = 0; serviceNumber < fileProto.getServiceCount(); serviceNumber++) {
+                ServiceContext serviceContext = buildServiceContext(
+                    fileProto.getService(serviceNumber),
+                    typeMap,
+                    fileProto.getSourceCodeInfo().getLocationList(),
+                    serviceNumber
+                );
+                serviceContext.protoName = fileProto.getName();
+                serviceContext.packageName = extractPackageName(fileProto);
+                contexts.add(serviceContext);
+            }
         });
 
         return contexts;
@@ -92,22 +93,34 @@ public abstract class ReactiveGrpcGenerator extends Generator {
         serviceContext.serviceName = serviceProto.getName();
         serviceContext.deprecated = serviceProto.getOptions() != null && serviceProto.getOptions().getDeprecated();
 
-        locations.stream()
-                .filter(location -> location.getPathCount() == METHOD_NUMBER_OF_PATHS &&
-                        location.getPath(0) == FileDescriptorProto.SERVICE_FIELD_NUMBER &&
-                        location.getPath(1) == serviceNumber &&
-                        location.getPath(2) == ServiceDescriptorProto.METHOD_FIELD_NUMBER)
-                .forEach(location -> {
-                    int methodNumber = location.getPath(METHOD_NUMBER_OF_PATHS - 1);
-                    MethodContext methodContext = buildMethodContext(serviceProto.getMethod(methodNumber), typeMap);
-                    methodContext.methodNumber = methodNumber;
-                    methodContext.javaDoc = getJavaDoc(getComments(location), getMethodJavaDocPrefix());
-                    serviceContext.methods.add(methodContext);
-                });
+        List<Location> allLocationsForService = locations.stream()
+                .filter(location ->
+                    location.getPathCount() >= 2 &&
+                       location.getPath(0) == FileDescriptorProto.SERVICE_FIELD_NUMBER &&
+                       location.getPath(1) == serviceNumber
+                )
+                .collect(Collectors.toList());
+
+        Location serviceLocation = allLocationsForService.stream()
+                .filter(location -> location.getPathCount() == SERVICE_NUMBER_OF_PATHS)
+                .findFirst()
+                .orElseGet(Location::getDefaultInstance);
+        serviceContext.javaDoc = getJavaDoc(getComments(serviceLocation), getServiceJavaDocPrefix());
+
+        for (int methodNumber = 0; methodNumber < serviceProto.getMethodCount(); methodNumber++) {
+            MethodContext methodContext = buildMethodContext(
+                serviceProto.getMethod(methodNumber),
+                typeMap,
+                locations,
+                methodNumber
+            );
+
+            serviceContext.methods.add(methodContext);
+        }
         return serviceContext;
     }
 
-    private MethodContext buildMethodContext(MethodDescriptorProto methodProto, ProtoTypeMap typeMap) {
+    private MethodContext buildMethodContext(MethodDescriptorProto methodProto, ProtoTypeMap typeMap, List<Location> locations, int methodNumber) {
         MethodContext methodContext = new MethodContext();
         methodContext.methodName = lowerCaseFirst(methodProto.getName());
         methodContext.inputType = typeMap.toJavaTypeName(methodProto.getInputType());
@@ -115,6 +128,17 @@ public abstract class ReactiveGrpcGenerator extends Generator {
         methodContext.deprecated = methodProto.getOptions() != null && methodProto.getOptions().getDeprecated();
         methodContext.isManyInput = methodProto.getClientStreaming();
         methodContext.isManyOutput = methodProto.getServerStreaming();
+        methodContext.methodNumber = methodNumber;
+
+        Location methodLocation = locations.stream()
+                .filter(location ->
+                    location.getPathCount() == METHOD_NUMBER_OF_PATHS &&
+                        location.getPath(METHOD_NUMBER_OF_PATHS - 1) == methodNumber
+                )
+                .findFirst()
+                .orElseGet(Location::getDefaultInstance);
+        methodContext.javaDoc = getJavaDoc(getComments(methodLocation), getMethodJavaDocPrefix());
+
         if (!methodProto.getClientStreaming() && !methodProto.getServerStreaming()) {
             methodContext.reactiveCallsMethodName = "oneToOne";
             methodContext.grpcCallsMethodName = "asyncUnaryCall";
