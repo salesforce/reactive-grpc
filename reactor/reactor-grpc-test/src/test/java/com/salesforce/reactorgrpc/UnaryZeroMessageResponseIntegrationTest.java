@@ -47,6 +47,18 @@ public class UnaryZeroMessageResponseIntegrationTest {
         }
     }
 
+    private static class ReactorMissingUnaryResponseService extends ReactorGreeterGrpc.GreeterImplBase {
+        @Override
+        public Mono<HelloResponse> sayHello(Mono<HelloRequest> request) {
+            return Mono.empty();
+        }
+
+        @Override
+        public Mono<HelloResponse> sayHelloReqStream(Flux<HelloRequest> request) {
+            return Mono.empty();
+        }
+    }
+
     @Test
     public void zeroMessageResponseOneToOne() {
         serverRule.getServiceRegistry().addService(new MissingUnaryResponseService());
@@ -75,5 +87,35 @@ public class UnaryZeroMessageResponseIntegrationTest {
         StepVerifier.create(resp).verifyErrorMatches(t ->
                 t instanceof StatusRuntimeException &&
                 ((StatusRuntimeException) t).getStatus().getCode() == Status.Code.CANCELLED);
+    }
+
+    @Test
+    public void reactorZeroMessageResponseOneToOne() {
+        serverRule.getServiceRegistry().addService(new ReactorMissingUnaryResponseService());
+
+        ReactorGreeterGrpc.ReactorGreeterStub stub = ReactorGreeterGrpc.newReactorStub(serverRule.getChannel());
+        Mono<HelloRequest> req = Mono.just(HelloRequest.newBuilder().setName("reactor").build());
+        Mono<HelloResponse> resp = req.compose(stub::sayHello);
+
+        StepVerifier.create(resp).verifyErrorMatches(t ->
+                t instanceof StatusRuntimeException &&
+                        ((StatusRuntimeException) t).getStatus().getCode() == Status.Code.CANCELLED);
+    }
+
+    @Test
+    public void reactorZeroMessageResponseManyToOne() {
+        serverRule.getServiceRegistry().addService(new ReactorMissingUnaryResponseService());
+
+        ReactorGreeterGrpc.ReactorGreeterStub stub = ReactorGreeterGrpc.newReactorStub(serverRule.getChannel());
+        Flux<HelloRequest> req = Flux.just(
+                HelloRequest.newBuilder().setName("a").build(),
+                HelloRequest.newBuilder().setName("b").build(),
+                HelloRequest.newBuilder().setName("c").build());
+
+        Mono<HelloResponse> resp = req.as(stub::sayHelloReqStream);
+
+        StepVerifier.create(resp).verifyErrorMatches(t ->
+                t instanceof StatusRuntimeException &&
+                        ((StatusRuntimeException) t).getStatus().getCode() == Status.Code.CANCELLED);
     }
 }

@@ -47,7 +47,8 @@ public final class ServerCalls {
                     responseObserver.onNext(value);
                     responseObserver.onCompleted();
                 },
-                throwable -> responseObserver.onError(prepareError(throwable)));
+                throwable -> responseObserver.onError(prepareError(throwable)),
+                responseObserver::onCompleted);
         } catch (Throwable throwable) {
             responseObserver.onError(prepareError(throwable));
         }
@@ -97,7 +98,8 @@ public final class ServerCalls {
                         streamObserverPublisher.abortPendingCancel();
                         responseObserver.onError(prepareError(throwable));
                     }
-                }
+                },
+                responseObserver::onCompleted
             );
         } catch (Throwable throwable) {
             responseObserver.onError(prepareError(throwable));
