@@ -45,9 +45,9 @@ public final class ServerCalls {
                         return;
                     }
                     responseObserver.onNext(value);
-                    responseObserver.onCompleted();
                 },
-                throwable -> responseObserver.onError(prepareError(throwable)));
+                throwable -> responseObserver.onError(prepareError(throwable)),
+                responseObserver::onCompleted);
         } catch (Throwable throwable) {
             responseObserver.onError(prepareError(throwable));
         }
@@ -88,7 +88,6 @@ public final class ServerCalls {
                     // Don't try to respond if the server has already canceled the request
                     if (!streamObserverPublisher.isCancelled()) {
                         responseObserver.onNext(value);
-                        responseObserver.onCompleted();
                     }
                 },
                 throwable -> {
@@ -97,7 +96,8 @@ public final class ServerCalls {
                         streamObserverPublisher.abortPendingCancel();
                         responseObserver.onError(prepareError(throwable));
                     }
-                }
+                },
+                responseObserver::onCompleted
             );
         } catch (Throwable throwable) {
             responseObserver.onError(prepareError(throwable));
