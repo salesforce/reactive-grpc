@@ -45,7 +45,6 @@ public final class ServerCalls {
                         return;
                     }
                     responseObserver.onNext(value);
-                    responseObserver.onCompleted();
                 },
                 throwable -> responseObserver.onError(prepareError(throwable)),
                 responseObserver::onCompleted);
@@ -89,7 +88,6 @@ public final class ServerCalls {
                     // Don't try to respond if the server has already canceled the request
                     if (!streamObserverPublisher.isCancelled()) {
                         responseObserver.onNext(value);
-                        responseObserver.onCompleted();
                     }
                 },
                 throwable -> {
