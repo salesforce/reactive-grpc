@@ -49,7 +49,8 @@ protobuf {
 ```
 And add the following dependency: `"com.salesforce.servicelibs:reactor-grpc-stub:${reactiveGrpcVersion}"`
 
-*At this time, Reactor-gRPC with Gradle only supports bash-based environments. Windows users will need to build using Windows Subsystem for Linux (win 10), Gitbash, or Cygwin.*
+*At this time, Reactor-gRPC with Gradle only supports bash-based environments. Windows users will need to build using 
+Windows Subsystem for Linux (win 10) or invoke the Maven protobuf plugin with Gradle.*
 
 Usage
 =====

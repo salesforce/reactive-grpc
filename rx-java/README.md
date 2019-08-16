@@ -47,7 +47,8 @@ protobuf {
     }
 }
 ```
-*At this time, RxGrpc with Gradle only supports bash-based environments. Windows users will need to build using Windows Subsystem for Linux (win 10), Gitbash, or Cygwin.*
+*At this time, RxGrpc with Gradle only supports bash-based environments. Windows users will need to build using Windows 
+Subsystem for Linux (win 10) or invoke the Maven protobuf plugin with Gradle.*
 
 Usage
 =====
