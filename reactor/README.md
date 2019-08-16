@@ -116,6 +116,18 @@ Flux<HelloResponse> fluxResponse = fluxRequest.compose(GrpcRetry.ManyToMany.retr
 
 For complex retry scenarios, use the `Retry` builder from <a href="https://github.com/reactor/reactor-addons/blob/master/reactor-extra/src/main/java/reactor/retry/Retry.java">Reactor Extras</a>.
 
+## gRPC Context propagation
+Reactor does not have a convenient mechanism for passing the `ThreadLocal` gRPC `Context` between threads in a reactive
+call chain. If you never use `observeOn()` or `subscribeOn()` the gRPC context _should_ propagate correctly. However,
+the use of a `Scheduler` will necessitate taking manual control over Context propagation.
+
+Two context propagation techniques are:
+
+1. Capture the context in a `Tuple<Context, T>` intermediate type, transforming an indirect static context reference
+   into an explicit reference.
+2. Make use of Reactor's [`subscriberContext()`](https://github.com/reactor/reactor-core/blob/master/docs/asciidoc/advancedFeatures.adoc#adding-a-context-to-a-reactive-sequence)
+   API to capture the gRPC context in the call chain.
+
 Modules
 =======
 
