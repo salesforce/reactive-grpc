@@ -1,0 +1,16 @@
+syntax = "proto3";
+
+package com.example;
+
+service Greeter {
+    rpc SayHello (HelloRequest) returns (HelloResponse) {}
+    rpc SayHelloStream (stream HelloRequest) returns (stream HelloResponse) {}
+}
+
+message HelloRequest {
+    string name = 1;
+}
+
+message HelloResponse {
+    repeated string message = 1;
+}
