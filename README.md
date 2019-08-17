@@ -11,8 +11,8 @@ Reactive gRPC supports the following reactive programming models:
 
 * [RxJava 2](https://github.com/salesforce/reactive-grpc/tree/master/rx-java)
 * [Spring Reactor](https://github.com/salesforce/reactive-grpc/tree/master/reactor)
-* (Eventually) [Java9 Flow](https://community.oracle.com/docs/DOC-1006738)
-* (Eventually) [Akka Streams](https://doc.akka.io/docs/akka/2.5/stream/index.html)
+
+[Akka gRPC](https://github.com/akka/akka-grpc) is now mature and production ready. Use that for Akka-based services.
 
 # Usage
 See the readme in each technology-specific sub-directory for usage details.
