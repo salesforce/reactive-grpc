@@ -32,7 +32,7 @@ protobuf {
     plugins {
         javalite { artifact = "com.google.protobuf:protoc-gen-javalite:3.0.0" }
         grpc { artifact = "io.grpc:protoc-gen-grpc-java:${grpcVersion}" }
-        rxgrpc { artifact = "com.salesforce.servicelibs:rxgrpc:${reactiveGrpcVersion}:jdk8@jar" }
+        rxgrpc { artifact = "com.salesforce.servicelibs:rxgrpc:${reactiveGrpcVersion}" }
     }
     generateProtoTasks {
         all().each { task ->

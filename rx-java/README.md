@@ -36,7 +36,7 @@ protobuf {
             artifact = "io.grpc:protoc-gen-grpc-java:${grpcVersion}"
         }
         rxgrpc {
-            artifact = "com.salesforce.servicelibs:rxgrpc:${reactiveGrpcVersion}:jdk8@jar"
+            artifact = "com.salesforce.servicelibs:rxgrpc:${reactiveGrpcVersion}"
         }
     }
     generateProtoTasks {
