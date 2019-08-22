@@ -7,7 +7,7 @@ apply plugin: 'com.google.protobuf'
 
 sourceCompatibility = 1.8
 
-def reactiveGrpcVersion = '0.9.1-SNAPSHOT'
+def reactiveGrpcVersion = '1.0.0-SNAPSHOT'
 def grpcVersion = '1.12.0'
 def protobufVersion = '3.4.0'
 
@@ -21,7 +21,7 @@ buildscript {
         maven { url "https://plugins.gradle.org/m2/" }
     }
     dependencies {
-        classpath 'com.google.protobuf:protobuf-gradle-plugin:0.8.3'
+        classpath 'com.google.protobuf:protobuf-gradle-plugin:0.8.10'
     }
 }
 
@@ -48,14 +48,14 @@ protobuf {
             artifact = "io.grpc:protoc-gen-grpc-java:${grpcVersion}"
         }
         rxgrpc {
-            artifact = "com.salesforce.servicelibs:rxgrpc:${reactiveGrpcVersion}:jdk8@jar"
+            artifact = "com.salesforce.servicelibs:rxgrpc:${reactiveGrpcVersion}"
         }
         reactor {
-            artifact = "com.salesforce.servicelibs:reactor-grpc:${reactiveGrpcVersion}:jdk8@jar"
+            artifact = "com.salesforce.servicelibs:reactor-grpc:${reactiveGrpcVersion}"
         }
     }
     generateProtoTasks {
-        ofSourceSet('main')*.plugins {
+        all()*.plugins {
             grpc { }
             rxgrpc {}
             reactor {}
