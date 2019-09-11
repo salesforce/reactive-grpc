@@ -34,6 +34,7 @@ import io.reactivex.schedulers.Schedulers;
 import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.RepeatedTest;
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import org.reactivestreams.Subscription;
 
@@ -168,6 +169,7 @@ public class AbstractSubscriberAndProducerTest {
                   .isEqualTo(integers);
     }
 
+    @Tag("unstable")
     @RepeatedTest(2)
     public void asyncModeWithRacingTest() {
         List<Integer> integers = Flowable.range(0, 10000000)
@@ -273,6 +275,7 @@ public class AbstractSubscriberAndProducerTest {
                   .isEqualTo(integers);
     }
 
+    @Tag("unstable")
     @RepeatedTest(2)
     public void asyncModeWithRacingAndOnErrorTest() {
 
@@ -305,6 +308,7 @@ public class AbstractSubscriberAndProducerTest {
         Assertions.assertThat(unhandledThrowable).isEmpty();
     }
 
+    @Tag("unstable")
     @RepeatedTest(2)
     public void asyncModeWithRacingAndErrorTest() throws InterruptedException {
         final CountDownLatch cancellationLatch = new CountDownLatch(1);
@@ -352,6 +356,7 @@ public class AbstractSubscriberAndProducerTest {
         Assertions.assertThat(unhandledThrowable).isEmpty();
     }
 
+    @Tag("unstable")
     @RepeatedTest(2)
     public void syncModeWithRacingAndErrorTest() throws InterruptedException {
         final CountDownLatch cancellationLatch = new CountDownLatch(1);
@@ -460,6 +465,7 @@ public class AbstractSubscriberAndProducerTest {
         Assertions.assertThat(unhandledThrowable).isEmpty();
     }
 
+    @Tag("unstable")
     @RepeatedTest(2)
     public void asyncModeWithRacingAndOnErrorOverOnNextTest()
         throws InterruptedException {
@@ -595,6 +601,7 @@ public class AbstractSubscriberAndProducerTest {
         Assertions.assertThat(unhandledThrowable).isEmpty();
     }
 
+    @Tag("unstable")
     @RepeatedTest(2)
     public void asyncModeWithRacingAndCancellationTest() throws InterruptedException {
         final CountDownLatch cancellationLatch = new CountDownLatch(1);
