@@ -21,7 +21,7 @@ shared: &shared
           # fallback to using the latest cache if no exact match is found
           - v1-dependencies-
 
-    - run: mvn install
+    - run: mvn install -DexcludedGroups=unstable
 
     - save_cache:
         paths:

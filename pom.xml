@@ -55,23 +55,25 @@
     </modules>
 
     <properties>
-        <!-- Dependency Versions -->
-        <reactive.streams.version>1.0.2</reactive.streams.version>
-        <grpc.version>1.19.0</grpc.version>
-        <protoc.version>3.6.1</protoc.version> <!-- Same version as grpc-proto -->
+        <!-- Maven Plugin Versions -->
         <protobuf.plugin.version>0.6.1</protobuf.plugin.version>
         <compiler.plugin.version>3.8.0</compiler.plugin.version>
-        <grpc.contrib.version>0.8.1</grpc.contrib.version>
+
+        <!-- Dependency Versions -->
+        <reactive.streams.version>1.0.2</reactive.streams.version>
+        <grpc.version>1.23.0</grpc.version>
+        <protoc.version>3.9.0</protoc.version> <!-- Same version as grpc-proto -->
         <jprotoc.version>0.9.1</jprotoc.version>
-        <rxjava.version>2.2.7</rxjava.version>
-        <reactor.version>3.1.15.RELEASE</reactor.version>
-        <reactor.extra.version>3.1.9.RELEASE</reactor.extra.version>
+        <rxjava.version>2.2.12</rxjava.version>
+        <reactor.version>3.2.12.RELEASE</reactor.version>
 
         <!-- Test Dependency Versions -->
+        <grpc.contrib.version>0.8.1</grpc.contrib.version>
         <junit.jupiter.version>5.4.0</junit.jupiter.version>
         <assertj.version>3.12.2</assertj.version>
         <awaitility.version>3.1.6</awaitility.version>
         <mockito.version>2.27.0</mockito.version>
+        <reactor.extra.version>3.1.9.RELEASE</reactor.extra.version>
 
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <java.version>1.8</java.version>
