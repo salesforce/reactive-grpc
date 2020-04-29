@@ -90,7 +90,7 @@ public final class ServerCalls {
             final StreamObserver<TResponse> responseObserver,
             final Function<Flowable<TRequest>, Single<TResponse>> delegate,
             int prefetch, int lowTide) {
-        
+
         if (lowTide >= prefetch) {
             throw new IllegalArgumentException("lowTide must be less than prefetch");
         }
@@ -137,7 +137,7 @@ public final class ServerCalls {
             final StreamObserver<TResponse> responseObserver,
             final Function<Flowable<TRequest>, Flowable<TResponse>> delegate,
             int prefetch, int lowTide) {
-        
+
         if (lowTide >= prefetch) {
             throw new IllegalArgumentException("lowTide must be less than prefetch");
         }
