@@ -100,8 +100,8 @@ public final class ClientCalls {
             final CallOptions options) {
         try {
 
-            int prefetch = options == null ? CALL_OPTIONS_PREFETCH.getDefault() : options.getOption(CALL_OPTIONS_PREFETCH);
-            int lowTide = getLowTide(options, prefetch);
+            final int prefetch = options == null ? CALL_OPTIONS_PREFETCH.getDefault() : options.getOption(CALL_OPTIONS_PREFETCH);
+            final int lowTide = getLowTide(options, prefetch);
 
             return rxRequest
                     .flatMapPublisher(new io.reactivex.functions.Function<TRequest, Publisher<? extends TResponse>>() {
@@ -166,8 +166,8 @@ public final class ClientCalls {
             final Function<StreamObserver<TResponse>, StreamObserver<TRequest>> delegate,
             final CallOptions options) {
 
-        int prefetch = options == null ? CALL_OPTIONS_PREFETCH.getDefault() : options.getOption(CALL_OPTIONS_PREFETCH);
-        int lowTide = getLowTide(options, prefetch);
+        final int prefetch = options == null ? CALL_OPTIONS_PREFETCH.getDefault() : options.getOption(CALL_OPTIONS_PREFETCH);
+        final int lowTide = getLowTide(options, prefetch);
 
         try {
             final RxSubscriberAndClientProducer<TRequest> subscriberAndGRPCProducer =

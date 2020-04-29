@@ -89,7 +89,7 @@ public final class ServerCalls {
     public static <TRequest, TResponse> StreamObserver<TRequest> manyToOne(
             final StreamObserver<TResponse> responseObserver,
             final Function<Flowable<TRequest>, Single<TResponse>> delegate,
-            int prefetch, int lowTide) {
+            final int prefetch, final int lowTide) {
 
         if (lowTide >= prefetch) {
             throw new IllegalArgumentException("lowTide must be less than prefetch");
@@ -136,7 +136,7 @@ public final class ServerCalls {
     public static <TRequest, TResponse> StreamObserver<TRequest> manyToMany(
             final StreamObserver<TResponse> responseObserver,
             final Function<Flowable<TRequest>, Flowable<TResponse>> delegate,
-            int prefetch, int lowTide) {
+            final int prefetch, final int lowTide) {
 
         if (lowTide >= prefetch) {
             throw new IllegalArgumentException("lowTide must be less than prefetch");
