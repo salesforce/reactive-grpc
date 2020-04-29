@@ -9,6 +9,7 @@ package com.salesforce.rxgrpc.stub;
 
 import com.salesforce.reactivegrpc.common.BiConsumer;
 import com.salesforce.reactivegrpc.common.Function;
+import io.grpc.CallOptions;
 import io.grpc.stub.CallStreamObserver;
 import io.grpc.stub.StreamObserver;
 import io.reactivex.Flowable;
@@ -29,11 +30,24 @@ public final class ClientCalls {
     }
 
     /**
+     * Sets Prefetch size of queue.
+     */
+    public static final CallOptions.Key<Integer> CALL_OPTIONS_PREFETCH =
+        CallOptions.Key.createWithDefault("reactivegrpc.internal.PREFETCH", Integer.valueOf(512));
+
+    /**
+     * Sets Low Tide of prefetch queue.
+     */
+    public static final CallOptions.Key<Integer> CALL_OPTIONS_LOW_TIDE =
+        CallOptions.Key.createWithDefault("reactivegrpc.internal.LOW_TIDE", Integer.valueOf(512 * 2 / 3));
+
+    /**
      * Implements a unary → unary call using {@link Single} → {@link Single}.
      */
     public static <TRequest, TResponse> Single<TResponse> oneToOne(
             final Single<TRequest> rxRequest,
-            final BiConsumer<TRequest, StreamObserver<TResponse>> delegate) {
+            final BiConsumer<TRequest, StreamObserver<TResponse>> delegate,
+            final CallOptions options) {
         try {
             return Single
                 .create(new SingleOnSubscribe<TResponse>() {
@@ -82,14 +96,19 @@ public final class ClientCalls {
      */
     public static <TRequest, TResponse> Flowable<TResponse> oneToMany(
             final Single<TRequest> rxRequest,
-            final BiConsumer<TRequest, StreamObserver<TResponse>> delegate) {
+            final BiConsumer<TRequest, StreamObserver<TResponse>> delegate,
+            final CallOptions options) {
         try {
+
+            int prefetch = options == null ? CALL_OPTIONS_PREFETCH.getDefault() : options.getOption(CALL_OPTIONS_PREFETCH);
+            int lowTide = getLowTide(options, prefetch);
+
             return rxRequest
                     .flatMapPublisher(new io.reactivex.functions.Function<TRequest, Publisher<? extends TResponse>>() {
                         @Override
                         public Publisher<? extends TResponse> apply(TRequest request) {
                             final RxClientStreamObserverAndPublisher<TResponse> consumerStreamObserver =
-                                new RxClientStreamObserverAndPublisher<TResponse>(null);
+                                new RxClientStreamObserverAndPublisher<TResponse>(null, null, prefetch, lowTide);
 
                             delegate.accept(request, consumerStreamObserver);
 
@@ -108,7 +127,8 @@ public final class ClientCalls {
     @SuppressWarnings("unchecked")
     public static <TRequest, TResponse> Single<TResponse> manyToOne(
             final Flowable<TRequest> flowableSource,
-            final Function<StreamObserver<TResponse>, StreamObserver<TRequest>> delegate) {
+            final Function<StreamObserver<TResponse>, StreamObserver<TRequest>> delegate,
+            final CallOptions options) {
         try {
             final RxSubscriberAndClientProducer<TRequest> subscriberAndGRPCProducer =
                     flowableSource.subscribeWith(new RxSubscriberAndClientProducer<TRequest>());
@@ -143,7 +163,12 @@ public final class ClientCalls {
     @SuppressWarnings("unchecked")
     public static <TRequest, TResponse> Flowable<TResponse> manyToMany(
             final Flowable<TRequest> flowableSource,
-            final Function<StreamObserver<TResponse>, StreamObserver<TRequest>> delegate) {
+            final Function<StreamObserver<TResponse>, StreamObserver<TRequest>> delegate,
+            final CallOptions options) {
+
+        int prefetch = options == null ? CALL_OPTIONS_PREFETCH.getDefault() : options.getOption(CALL_OPTIONS_PREFETCH);
+        int lowTide = getLowTide(options, prefetch);
+
         try {
             final RxSubscriberAndClientProducer<TRequest> subscriberAndGRPCProducer =
                     flowableSource.subscribeWith(new RxSubscriberAndClientProducer<TRequest>());
@@ -160,13 +185,21 @@ public final class ClientCalls {
                         public void run() {
                             subscriberAndGRPCProducer.cancel();
                         }
-                    }
-                );
+                    },
+                    prefetch, lowTide);
             delegate.apply(observerAndPublisher);
 
             return Flowable.fromPublisher(observerAndPublisher);
         } catch (Throwable throwable) {
             return Flowable.error(throwable);
         }
+    }
+
+    private static int getLowTide(final CallOptions options, int prefetch) {
+        int lowTide = options == null ? CALL_OPTIONS_LOW_TIDE.getDefault() : options.getOption(CALL_OPTIONS_LOW_TIDE);
+        if (lowTide >= prefetch) {
+            throw new IllegalArgumentException(CALL_OPTIONS_LOW_TIDE + " must be less than " + CALL_OPTIONS_PREFETCH);
+        }
+        return lowTide;
     }
 }

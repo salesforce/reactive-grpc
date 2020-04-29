@@ -26,10 +26,20 @@ public abstract class AbstractServerStreamObserverAndPublisher<T>
     private volatile boolean abandonDelayedCancel;
 
     public AbstractServerStreamObserverAndPublisher(
+        ServerCallStreamObserver<?> serverCallStreamObserver,
+        Queue<T> queue,
+        Consumer<CallStreamObserver<?>> onSubscribe) {
+        super(queue, onSubscribe);
+        super.onSubscribe(serverCallStreamObserver);
+    }
+
+    public AbstractServerStreamObserverAndPublisher(
             ServerCallStreamObserver<?> serverCallStreamObserver,
             Queue<T> queue,
-            Consumer<CallStreamObserver<?>> onSubscribe) {
-        super(queue, onSubscribe);
+            Consumer<CallStreamObserver<?>> onSubscribe,
+            int prefetch,
+            int lowTide) {
+        super(queue, prefetch, lowTide, onSubscribe);
         super.onSubscribe(serverCallStreamObserver);
     }
 

@@ -32,6 +32,14 @@ class RxClientStreamObserverAndPublisher<T>
         super(new SimpleQueueAdapter<T>(new SpscArrayQueue<T>(DEFAULT_CHUNK_SIZE)), onSubscribe, onTerminate);
     }
 
+    RxClientStreamObserverAndPublisher(
+            Consumer<CallStreamObserver<?>> onSubscribe,
+            Runnable onTerminate,
+            int prefetch,
+            int lowTide) {
+        super(new SimpleQueueAdapter<T>(new SpscArrayQueue<T>(prefetch)), onSubscribe, onTerminate, prefetch, lowTide);
+    }
+
     @Override
     public int requestFusion(int requestedMode) {
         if ((requestedMode & QueueFuseable.ASYNC) != 0) {

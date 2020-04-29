@@ -88,9 +88,15 @@ public final class ServerCalls {
      */
     public static <TRequest, TResponse> StreamObserver<TRequest> manyToOne(
             final StreamObserver<TResponse> responseObserver,
-            final Function<Flowable<TRequest>, Single<TResponse>> delegate) {
+            final Function<Flowable<TRequest>, Single<TResponse>> delegate,
+            int prefetch, int lowTide) {
+        
+        if (lowTide >= prefetch) {
+            throw new IllegalArgumentException("lowTide must be less than prefetch");
+        }
+
         final RxServerStreamObserverAndPublisher<TRequest> streamObserverPublisher =
-                new RxServerStreamObserverAndPublisher<TRequest>((ServerCallStreamObserver<TResponse>) responseObserver, null);
+                new RxServerStreamObserverAndPublisher<TRequest>((ServerCallStreamObserver<TResponse>) responseObserver, null, prefetch, lowTide);
 
         try {
             final Single<TResponse> rxResponse = Preconditions.checkNotNull(delegate.apply(Flowable.fromPublisher(streamObserverPublisher)));
@@ -129,9 +135,15 @@ public final class ServerCalls {
      */
     public static <TRequest, TResponse> StreamObserver<TRequest> manyToMany(
             final StreamObserver<TResponse> responseObserver,
-            final Function<Flowable<TRequest>, Flowable<TResponse>> delegate) {
+            final Function<Flowable<TRequest>, Flowable<TResponse>> delegate,
+            int prefetch, int lowTide) {
+        
+        if (lowTide >= prefetch) {
+            throw new IllegalArgumentException("lowTide must be less than prefetch");
+        }
+
         final RxServerStreamObserverAndPublisher<TRequest> streamObserverPublisher =
-                new RxServerStreamObserverAndPublisher<TRequest>((ServerCallStreamObserver<TResponse>) responseObserver, null);
+                new RxServerStreamObserverAndPublisher<TRequest>((ServerCallStreamObserver<TResponse>) responseObserver, null, prefetch, lowTide);
 
         try {
             final Flowable<TResponse> rxResponse = Preconditions.checkNotNull(delegate.apply(Flowable.fromPublisher(streamObserverPublisher)));

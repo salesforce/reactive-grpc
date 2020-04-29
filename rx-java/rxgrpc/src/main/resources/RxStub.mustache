@@ -58,7 +58,7 @@ public final class {{className}} {
                     public void accept({{inputType}} request, io.grpc.stub.StreamObserver<{{outputType}}> observer) {
                         delegateStub.{{methodNameCamelCase}}(request, observer);
                     }
-                });
+                }, getCallOptions());
             {{/isManyInput}}
             {{#isManyInput}}
                 new com.salesforce.reactivegrpc.common.Function<io.grpc.stub.StreamObserver<{{outputType}}>, io.grpc.stub.StreamObserver<{{inputType}}>>() {
@@ -66,7 +66,7 @@ public final class {{className}} {
                     public io.grpc.stub.StreamObserver<{{inputType}}> apply(io.grpc.stub.StreamObserver<{{outputType}}> observer) {
                         return delegateStub.{{methodNameCamelCase}}(observer);
                     }
-                });
+                }, getCallOptions());
             {{/isManyInput}}
         }
 
@@ -85,7 +85,7 @@ public final class {{className}} {
                     public void accept({{inputType}} request, io.grpc.stub.StreamObserver<{{outputType}}> observer) {
                         delegateStub.{{methodNameCamelCase}}(request, observer);
                     }
-                });
+                }, getCallOptions());
         }
 
         {{/unaryRequestMethods}}
@@ -121,6 +121,15 @@ public final class {{className}} {
                     {{/methods}}
                     .build();
         }
+        
+        public int getPrefetch(int methodId) {
+            return 512;
+        }
+        
+        public int getLowTide(int methodId) {
+            return 512 * 2 / 3;
+        }
+        
     }
 
     {{#methods}}
@@ -172,7 +181,7 @@ public final class {{className}} {
                 case METHODID_{{methodNameUpperUnderscore}}:
                     return (io.grpc.stub.StreamObserver<Req>) com.salesforce.rxgrpc.stub.ServerCalls.{{reactiveCallsMethodName}}(
                             (io.grpc.stub.StreamObserver<{{outputType}}>) responseObserver,
-                            serviceImpl::{{methodNameCamelCase}});
+                            serviceImpl::{{methodNameCamelCase}}, serviceImpl.getPrefetch(methodId), serviceImpl.getLowTide(methodId));
                 {{/isManyInput}}
                 {{/methods}}
                 default:
