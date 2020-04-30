@@ -9,6 +9,7 @@ package com.salesforce.rxgrpc.stub;
 
 import com.google.common.base.Preconditions;
 import com.salesforce.reactivegrpc.common.Function;
+import io.grpc.CallOptions;
 import io.grpc.Status;
 import io.grpc.StatusException;
 import io.grpc.StatusRuntimeException;
@@ -27,6 +28,16 @@ public final class ServerCalls {
     private ServerCalls() {
 
     }
+
+    /**
+     * Sets Prefetch size of queue.
+     */
+    public static final CallOptions.Key<Integer> CALL_OPTIONS_PREFETCH = ClientCalls.CALL_OPTIONS_PREFETCH;
+
+    /**
+     * Sets Low Tide of prefetch queue.
+     */
+    public static final CallOptions.Key<Integer> CALL_OPTIONS_LOW_TIDE = ClientCalls.CALL_OPTIONS_LOW_TIDE;
 
     /**
      * Implements a unary → unary call using {@link Single} → {@link Single}.
@@ -89,11 +100,10 @@ public final class ServerCalls {
     public static <TRequest, TResponse> StreamObserver<TRequest> manyToOne(
             final StreamObserver<TResponse> responseObserver,
             final Function<Flowable<TRequest>, Single<TResponse>> delegate,
-            final int prefetch, final int lowTide) {
+            final CallOptions options) {
 
-        if (lowTide >= prefetch) {
-            throw new IllegalArgumentException("lowTide must be less than prefetch");
-        }
+        final int prefetch = options == null ? CALL_OPTIONS_PREFETCH.getDefault() : options.getOption(CALL_OPTIONS_PREFETCH);
+        final int lowTide = ClientCalls.getLowTide(options, prefetch);
 
         final RxServerStreamObserverAndPublisher<TRequest> streamObserverPublisher =
                 new RxServerStreamObserverAndPublisher<TRequest>((ServerCallStreamObserver<TResponse>) responseObserver, null, prefetch, lowTide);
@@ -136,11 +146,10 @@ public final class ServerCalls {
     public static <TRequest, TResponse> StreamObserver<TRequest> manyToMany(
             final StreamObserver<TResponse> responseObserver,
             final Function<Flowable<TRequest>, Flowable<TResponse>> delegate,
-            final int prefetch, final int lowTide) {
+            final CallOptions options) {
 
-        if (lowTide >= prefetch) {
-            throw new IllegalArgumentException("lowTide must be less than prefetch");
-        }
+        final int prefetch = options == null ? CALL_OPTIONS_PREFETCH.getDefault() : options.getOption(CALL_OPTIONS_PREFETCH);
+        final int lowTide = ClientCalls.getLowTide(options, prefetch);
 
         final RxServerStreamObserverAndPublisher<TRequest> streamObserverPublisher =
                 new RxServerStreamObserverAndPublisher<TRequest>((ServerCallStreamObserver<TResponse>) responseObserver, null, prefetch, lowTide);

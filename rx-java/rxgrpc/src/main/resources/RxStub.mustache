@@ -121,19 +121,15 @@ public final class {{className}} {
                     {{/methods}}
                     .build();
         }
-        
-        public int getPrefetch(int methodId) {
-            return 512;
+
+        protected io.grpc.CallOptions getCallOptions(int methodId) {
+            return null;
         }
-        
-        public int getLowTide(int methodId) {
-            return 512 * 2 / 3;
-        }
-        
+
     }
 
     {{#methods}}
-    private static final int METHODID_{{methodNameUpperUnderscore}} = {{methodNumber}};
+    public static final int METHODID_{{methodNameUpperUnderscore}} = {{methodNumber}};
     {{/methods}}
 
     private static final class MethodHandlers<Req, Resp> implements
@@ -181,7 +177,7 @@ public final class {{className}} {
                 case METHODID_{{methodNameUpperUnderscore}}:
                     return (io.grpc.stub.StreamObserver<Req>) com.salesforce.rxgrpc.stub.ServerCalls.{{reactiveCallsMethodName}}(
                             (io.grpc.stub.StreamObserver<{{outputType}}>) responseObserver,
-                            serviceImpl::{{methodNameCamelCase}}, serviceImpl.getPrefetch(methodId), serviceImpl.getLowTide(methodId));
+                            serviceImpl::{{methodNameCamelCase}}, serviceImpl.getCallOptions(methodId));
                 {{/isManyInput}}
                 {{/methods}}
                 default:
