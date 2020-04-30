@@ -22,10 +22,6 @@ class RxClientStreamObserverAndPublisher<T>
         extends AbstractClientStreamObserverAndPublisher<T>
         implements QueueSubscription<T> {
 
-    RxClientStreamObserverAndPublisher(Consumer<CallStreamObserver<?>> onSubscribe) {
-        super(new SimpleQueueAdapter<T>(new SpscArrayQueue<T>(DEFAULT_CHUNK_SIZE)), onSubscribe);
-    }
-
     RxClientStreamObserverAndPublisher(
             Consumer<CallStreamObserver<?>> onSubscribe,
             Runnable onTerminate) {
