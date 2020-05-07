@@ -77,7 +77,7 @@ public class UnexpectedServerErrorIntegrationTest {
     @Test
     public void oneToOne() {
         ReactorGreeterGrpc.ReactorGreeterStub stub = ReactorGreeterGrpc.newReactorStub(channel);
-        Mono<HelloResponse> resp = Mono.just(HelloRequest.getDefaultInstance()).compose(stub::sayHello);
+        Mono<HelloResponse> resp = Mono.just(HelloRequest.getDefaultInstance()).transform(stub::sayHello);
 
         StepVerifier.create(resp)
                 .verifyErrorMatches(t -> t instanceof StatusRuntimeException && ((StatusRuntimeException)t).getStatus().getCode() == Status.Code.INTERNAL);
@@ -111,7 +111,7 @@ public class UnexpectedServerErrorIntegrationTest {
     public void manyToMany() {
         ReactorGreeterGrpc.ReactorGreeterStub stub = ReactorGreeterGrpc.newReactorStub(channel);
         Flux<HelloRequest> req = Flux.just(HelloRequest.getDefaultInstance());
-        Flux<HelloResponse> resp = req.compose(stub::sayHelloBothStream);
+        Flux<HelloResponse> resp = req.transform(stub::sayHelloBothStream);
 
         StepVerifier.create(resp)
                 .verifyErrorMatches(t -> t instanceof StatusRuntimeException && ((StatusRuntimeException)t).getStatus().getCode() == Status.Code.INTERNAL);

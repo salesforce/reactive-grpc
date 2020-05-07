@@ -65,7 +65,7 @@ public class UnaryZeroMessageResponseIntegrationTest {
 
         ReactorGreeterGrpc.ReactorGreeterStub stub = ReactorGreeterGrpc.newReactorStub(serverRule.getChannel());
         Mono<HelloRequest> req = Mono.just(HelloRequest.newBuilder().setName("reactor").build());
-        Mono<HelloResponse> resp = req.compose(stub::sayHello);
+        Mono<HelloResponse> resp = req.transform(stub::sayHello);
 
         StepVerifier.create(resp).verifyErrorMatches(t ->
                 t instanceof StatusRuntimeException &&
@@ -95,7 +95,7 @@ public class UnaryZeroMessageResponseIntegrationTest {
 
         ReactorGreeterGrpc.ReactorGreeterStub stub = ReactorGreeterGrpc.newReactorStub(serverRule.getChannel());
         Mono<HelloRequest> req = Mono.just(HelloRequest.newBuilder().setName("reactor").build());
-        Mono<HelloResponse> resp = req.compose(stub::sayHello);
+        Mono<HelloResponse> resp = req.transform(stub::sayHello);
 
         StepVerifier.create(resp).verifyErrorMatches(t ->
                 t instanceof StatusRuntimeException &&
