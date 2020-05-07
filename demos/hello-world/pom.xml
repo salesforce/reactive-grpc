@@ -13,8 +13,8 @@
         <rxjava.version>2.1.10</rxjava.version>
         <reactive.grpc.version>1.0.0</reactive.grpc.version>
         <grpc.contrib.version>0.8.0</grpc.contrib.version>
-        <grpc.version>1.12.0</grpc.version>
-        <protoc.version>3.5.1</protoc.version>
+        <grpc.version>1.23.0</grpc.version>
+        <protoc.version>3.9.0</protoc.version>
     </properties>
 
     <dependencies>
