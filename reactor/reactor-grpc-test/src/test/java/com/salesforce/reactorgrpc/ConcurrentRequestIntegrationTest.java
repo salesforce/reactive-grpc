@@ -81,7 +81,7 @@ public class ConcurrentRequestIntegrationTest {
         // == MAKE REQUESTS ==
         // One to One
         Mono<HelloRequest> req1 = Mono.just(HelloRequest.newBuilder().setName("reactorjava").build());
-        Mono<HelloResponse> resp1 = req1.compose(stub::sayHello);
+        Mono<HelloResponse> resp1 = req1.transform(stub::sayHello);
 
         // One to Many
         Mono<HelloRequest> req2 = Mono.just(HelloRequest.newBuilder().setName("reactorjava").build());
