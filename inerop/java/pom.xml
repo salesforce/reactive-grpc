@@ -42,7 +42,7 @@
         <dependency>
             <groupId>com.salesforce.servicelibs</groupId>
             <artifactId>reactor-grpc-stub</artifactId>
-            <version>0.10.0</version>
+            <version>1.0.0</version>
         </dependency>
     </dependencies>
 
@@ -70,7 +70,7 @@
                             <id>reactor-grpc</id>
                             <groupId>com.salesforce.servicelibs</groupId>
                             <artifactId>reactor-grpc</artifactId>
-                            <version>0.10.0</version>
+                            <version>1.0.0</version>
                             <mainClass>com.salesforce.reactorgrpc.ReactorGrpcGenerator</mainClass>
                         </protocPlugin>
                     </protocPlugins>
