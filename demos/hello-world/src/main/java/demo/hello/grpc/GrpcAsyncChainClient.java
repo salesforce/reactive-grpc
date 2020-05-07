@@ -15,7 +15,7 @@ public class GrpcAsyncChainClient {
         GreeterGrpc.GreeterStub stub = GreeterGrpc.newStub(channel);
 
         // Call UNARY service asynchronously
-        stub.greet(HelloRequest.newBuilder().setName("OSCON").build(), new StreamObserver<HelloResponse>() {
+        stub.greet(HelloRequest.newBuilder().setName("World").build(), new StreamObserver<HelloResponse>() {
             @Override
             public void onNext(HelloResponse value) {
 
