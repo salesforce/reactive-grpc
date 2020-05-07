@@ -14,7 +14,7 @@ public class RxgrpcAsyncChainClient {
         ManagedChannel channel = ManagedChannelBuilder.forAddress("localhost", 8888).usePlaintext().build();
         RxGreeterGrpc.RxGreeterStub stub = RxGreeterGrpc.newRxStub(channel);
 
-        Single.just("OSCON")
+        Single.just("World")
                 // Call UNARY service asynchronously
                 .map(RxgrpcAsyncChainClient::request)
                 .as(stub::greet)
