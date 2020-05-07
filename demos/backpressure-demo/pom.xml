@@ -10,7 +10,7 @@
 
     <properties>
         <rxjava.version>2.1.10</rxjava.version>
-        <reactive.grpc.version>0.10.0</reactive.grpc.version>
+        <reactive.grpc.version>1.0.0</reactive.grpc.version>
         <grpc.contrib.version>0.8.0</grpc.contrib.version>
         <rxjavafx.version>2.2.2</rxjavafx.version>
         <grpc.version>1.12.0</grpc.version>
