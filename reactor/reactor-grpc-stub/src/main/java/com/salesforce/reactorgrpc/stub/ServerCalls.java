@@ -7,14 +7,14 @@
 
 package com.salesforce.reactorgrpc.stub;
 
-import java.util.function.Function;
-
 import com.google.common.base.Preconditions;
+import io.grpc.CallOptions;
 import io.grpc.Status;
 import io.grpc.StatusException;
 import io.grpc.StatusRuntimeException;
 import io.grpc.stub.ServerCallStreamObserver;
 import io.grpc.stub.StreamObserver;
+import java.util.function.Function;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
@@ -77,9 +77,14 @@ public final class ServerCalls {
      */
     public static <TRequest, TResponse> StreamObserver<TRequest> manyToOne(
             StreamObserver<TResponse> responseObserver,
-            Function<Flux<TRequest>, Mono<TResponse>> delegate) {
+            Function<Flux<TRequest>, Mono<TResponse>> delegate,
+            CallOptions options) {
+
+        final int prefetch = ReactorCallOptions.getPrefetch(options);
+        final int lowTide = ReactorCallOptions.getLowTide(options);
+
         ReactorServerStreamObserverAndPublisher<TRequest> streamObserverPublisher =
-                new ReactorServerStreamObserverAndPublisher<>((ServerCallStreamObserver<TResponse>) responseObserver, null);
+                new ReactorServerStreamObserverAndPublisher<>((ServerCallStreamObserver<TResponse>) responseObserver, null, prefetch, lowTide);
 
         try {
             Mono<TResponse> rxResponse = Preconditions.checkNotNull(delegate.apply(Flux.from(streamObserverPublisher)));
@@ -112,9 +117,14 @@ public final class ServerCalls {
      */
     public static <TRequest, TResponse> StreamObserver<TRequest> manyToMany(
             StreamObserver<TResponse> responseObserver,
-            Function<Flux<TRequest>, Flux<TResponse>> delegate) {
+            Function<Flux<TRequest>, Flux<TResponse>> delegate,
+            CallOptions options) {
+
+        final int prefetch = ReactorCallOptions.getPrefetch(options);
+        final int lowTide = ReactorCallOptions.getLowTide(options);
+
         ReactorServerStreamObserverAndPublisher<TRequest> streamObserverPublisher =
-                new ReactorServerStreamObserverAndPublisher<>((ServerCallStreamObserver<TResponse>) responseObserver, null);
+                new ReactorServerStreamObserverAndPublisher<>((ServerCallStreamObserver<TResponse>) responseObserver, null, prefetch, lowTide);
 
         try {
             Flux<TResponse> rxResponse = Preconditions.checkNotNull(delegate.apply(Flux.from(streamObserverPublisher)));

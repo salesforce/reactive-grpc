@@ -7,11 +7,11 @@
 
 package com.salesforce.reactorgrpc.stub;
 
-import java.util.function.BiConsumer;
-import java.util.function.Function;
-
+import io.grpc.CallOptions;
 import io.grpc.stub.CallStreamObserver;
 import io.grpc.stub.StreamObserver;
+import java.util.function.BiConsumer;
+import java.util.function.Function;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import reactor.core.publisher.Operators;
@@ -31,7 +31,8 @@ public final class ClientCalls {
      */
     public static <TRequest, TResponse> Mono<TResponse> oneToOne(
             Mono<TRequest> monoSource,
-            BiConsumer<TRequest, StreamObserver<TResponse>> delegate) {
+            BiConsumer<TRequest, StreamObserver<TResponse>> delegate,
+            CallOptions options) {
         try {
             return Mono
                     .<TResponse>create(emitter -> monoSource.subscribe(
@@ -65,12 +66,17 @@ public final class ClientCalls {
      */
     public static <TRequest, TResponse> Flux<TResponse> oneToMany(
             Mono<TRequest> monoSource,
-            BiConsumer<TRequest, StreamObserver<TResponse>> delegate) {
+            BiConsumer<TRequest, StreamObserver<TResponse>> delegate,
+            CallOptions options) {
         try {
+
+            final int prefetch = ReactorCallOptions.getPrefetch(options);
+            final int lowTide = ReactorCallOptions.getLowTide(options);
+
             return monoSource
                     .flatMapMany(request -> {
                         ReactorClientStreamObserverAndPublisher<TResponse> consumerStreamObserver =
-                            new ReactorClientStreamObserverAndPublisher<>(null);
+                            new ReactorClientStreamObserverAndPublisher<>(null, null, prefetch, lowTide);
 
                         delegate.accept(request, consumerStreamObserver);
 
@@ -88,7 +94,8 @@ public final class ClientCalls {
     @SuppressWarnings("unchecked")
     public static <TRequest, TResponse> Mono<TResponse> manyToOne(
             Flux<TRequest> fluxSource,
-            Function<StreamObserver<TResponse>, StreamObserver<TRequest>> delegate) {
+            Function<StreamObserver<TResponse>, StreamObserver<TRequest>> delegate,
+            CallOptions options) {
         try {
             ReactorSubscriberAndClientProducer<TRequest> subscriberAndGRPCProducer =
                     fluxSource.subscribeWith(new ReactorSubscriberAndClientProducer<>());
@@ -113,14 +120,19 @@ public final class ClientCalls {
     @SuppressWarnings("unchecked")
     public static <TRequest, TResponse> Flux<TResponse> manyToMany(
             Flux<TRequest> fluxSource,
-            Function<StreamObserver<TResponse>, StreamObserver<TRequest>> delegate) {
+            Function<StreamObserver<TResponse>, StreamObserver<TRequest>> delegate,
+            CallOptions options) {
         try {
+
+            final int prefetch = ReactorCallOptions.getPrefetch(options);
+            final int lowTide = ReactorCallOptions.getLowTide(options);
+
             ReactorSubscriberAndClientProducer<TRequest> subscriberAndGRPCProducer =
                 fluxSource.subscribeWith(new ReactorSubscriberAndClientProducer<>());
             ReactorClientStreamObserverAndPublisher<TResponse> observerAndPublisher =
                 new ReactorClientStreamObserverAndPublisher<>(
                     s -> subscriberAndGRPCProducer.subscribe((CallStreamObserver<TRequest>) s),
-                    subscriberAndGRPCProducer::cancel
+                    subscriberAndGRPCProducer::cancel, prefetch, lowTide
                 );
             delegate.apply(observerAndPublisher);
 
