@@ -11,7 +11,7 @@ import com.salesforce.reactivegrpc.common.AbstractStreamObserverAndPublisher;
 import io.grpc.CallOptions;
 
 /**
- * RX Call options.
+ * Reactor Call options.
  */
 public final class ReactorCallOptions {
 
