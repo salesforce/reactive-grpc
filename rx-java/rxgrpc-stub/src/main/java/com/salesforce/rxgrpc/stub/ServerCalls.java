@@ -30,16 +30,6 @@ public final class ServerCalls {
     }
 
     /**
-     * Sets Prefetch size of queue.
-     */
-    public static final CallOptions.Key<Integer> CALL_OPTIONS_PREFETCH = ClientCalls.CALL_OPTIONS_PREFETCH;
-
-    /**
-     * Sets Low Tide of prefetch queue.
-     */
-    public static final CallOptions.Key<Integer> CALL_OPTIONS_LOW_TIDE = ClientCalls.CALL_OPTIONS_LOW_TIDE;
-
-    /**
      * Implements a unary → unary call using {@link Single} → {@link Single}.
      */
     public static <TRequest, TResponse> void oneToOne(
@@ -102,8 +92,8 @@ public final class ServerCalls {
             final Function<Flowable<TRequest>, Single<TResponse>> delegate,
             final CallOptions options) {
 
-        final int prefetch = options == null ? CALL_OPTIONS_PREFETCH.getDefault() : options.getOption(CALL_OPTIONS_PREFETCH);
-        final int lowTide = ClientCalls.getLowTide(options, prefetch);
+        final int prefetch = RxCallOptions.getPrefetch(options);
+        final int lowTide = RxCallOptions.getLowTide(options);
 
         final RxServerStreamObserverAndPublisher<TRequest> streamObserverPublisher =
                 new RxServerStreamObserverAndPublisher<TRequest>((ServerCallStreamObserver<TResponse>) responseObserver, null, prefetch, lowTide);
@@ -148,8 +138,8 @@ public final class ServerCalls {
             final Function<Flowable<TRequest>, Flowable<TResponse>> delegate,
             final CallOptions options) {
 
-        final int prefetch = options == null ? CALL_OPTIONS_PREFETCH.getDefault() : options.getOption(CALL_OPTIONS_PREFETCH);
-        final int lowTide = ClientCalls.getLowTide(options, prefetch);
+        final int prefetch = RxCallOptions.getPrefetch(options);
+        final int lowTide = RxCallOptions.getLowTide(options);
 
         final RxServerStreamObserverAndPublisher<TRequest> streamObserverPublisher =
                 new RxServerStreamObserverAndPublisher<TRequest>((ServerCallStreamObserver<TResponse>) responseObserver, null, prefetch, lowTide);

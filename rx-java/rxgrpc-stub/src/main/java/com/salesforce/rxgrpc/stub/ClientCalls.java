@@ -7,7 +7,6 @@
 
 package com.salesforce.rxgrpc.stub;
 
-import com.salesforce.reactivegrpc.common.AbstractStreamObserverAndPublisher;
 import com.salesforce.reactivegrpc.common.BiConsumer;
 import com.salesforce.reactivegrpc.common.Function;
 import io.grpc.CallOptions;
@@ -29,20 +28,6 @@ public final class ClientCalls {
     private ClientCalls() {
 
     }
-
-    /**
-     * Sets Prefetch size of queue.
-     */
-    public static final CallOptions.Key<Integer> CALL_OPTIONS_PREFETCH =
-        CallOptions.Key.createWithDefault("reactivegrpc.internal.PREFETCH",
-            Integer.valueOf(AbstractStreamObserverAndPublisher.DEFAULT_CHUNK_SIZE));
-
-    /**
-     * Sets Low Tide of prefetch queue.
-     */
-    public static final CallOptions.Key<Integer> CALL_OPTIONS_LOW_TIDE =
-        CallOptions.Key.createWithDefault("reactivegrpc.internal.LOW_TIDE",
-            Integer.valueOf(AbstractStreamObserverAndPublisher.TWO_THIRDS_OF_DEFAULT_CHUNK_SIZE));
 
     /**
      * Implements a unary → unary call using {@link Single} → {@link Single}.
@@ -103,8 +88,8 @@ public final class ClientCalls {
             final CallOptions options) {
         try {
 
-            final int prefetch = options == null ? CALL_OPTIONS_PREFETCH.getDefault() : options.getOption(CALL_OPTIONS_PREFETCH);
-            final int lowTide = getLowTide(options, prefetch);
+            final int prefetch = RxCallOptions.getPrefetch(options);
+            final int lowTide = RxCallOptions.getLowTide(options);
 
             return rxRequest
                     .flatMapPublisher(new io.reactivex.functions.Function<TRequest, Publisher<? extends TResponse>>() {
@@ -169,8 +154,8 @@ public final class ClientCalls {
             final Function<StreamObserver<TResponse>, StreamObserver<TRequest>> delegate,
             final CallOptions options) {
 
-        final int prefetch = options == null ? CALL_OPTIONS_PREFETCH.getDefault() : options.getOption(CALL_OPTIONS_PREFETCH);
-        final int lowTide = getLowTide(options, prefetch);
+        final int prefetch = RxCallOptions.getPrefetch(options);
+        final int lowTide = RxCallOptions.getLowTide(options);
 
         try {
             final RxSubscriberAndClientProducer<TRequest> subscriberAndGRPCProducer =
@@ -198,11 +183,4 @@ public final class ClientCalls {
         }
     }
 
-    static int getLowTide(final CallOptions options, int prefetch) {
-        int lowTide = options == null ? CALL_OPTIONS_LOW_TIDE.getDefault() : options.getOption(CALL_OPTIONS_LOW_TIDE);
-        if (lowTide >= prefetch) {
-            throw new IllegalArgumentException(CALL_OPTIONS_LOW_TIDE + " must be less than " + CALL_OPTIONS_PREFETCH);
-        }
-        return lowTide;
-    }
 }
