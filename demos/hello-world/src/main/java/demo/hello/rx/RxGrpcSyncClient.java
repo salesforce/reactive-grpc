@@ -18,7 +18,7 @@ public class RxGrpcSyncClient {
         /*
          * Create a service request
          */
-        Single<HelloRequest> request = Single.just(HelloRequest.newBuilder().setName("OSCON").build());
+        Single<HelloRequest> request = Single.just(HelloRequest.newBuilder().setName("World").build());
 
 
 

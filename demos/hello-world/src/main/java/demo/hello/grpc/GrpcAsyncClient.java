@@ -14,7 +14,7 @@ public class GrpcAsyncClient {
         ManagedChannel channel = ManagedChannelBuilder.forAddress("localhost", 8888).usePlaintext().build();
         GreeterGrpc.GreeterStub stub = GreeterGrpc.newStub(channel);
 
-        HelloRequest request = HelloRequest.newBuilder().setName("OSCON").build();
+        HelloRequest request = HelloRequest.newBuilder().setName("World").build();
 
         /*
          * Create a request callback observer.

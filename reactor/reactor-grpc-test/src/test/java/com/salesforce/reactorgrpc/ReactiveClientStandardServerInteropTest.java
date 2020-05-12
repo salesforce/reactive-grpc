@@ -122,7 +122,7 @@ public class ReactiveClientStandardServerInteropTest {
     public void oneToOne() {
         ReactorGreeterGrpc.ReactorGreeterStub stub = ReactorGreeterGrpc.newReactorStub(channel);
         Mono<String> reactorRequest = Mono.just("World");
-        Mono<String> reactorResponse = reactorRequest.map(this::toRequest).compose(stub::sayHello).map(this::fromResponse);
+        Mono<String> reactorResponse = reactorRequest.map(this::toRequest).transform(stub::sayHello).map(this::fromResponse);
 
         StepVerifier.create(reactorResponse)
                 .expectNext("Hello World")
@@ -155,7 +155,7 @@ public class ReactiveClientStandardServerInteropTest {
     public void manyToMany() {
         ReactorGreeterGrpc.ReactorGreeterStub stub = ReactorGreeterGrpc.newReactorStub(channel);
         Flux<String> reactorRequest = Flux.just("A", "B", "C", "D");
-        Flux<String> reactorResponse = reactorRequest.map(this::toRequest).compose(stub::sayHelloBothStream).map(this::fromResponse);
+        Flux<String> reactorResponse = reactorRequest.map(this::toRequest).transform(stub::sayHelloBothStream).map(this::fromResponse);
 
         StepVerifier.create(reactorResponse)
                 .expectNext("Hello A and B", "Hello C and D")

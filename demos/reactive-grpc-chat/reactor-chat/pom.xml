@@ -17,9 +17,9 @@
     <modelVersion>4.0.0</modelVersion>
 
     <properties>
-        <reactive.grpc.version>0.10.0</reactive.grpc.version>
-        <grpc.version>1.12.0</grpc.version>
-        <protoc.version>3.5.1</protoc.version>
+        <reactive.grpc.version>1.0.0</reactive.grpc.version>
+        <grpc.version>1.23.0</grpc.version>
+        <protoc.version>3.9.0</protoc.version>
         <grpc.contrib.version>0.8.0</grpc.contrib.version>
         <reactor.version>3.1.5.RELEASE</reactor.version>
     </properties>
@@ -38,6 +38,11 @@
         <dependency>
             <groupId>io.grpc</groupId>
             <artifactId>grpc-protobuf</artifactId>
+            <version>${grpc.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>io.grpc</groupId>
+            <artifactId>grpc-stub</artifactId>
             <version>${grpc.version}</version>
         </dependency>
         <dependency>

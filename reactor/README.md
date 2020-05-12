@@ -91,12 +91,12 @@ After installing the plugin, Reactor-gRPC service stubs will be generated along 
 
 ## Don't break the chain
 Used on their own, the generated Reactor stub methods do not cleanly chain with other Reactor operators.
-Using the `compose()` and `as()` methods of `Mono` and `Flux` are preferred over direct invocation.
+Using the `transform()` and `as()` methods of `Mono` and `Flux` are preferred over direct invocation.
 
 #### One→One, Many→Many
 ```java
-Mono<HelloResponse> monoResponse = monoRequest.compose(stub::sayHello);
-Flux<HelloResponse> fluxResponse = fluxRequest.compose(stub::sayHelloBothStream);
+Mono<HelloResponse> monoResponse = monoRequest.transform(stub::sayHello);
+Flux<HelloResponse> fluxResponse = fluxRequest.transform(stub::sayHelloBothStream);
 ```
 
 #### One→Many, Many→One

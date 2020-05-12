@@ -18,7 +18,7 @@ public class GrpcSyncClient {
         /*
          * Create a service request
          */
-        HelloRequest request = HelloRequest.newBuilder().setName("OSCON").build();
+        HelloRequest request = HelloRequest.newBuilder().setName("World").build();
 
 
 
