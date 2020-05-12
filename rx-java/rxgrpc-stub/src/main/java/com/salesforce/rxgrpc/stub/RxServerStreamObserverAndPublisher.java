@@ -25,8 +25,10 @@ class RxServerStreamObserverAndPublisher<T>
 
     RxServerStreamObserverAndPublisher(
             ServerCallStreamObserver<?> serverCallStreamObserver,
-            Consumer<CallStreamObserver<?>> onSubscribe) {
-        super(serverCallStreamObserver, new SimpleQueueAdapter<T>(new SpscArrayQueue<T>(DEFAULT_CHUNK_SIZE)), onSubscribe);
+            Consumer<CallStreamObserver<?>> onSubscribe,
+            int prefetch,
+            int lowTide) {
+        super(serverCallStreamObserver, new SimpleQueueAdapter<T>(new SpscArrayQueue<T>(prefetch)), onSubscribe, prefetch, lowTide);
     }
 
     @Override

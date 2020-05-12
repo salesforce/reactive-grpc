@@ -64,8 +64,8 @@ public abstract class AbstractStreamObserverAndPublisher<T> extends AbstractUnim
     };
 
 
-    protected static final int DEFAULT_CHUNK_SIZE = 512;
-    protected static final int TWO_THIRDS_OF_DEFAULT_CHUNK_SIZE = DEFAULT_CHUNK_SIZE * 2 / 3;
+    public static final int DEFAULT_CHUNK_SIZE = 512;
+    public static final int TWO_THIRDS_OF_DEFAULT_CHUNK_SIZE = DEFAULT_CHUNK_SIZE * 2 / 3;
 
     private static final int UNSUBSCRIBED_STATE    = 0;
     private static final int SUBSCRIBED_ONCE_STATE = 1;

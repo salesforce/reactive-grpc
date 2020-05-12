@@ -128,6 +128,31 @@ Two context propagation techniques are:
 2. Make use of Reactor's [`subscriberContext()`](https://github.com/reactor/reactor-core/blob/master/docs/asciidoc/advancedFeatures.adoc#adding-a-context-to-a-reactive-sequence)
    API to capture the gRPC context in the call chain.
 
+## Configuration of flow control
+Reactor GRPC by default prefetch 512 items on client and server side. When the messages are bigger it
+can consume a lot of memory. One can override these default settings using ReactorCallOptions:
+
+Prefetch on client side (client consumes too slow):
+
+```java
+    ReactorMyAPIStub api = ReactorMyAPIGrpc.newReactorStub(channel)
+        .withOption(ReactorCallOptions.CALL_OPTIONS_PREFETCH, 16)
+        .withOption(ReactorCallOptions.CALL_OPTIONS_LOW_TIDE, 4);
+```
+
+Prefetch on server side (server consumes too slow):
+
+```java
+    // Override getCallOptions method in your *ImplBase service class.
+    // One can use methodId to do method specific override
+    @Override
+    protected CallOptions getCallOptions(int methodId) {
+        return CallOptions.DEFAULT
+            .withOption(ReactorCallOptions.CALL_OPTIONS_PREFETCH, 16)
+            .withOption(ReactorCallOptions.CALL_OPTIONS_LOW_TIDE, 4);
+    }
+```
+
 Modules
 =======
 

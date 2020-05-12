@@ -30,6 +30,14 @@ class ReactorClientStreamObserverAndPublisher<T>
         super(Queues.<T>get(DEFAULT_CHUNK_SIZE).get(), onSubscribe, onTerminate);
     }
 
+    ReactorClientStreamObserverAndPublisher(
+            Consumer<CallStreamObserver<?>> onSubscribe,
+            Runnable onTerminate,
+            int prefetch,
+            int lowTide) {
+        super(Queues.<T>get(DEFAULT_CHUNK_SIZE).get(), onSubscribe, onTerminate, prefetch, lowTide);
+    }
+
     @Override
     public int requestFusion(int requestedMode) {
         if ((requestedMode & Fuseable.ASYNC) != 0) {

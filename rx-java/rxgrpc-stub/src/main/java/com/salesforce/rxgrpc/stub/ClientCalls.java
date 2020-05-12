@@ -9,6 +9,7 @@ package com.salesforce.rxgrpc.stub;
 
 import com.salesforce.reactivegrpc.common.BiConsumer;
 import com.salesforce.reactivegrpc.common.Function;
+import io.grpc.CallOptions;
 import io.grpc.stub.CallStreamObserver;
 import io.grpc.stub.StreamObserver;
 import io.reactivex.Flowable;
@@ -33,7 +34,8 @@ public final class ClientCalls {
      */
     public static <TRequest, TResponse> Single<TResponse> oneToOne(
             final Single<TRequest> rxRequest,
-            final BiConsumer<TRequest, StreamObserver<TResponse>> delegate) {
+            final BiConsumer<TRequest, StreamObserver<TResponse>> delegate,
+            final CallOptions options) {
         try {
             return Single
                 .create(new SingleOnSubscribe<TResponse>() {
@@ -82,14 +84,19 @@ public final class ClientCalls {
      */
     public static <TRequest, TResponse> Flowable<TResponse> oneToMany(
             final Single<TRequest> rxRequest,
-            final BiConsumer<TRequest, StreamObserver<TResponse>> delegate) {
+            final BiConsumer<TRequest, StreamObserver<TResponse>> delegate,
+            final CallOptions options) {
         try {
+
+            final int prefetch = RxCallOptions.getPrefetch(options);
+            final int lowTide = RxCallOptions.getLowTide(options);
+
             return rxRequest
                     .flatMapPublisher(new io.reactivex.functions.Function<TRequest, Publisher<? extends TResponse>>() {
                         @Override
                         public Publisher<? extends TResponse> apply(TRequest request) {
                             final RxClientStreamObserverAndPublisher<TResponse> consumerStreamObserver =
-                                new RxClientStreamObserverAndPublisher<TResponse>(null);
+                                new RxClientStreamObserverAndPublisher<TResponse>(null, null, prefetch, lowTide);
 
                             delegate.accept(request, consumerStreamObserver);
 
@@ -108,7 +115,8 @@ public final class ClientCalls {
     @SuppressWarnings("unchecked")
     public static <TRequest, TResponse> Single<TResponse> manyToOne(
             final Flowable<TRequest> flowableSource,
-            final Function<StreamObserver<TResponse>, StreamObserver<TRequest>> delegate) {
+            final Function<StreamObserver<TResponse>, StreamObserver<TRequest>> delegate,
+            final CallOptions options) {
         try {
             final RxSubscriberAndClientProducer<TRequest> subscriberAndGRPCProducer =
                     flowableSource.subscribeWith(new RxSubscriberAndClientProducer<TRequest>());
@@ -143,7 +151,12 @@ public final class ClientCalls {
     @SuppressWarnings("unchecked")
     public static <TRequest, TResponse> Flowable<TResponse> manyToMany(
             final Flowable<TRequest> flowableSource,
-            final Function<StreamObserver<TResponse>, StreamObserver<TRequest>> delegate) {
+            final Function<StreamObserver<TResponse>, StreamObserver<TRequest>> delegate,
+            final CallOptions options) {
+
+        final int prefetch = RxCallOptions.getPrefetch(options);
+        final int lowTide = RxCallOptions.getLowTide(options);
+
         try {
             final RxSubscriberAndClientProducer<TRequest> subscriberAndGRPCProducer =
                     flowableSource.subscribeWith(new RxSubscriberAndClientProducer<TRequest>());
@@ -160,8 +173,8 @@ public final class ClientCalls {
                         public void run() {
                             subscriberAndGRPCProducer.cancel();
                         }
-                    }
-                );
+                    },
+                    prefetch, lowTide);
             delegate.apply(observerAndPublisher);
 
             return Flowable.fromPublisher(observerAndPublisher);
@@ -169,4 +182,5 @@ public final class ClientCalls {
             return Flowable.error(throwable);
         }
     }
+
 }

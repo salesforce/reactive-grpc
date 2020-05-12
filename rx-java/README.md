@@ -139,6 +139,31 @@ public class RxContextPropagator {
 	}
 }
 ```
+
+## Configuration of flow control
+RX GRPC by default prefetch 512 items on client and server side. When the messages are bigger it
+can consume a lot of memory. One can override these default settings using RxCallOptions:
+
+Prefetch on client side (client consumes too slow):
+
+```java
+    RxMyAPIStub api = RxMyAPIGrpc.newRxStub(channel)
+        .withOption(RxCallOptions.CALL_OPTIONS_PREFETCH, 16)
+        .withOption(RxCallOptions.CALL_OPTIONS_LOW_TIDE, 4);
+```
+
+Prefetch on server side (server consumes too slow):
+
+```java
+    // Override getCallOptions method in your *ImplBase service class.
+    // One can use methodId to do method specific override
+    @Override
+    protected CallOptions getCallOptions(int methodId) {
+        return CallOptions.DEFAULT
+            .withOption(RxCallOptions.CALL_OPTIONS_PREFETCH, 16)
+            .withOption(RxCallOptions.CALL_OPTIONS_LOW_TIDE, 4);
+    }
+```
   
 Modules
 =======

@@ -51,7 +51,7 @@ public final class {{className}} {
         @java.lang.Deprecated
             {{/deprecated}}
         public {{#isManyOutput}}reactor.core.publisher.Flux{{/isManyOutput}}{{^isManyOutput}}reactor.core.publisher.Mono{{/isManyOutput}}<{{outputType}}> {{methodName}}({{#isManyInput}}reactor.core.publisher.Flux{{/isManyInput}}{{^isManyInput}}reactor.core.publisher.Mono{{/isManyInput}}<{{inputType}}> reactorRequest) {
-            return com.salesforce.reactorgrpc.stub.ClientCalls.{{reactiveCallsMethodName}}(reactorRequest, delegateStub::{{methodName}});
+            return com.salesforce.reactorgrpc.stub.ClientCalls.{{reactiveCallsMethodName}}(reactorRequest, delegateStub::{{methodName}}, getCallOptions());
         }
 
         {{/methods}}
@@ -63,7 +63,7 @@ public final class {{className}} {
         @java.lang.Deprecated
            {{/deprecated}}
         public {{#isManyOutput}}reactor.core.publisher.Flux{{/isManyOutput}}{{^isManyOutput}}reactor.core.publisher.Mono{{/isManyOutput}}<{{outputType}}> {{methodName}}({{inputType}} reactorRequest) {
-           return com.salesforce.reactorgrpc.stub.ClientCalls.{{reactiveCallsMethodName}}(reactor.core.publisher.Mono.just(reactorRequest), delegateStub::{{methodName}});
+           return com.salesforce.reactorgrpc.stub.ClientCalls.{{reactiveCallsMethodName}}(reactor.core.publisher.Mono.just(reactorRequest), delegateStub::{{methodName}}, getCallOptions());
         }
 
         {{/unaryRequestMethods}}
@@ -99,10 +99,15 @@ public final class {{className}} {
                     {{/methods}}
                     .build();
         }
+
+        protected io.grpc.CallOptions getCallOptions(int methodId) {
+            return null;
+        }
+
     }
 
     {{#methods}}
-    private static final int METHODID_{{methodNameUpperUnderscore}} = {{methodNumber}};
+    public static final int METHODID_{{methodNameUpperUnderscore}} = {{methodNumber}};
     {{/methods}}
 
     private static final class MethodHandlers<Req, Resp> implements
@@ -145,7 +150,7 @@ public final class {{className}} {
                 case METHODID_{{methodNameUpperUnderscore}}:
                     return (io.grpc.stub.StreamObserver<Req>) com.salesforce.reactorgrpc.stub.ServerCalls.{{reactiveCallsMethodName}}(
                             (io.grpc.stub.StreamObserver<{{outputType}}>) responseObserver,
-                            serviceImpl::{{methodName}});
+                            serviceImpl::{{methodName}}, serviceImpl.getCallOptions(methodId));
                 {{/isManyInput}}
                 {{/methods}}
                 default:

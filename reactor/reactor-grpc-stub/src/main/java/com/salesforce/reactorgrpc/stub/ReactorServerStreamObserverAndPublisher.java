@@ -24,8 +24,10 @@ class ReactorServerStreamObserverAndPublisher<T>
 
     ReactorServerStreamObserverAndPublisher(
             ServerCallStreamObserver<?> serverCallStreamObserver,
-            Consumer<CallStreamObserver<?>> onSubscribe) {
-        super(serverCallStreamObserver, Queues.<T>get(DEFAULT_CHUNK_SIZE).get(), onSubscribe);
+            Consumer<CallStreamObserver<?>> onSubscribe,
+            int prefetch,
+            int lowTide) {
+        super(serverCallStreamObserver, Queues.<T>get(DEFAULT_CHUNK_SIZE).get(), onSubscribe, prefetch, lowTide);
     }
 
     @Override

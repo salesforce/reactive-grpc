@@ -58,7 +58,7 @@ public final class {{className}} {
                     public void accept({{inputType}} request, io.grpc.stub.StreamObserver<{{outputType}}> observer) {
                         delegateStub.{{methodNameCamelCase}}(request, observer);
                     }
-                });
+                }, getCallOptions());
             {{/isManyInput}}
             {{#isManyInput}}
                 new com.salesforce.reactivegrpc.common.Function<io.grpc.stub.StreamObserver<{{outputType}}>, io.grpc.stub.StreamObserver<{{inputType}}>>() {
@@ -66,7 +66,7 @@ public final class {{className}} {
                     public io.grpc.stub.StreamObserver<{{inputType}}> apply(io.grpc.stub.StreamObserver<{{outputType}}> observer) {
                         return delegateStub.{{methodNameCamelCase}}(observer);
                     }
-                });
+                }, getCallOptions());
             {{/isManyInput}}
         }
 
@@ -85,7 +85,7 @@ public final class {{className}} {
                     public void accept({{inputType}} request, io.grpc.stub.StreamObserver<{{outputType}}> observer) {
                         delegateStub.{{methodNameCamelCase}}(request, observer);
                     }
-                });
+                }, getCallOptions());
         }
 
         {{/unaryRequestMethods}}
@@ -121,10 +121,15 @@ public final class {{className}} {
                     {{/methods}}
                     .build();
         }
+
+        protected io.grpc.CallOptions getCallOptions(int methodId) {
+            return null;
+        }
+
     }
 
     {{#methods}}
-    private static final int METHODID_{{methodNameUpperUnderscore}} = {{methodNumber}};
+    public static final int METHODID_{{methodNameUpperUnderscore}} = {{methodNumber}};
     {{/methods}}
 
     private static final class MethodHandlers<Req, Resp> implements
@@ -172,7 +177,7 @@ public final class {{className}} {
                 case METHODID_{{methodNameUpperUnderscore}}:
                     return (io.grpc.stub.StreamObserver<Req>) com.salesforce.rxgrpc.stub.ServerCalls.{{reactiveCallsMethodName}}(
                             (io.grpc.stub.StreamObserver<{{outputType}}>) responseObserver,
-                            serviceImpl::{{methodNameCamelCase}});
+                            serviceImpl::{{methodNameCamelCase}}, serviceImpl.getCallOptions(methodId));
                 {{/isManyInput}}
                 {{/methods}}
                 default:
