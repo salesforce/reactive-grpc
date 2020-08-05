@@ -9,7 +9,7 @@ package com.salesforce.reactivegrpc.examples;
 
 import io.grpc.ManagedChannel;
 import io.grpc.netty.NettyChannelBuilder;
-import io.reactivex.Single;
+import io.reactivex.rxjava3.core.Single;
 
 /**
  * This demo shows how clients and servers behave in the presence of backpressure. In this example, the client

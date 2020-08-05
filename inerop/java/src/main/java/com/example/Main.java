@@ -33,13 +33,13 @@ public class Main {
 
         // Call the Go service
         Mono.just(GreeterOuterClass.HelloRequest.newBuilder().setName("Java").build())
-            .as(goStub::sayHello)
+            .to(goStub::sayHello)
             .block()
             .getMessageList().forEach(msg -> System.out.println("Java " + msg));
 
         Flux.range(1, 100)
             .map(i -> GreeterOuterClass.HelloRequest.newBuilder().setName("Number " + i).build())
-            .as(goStub::sayHelloStream)
+            .to(goStub::sayHelloStream)
             .flatMap(resp -> Flux.fromIterable(resp.getMessageList()))
             .doOnEach(msg -> System.out.println("Java " + msg))
             .blockLast();
@@ -54,13 +54,13 @@ public class Main {
 
         // Call the Go service
         Mono.just(GreeterOuterClass.HelloRequest.newBuilder().setName("Java").build())
-            .as(csharpStub::sayHello)
+            .to(csharpStub::sayHello)
             .block()
             .getMessageList().forEach(msg -> System.out.println("Java " + msg));
 
         Flux.range(1, 100)
             .map(i -> GreeterOuterClass.HelloRequest.newBuilder().setName("Number " + i).build())
-            .as(csharpStub::sayHelloStream)
+            .to(csharpStub::sayHelloStream)
             .flatMap(resp -> Flux.fromIterable(resp.getMessageList()))
             .doOnEach(msg -> System.out.println("Java " + msg))
             .blockLast();

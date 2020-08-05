@@ -9,15 +9,13 @@ package com.salesforce.rxgrpc.stub;
 
 import com.salesforce.reactivegrpc.common.BiConsumer;
 import com.salesforce.reactivegrpc.common.Function;
+
 import io.grpc.CallOptions;
 import io.grpc.stub.CallStreamObserver;
 import io.grpc.stub.StreamObserver;
-import io.reactivex.Flowable;
-import io.reactivex.Single;
-import io.reactivex.SingleEmitter;
-import io.reactivex.SingleOnSubscribe;
-import io.reactivex.functions.Consumer;
-import org.reactivestreams.Publisher;
+import io.reactivex.rxjava3.core.Flowable;
+import io.reactivex.rxjava3.core.Single;
+import io.reactivex.rxjava3.core.SingleOnSubscribe;
 
 /**
  * Utility functions for processing different client call idioms. We have one-to-one correspondence
@@ -38,41 +36,26 @@ public final class ClientCalls {
             final CallOptions options) {
         try {
             return Single
-                .create(new SingleOnSubscribe<TResponse>() {
-                    @Override
-                    public void subscribe(final SingleEmitter<TResponse> emitter) {
-                        rxRequest.subscribe(
-                            new Consumer<TRequest>() {
-                                @Override
-                                public void accept(TRequest request) {
-                                    delegate.accept(request, new StreamObserver<TResponse>() {
-                                        @Override
-                                        public void onNext(TResponse tResponse) {
-                                            emitter.onSuccess(tResponse);
-                                        }
-
-                                        @Override
-                                        public void onError(Throwable throwable) {
-                                            emitter.onError(throwable);
-                                        }
-
-                                        @Override
-                                        public void onCompleted() {
-                                            // Do nothing
-                                        }
-                                    });
-                                }
-                            },
-                            new Consumer<Throwable>() {
-                                @Override
-                                public void accept(Throwable t) {
-                                    emitter.onError(t);
-                                }
+                .create((SingleOnSubscribe<TResponse>) emitter -> rxRequest.subscribe(
+                        request -> delegate.accept(request, new StreamObserver<>() {
+                            @Override
+                            public void onNext(TResponse tResponse) {
+                                emitter.onSuccess(tResponse);
                             }
-                        );
-                    }
-                })
-                .lift(new SubscribeOnlyOnceSingleOperator<TResponse>());
+
+                            @Override
+                            public void onError(Throwable throwable) {
+                                emitter.onError(throwable);
+                            }
+
+                            @Override
+                            public void onCompleted() {
+                                // Do nothing
+                            }
+                        }),
+                        emitter::onError
+                ))
+                .lift(new SubscribeOnlyOnceSingleOperator<>());
         } catch (Throwable throwable) {
             return Single.error(throwable);
         }
@@ -92,16 +75,13 @@ public final class ClientCalls {
             final int lowTide = RxCallOptions.getLowTide(options);
 
             return rxRequest
-                    .flatMapPublisher(new io.reactivex.functions.Function<TRequest, Publisher<? extends TResponse>>() {
-                        @Override
-                        public Publisher<? extends TResponse> apply(TRequest request) {
-                            final RxClientStreamObserverAndPublisher<TResponse> consumerStreamObserver =
-                                new RxClientStreamObserverAndPublisher<TResponse>(null, null, prefetch, lowTide);
+                    .flatMapPublisher(request -> {
+                        final RxClientStreamObserverAndPublisher<TResponse> consumerStreamObserver =
+                                new RxClientStreamObserverAndPublisher<>(null, null, prefetch, lowTide);
 
-                            delegate.accept(request, consumerStreamObserver);
+                        delegate.accept(request, consumerStreamObserver);
 
-                            return consumerStreamObserver;
-                        }
+                        return consumerStreamObserver;
                     });
         } catch (Throwable throwable) {
             return Flowable.error(throwable);
@@ -119,21 +99,11 @@ public final class ClientCalls {
             final CallOptions options) {
         try {
             final RxSubscriberAndClientProducer<TRequest> subscriberAndGRPCProducer =
-                    flowableSource.subscribeWith(new RxSubscriberAndClientProducer<TRequest>());
+                    flowableSource.subscribeWith(new RxSubscriberAndClientProducer<>());
             final RxClientStreamObserverAndPublisher<TResponse> observerAndPublisher =
                 new RxClientStreamObserverAndPublisher<TResponse>(
-                    new com.salesforce.reactivegrpc.common.Consumer<CallStreamObserver<?>>() {
-                        @Override
-                        public void accept(CallStreamObserver<?> observer) {
-                            subscriberAndGRPCProducer.subscribe((CallStreamObserver<TRequest>) observer);
-                        }
-                    },
-                    new Runnable() {
-                        @Override
-                        public void run() {
-                            subscriberAndGRPCProducer.cancel();
-                        }
-                    }
+                        observer -> subscriberAndGRPCProducer.subscribe((CallStreamObserver<TRequest>) observer),
+                        subscriberAndGRPCProducer::cancel
                 );
             delegate.apply(observerAndPublisher);
 
@@ -159,21 +129,11 @@ public final class ClientCalls {
 
         try {
             final RxSubscriberAndClientProducer<TRequest> subscriberAndGRPCProducer =
-                    flowableSource.subscribeWith(new RxSubscriberAndClientProducer<TRequest>());
+                    flowableSource.subscribeWith(new RxSubscriberAndClientProducer<>());
             final RxClientStreamObserverAndPublisher<TResponse> observerAndPublisher =
                 new RxClientStreamObserverAndPublisher<TResponse>(
-                    new com.salesforce.reactivegrpc.common.Consumer<CallStreamObserver<?>>() {
-                        @Override
-                        public void accept(CallStreamObserver<?> observer) {
-                            subscriberAndGRPCProducer.subscribe((CallStreamObserver<TRequest>) observer);
-                        }
-                    },
-                    new Runnable() {
-                        @Override
-                        public void run() {
-                            subscriberAndGRPCProducer.cancel();
-                        }
-                    },
+                        observer -> subscriberAndGRPCProducer.subscribe((CallStreamObserver<TRequest>) observer),
+                        subscriberAndGRPCProducer::cancel,
                     prefetch, lowTide);
             delegate.apply(observerAndPublisher);
 

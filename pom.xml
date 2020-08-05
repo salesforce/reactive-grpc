@@ -1,346 +1,318 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project xmlns="http://maven.apache.org/POM/4.0.0"
-         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
-    <modelVersion>4.0.0</modelVersion>
+		 xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+		 xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+	<modelVersion>4.0.0</modelVersion>
 
-    <groupId>com.salesforce.servicelibs</groupId>
-    <artifactId>reactive-grpc</artifactId>
-    <version>1.0.2-SNAPSHOT</version>
-    <packaging>pom</packaging>
+	<groupId>com.salesforce.servicelibs</groupId>
+	<artifactId>reactive-grpc</artifactId>
+	<version>1.0.2-SNAPSHOT</version>
+	<packaging>pom</packaging>
 
-    <name>reactive-grpc</name>
-    <description>Integrating gRPC with reactive technologies.</description>
-    <url>https://github.com/salesforce/reactive-grpc</url>
+	<name>reactive-grpc</name>
+	<description>Integrating gRPC with reactive technologies.</description>
+	<url>https://github.com/salesforce/reactive-grpc</url>
 
-    <licenses>
-        <license>
-            <name>BSD 3-Clause License</name>
-            <url>https://github.com/salesforce/grpc-java-contrib/blob/master/LICENSE</url>
-            <distribution>repo</distribution>
-        </license>
-    </licenses>
+	<licenses>
+		<license>
+			<name>BSD 3-Clause License</name>
+			<url>https://github.com/salesforce/grpc-java-contrib/blob/master/LICENSE</url>
+			<distribution>repo</distribution>
+		</license>
+	</licenses>
 
-    <developers>
-        <developer>
-            <id>rmichela</id>
-            <name>Ryan Michela</name>
-            <email>rmichela@salesforce.com</email>
-        </developer>
-        <developer>
-            <id>cbornet</id>
-            <name>Christophe Bornet</name>
-            <email>cbornet@hotmail.com</email>
-        </developer>
-        <developer>
-            <id>olegdokuka</id>
-            <name>Oleh Dokuka</name>
-            <email>shadowgun@i.ua</email>
-        </developer>
-    </developers>
+	<developers>
+		<developer>
+			<id>rmichela</id>
+			<name>Ryan Michela</name>
+			<email>rmichela@salesforce.com</email>
+		</developer>
+		<developer>
+			<id>cbornet</id>
+			<name>Christophe Bornet</name>
+			<email>cbornet@hotmail.com</email>
+		</developer>
+		<developer>
+			<id>olegdokuka</id>
+			<name>Oleh Dokuka</name>
+			<email>shadowgun@i.ua</email>
+		</developer>
+	</developers>
 
-    <modules>
-        <module>common/reactive-grpc-common</module>
-        <module>common/reactive-grpc-gencommon</module>
-        <module>rx-java/rxgrpc</module>
-        <module>rx-java/rxgrpc-stub</module>
-        <module>rx-java/rxgrpc-tck</module>
-        <module>rx-java/rxgrpc-test</module>
-        <module>reactor/reactor-grpc</module>
-        <module>reactor/reactor-grpc-stub</module>
-        <module>reactor/reactor-grpc-tck</module>
-        <module>reactor/reactor-grpc-test</module>
-        <module>reactor/reactor-grpc-test-32</module>
-        <module>common/reactive-grpc-benchmarks</module>
-    </modules>
+	<modules>
+		<module>common/reactive-grpc-common</module>
+		<module>common/reactive-grpc-gencommon</module>
+		<module>rx-java/rxgrpc</module>
+		<module>rx-java/rxgrpc-stub</module>
+		<module>rx-java/rxgrpc-tck</module>
+		<module>rx-java/rxgrpc-test</module>
+		<module>reactor/reactor-grpc</module>
+		<module>reactor/reactor-grpc-stub</module>
+		<module>reactor/reactor-grpc-tck</module>
+		<module>reactor/reactor-grpc-test</module>
+		<module>reactor/reactor-grpc-test-32</module>
+		<module>common/reactive-grpc-benchmarks</module>
+	</modules>
 
-    <properties>
-        <!-- Maven Plugin Versions -->
-        <protobuf.plugin.version>0.6.1</protobuf.plugin.version>
-        <compiler.plugin.version>3.8.0</compiler.plugin.version>
+	<properties>
+		<!-- Maven Plugin Versions -->
+		<protobuf.plugin.version>0.6.1</protobuf.plugin.version>
+		<compiler.plugin.version>3.8.0</compiler.plugin.version>
 
-        <!-- Dependency Versions -->
-        <reactive.streams.version>1.0.2</reactive.streams.version>
-        <grpc.version>1.23.0</grpc.version>
-        <protoc.version>3.9.0</protoc.version> <!-- Same version as grpc-proto -->
-        <jprotoc.version>0.9.1</jprotoc.version>
-        <rxjava.version>2.2.12</rxjava.version>
-        <reactor.version>3.2.12.RELEASE</reactor.version>
+		<!-- Dependency Versions -->
+		<reactive.streams.version>1.0.2</reactive.streams.version>
+		<grpc.version>1.31.0</grpc.version>
+		<protoc.version>3.12.0</protoc.version> <!-- Same version as grpc-proto -->
+		<jprotoc.version>1.0.1</jprotoc.version>
+		<rxjava.version>3.0.5</rxjava.version>
+		<reactor.version>3.3.8.RELEASE</reactor.version>
 
-        <!-- Test Dependency Versions -->
-        <grpc.contrib.version>0.8.1</grpc.contrib.version>
-        <junit.jupiter.version>5.4.0</junit.jupiter.version>
-        <assertj.version>3.12.2</assertj.version>
-        <awaitility.version>3.1.6</awaitility.version>
-        <mockito.version>2.27.0</mockito.version>
-        <reactor.extra.version>3.1.9.RELEASE</reactor.extra.version>
+		<!-- Test Dependency Versions -->
+		<grpc.contrib.version>0.8.1</grpc.contrib.version>
+		<junit.jupiter.version>5.4.0</junit.jupiter.version>
+		<assertj.version>3.12.2</assertj.version>
+		<awaitility.version>3.1.6</awaitility.version>
+		<mockito.version>2.27.0</mockito.version>
+		<reactor.extra.version>3.3.3.RELEASE</reactor.extra.version>
 
-        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <java.version>1.8</java.version>
-        <java.test.version>1.8</java.test.version>
-        <maven.compiler.source>${java.version}</maven.compiler.source>
-        <maven.compiler.target>${java.version}</maven.compiler.target>
-        <maven.compiler.test.source>${java.test.version}</maven.compiler.test.source>
-        <maven.compiler.test.target>${java.test.version}</maven.compiler.test.target>
-    </properties>
+		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+		<java.version>11</java.version>
+		<java.test.version>11</java.test.version>
+		<maven.compiler.source>${java.version}</maven.compiler.source>
+		<maven.compiler.target>${java.version}</maven.compiler.target>
+		<maven.compiler.test.source>${java.test.version}</maven.compiler.test.source>
+		<maven.compiler.test.target>${java.test.version}</maven.compiler.test.target>
+	</properties>
 
-    <scm>
-        <url>https://github.com/salesforce/reactive-grpc</url>
-        <connection>scm:git:git@github.com:salesforce/reactive-grpc.git</connection>
-        <developerConnection>scm:git:git@github.com:salesforce/reactive-grpc.git</developerConnection>
-    </scm>
+	<scm>
+		<url>https://github.com/salesforce/reactive-grpc</url>
+		<connection>scm:git:git@github.com:salesforce/reactive-grpc.git</connection>
+		<developerConnection>scm:git:git@github.com:salesforce/reactive-grpc.git</developerConnection>
+	</scm>
 
-    <distributionManagement>
-        <repository>
-            <id>ossrh</id>
-            <url>https://oss.sonatype.org/content/repositories/releases</url>
-        </repository>
-        <snapshotRepository>
-            <id>ossrh</id>
-            <url>https://oss.sonatype.org/content/repositories/snapshots</url>
-        </snapshotRepository>
-    </distributionManagement>
+	<distributionManagement>
+		<repository>
+			<id>ossrh</id>
+			<url>https://oss.sonatype.org/content/repositories/releases</url>
+		</repository>
+		<snapshotRepository>
+			<id>ossrh</id>
+			<url>https://oss.sonatype.org/content/repositories/snapshots</url>
+		</snapshotRepository>
+	</distributionManagement>
 
-    <dependencyManagement>
-        <dependencies>
-            <!--
-             ~ Where are Guava and Protobuf?
-             ~ Due to the coupled nature between these contrib libraries and gRPC, the versions of Guava and Protobuf
-             ~ need to be kept in lockstep with the versions used by gRPC. Declaring explicit dependencies on Guava and
-             ~ Protobuf would require keeping them manually aligned with gRPC. Instead, Guava and Protobuf are
-             ~ referenced transitively via gRPC itself.
-            -->
+	<dependencyManagement>
+		<dependencies>
+			<!--
+			 ~ Where are Guava and Protobuf?
+			 ~ Due to the coupled nature between these contrib libraries and gRPC, the versions of Guava and Protobuf
+			 ~ need to be kept in lockstep with the versions used by gRPC. Declaring explicit dependencies on Guava and
+			 ~ Protobuf would require keeping them manually aligned with gRPC. Instead, Guava and Protobuf are
+			 ~ referenced transitively via gRPC itself.
+			-->
 
-            <dependency>
-                <groupId>${project.groupId}</groupId>
-                <artifactId>rxgrpc-stub</artifactId>
-                <version>${project.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>${project.groupId}</groupId>
-                <artifactId>reactor-grpc-stub</artifactId>
-                <version>${project.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>com.salesforce.servicelibs</groupId>
-                <artifactId>grpc-contrib</artifactId>
-                <version>${grpc.contrib.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>com.salesforce.servicelibs</groupId>
-                <artifactId>jprotoc</artifactId>
-                <version>${jprotoc.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>io.grpc</groupId>
-                <artifactId>grpc-netty</artifactId>
-                <version>${grpc.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>io.grpc</groupId>
-                <artifactId>grpc-protobuf</artifactId>
-                <version>${grpc.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>io.grpc</groupId>
-                <artifactId>grpc-core</artifactId>
-                <version>${grpc.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>io.grpc</groupId>
-                <artifactId>grpc-context</artifactId>
-                <version>${grpc.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>io.grpc</groupId>
-                <artifactId>grpc-stub</artifactId>
-                <version>${grpc.version}</version>
-            </dependency>
-            <!-- Test dependencies -->
-            <dependency>
-                <groupId>io.grpc</groupId>
-                <artifactId>grpc-testing</artifactId>
-                <version>${grpc.version}</version>
-                <scope>test</scope>
-            </dependency>
-            <dependency>
-                <groupId>com.salesforce.servicelibs</groupId>
-                <artifactId>grpc-testing-contrib</artifactId>
-                <version>${grpc.contrib.version}</version>
-                <scope>test</scope>
-            </dependency>
-            <dependency>
-                <groupId>org.junit.jupiter</groupId>
-                <artifactId>junit-jupiter-api</artifactId>
-                <version>${junit.jupiter.version}</version>
-                <scope>test</scope>
-            </dependency>
-            <dependency>
-                <groupId>org.junit.jupiter</groupId>
-                <artifactId>junit-jupiter-params</artifactId>
-                <version>${junit.jupiter.version}</version>
-                <scope>test</scope>
-            </dependency>
-            <dependency>
-                <groupId>org.junit.jupiter</groupId>
-                <artifactId>junit-jupiter-engine</artifactId>
-                <version>${junit.jupiter.version}</version>
-                <scope>test</scope>
-            </dependency>
-            <dependency>
-                <groupId>org.assertj</groupId>
-                <artifactId>assertj-core</artifactId>
-                <version>${assertj.version}</version>
-                <scope>test</scope>
-            </dependency>
-            <dependency>
-                <groupId>org.awaitility</groupId>
-                <artifactId>awaitility</artifactId>
-                <version>${awaitility.version}</version>
-                <scope>test</scope>
-            </dependency>
-            <dependency>
-                <groupId>org.mockito</groupId>
-                <artifactId>mockito-core</artifactId>
-                <version>${mockito.version}</version>
-                <scope>test</scope>
-            </dependency>
-        </dependencies>
-    </dependencyManagement>
+			<dependency>
+				<groupId>${project.groupId}</groupId>
+				<artifactId>rxgrpc-stub</artifactId>
+				<version>${project.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>${project.groupId}</groupId>
+				<artifactId>reactor-grpc-stub</artifactId>
+				<version>${project.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>com.salesforce.servicelibs</groupId>
+				<artifactId>grpc-contrib</artifactId>
+				<version>${grpc.contrib.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>com.salesforce.servicelibs</groupId>
+				<artifactId>jprotoc</artifactId>
+				<version>${jprotoc.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>io.grpc</groupId>
+				<artifactId>grpc-netty</artifactId>
+				<version>${grpc.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>io.grpc</groupId>
+				<artifactId>grpc-protobuf</artifactId>
+				<version>${grpc.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>io.grpc</groupId>
+				<artifactId>grpc-core</artifactId>
+				<version>${grpc.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>io.grpc</groupId>
+				<artifactId>grpc-context</artifactId>
+				<version>${grpc.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>io.grpc</groupId>
+				<artifactId>grpc-stub</artifactId>
+				<version>${grpc.version}</version>
+			</dependency>
+			<!-- Test dependencies -->
+			<dependency>
+				<groupId>io.grpc</groupId>
+				<artifactId>grpc-testing</artifactId>
+				<version>${grpc.version}</version>
+				<scope>test</scope>
+			</dependency>
+			<dependency>
+				<groupId>com.salesforce.servicelibs</groupId>
+				<artifactId>grpc-testing-contrib</artifactId>
+				<version>${grpc.contrib.version}</version>
+				<scope>test</scope>
+			</dependency>
+			<dependency>
+				<groupId>org.junit.jupiter</groupId>
+				<artifactId>junit-jupiter-api</artifactId>
+				<version>${junit.jupiter.version}</version>
+				<scope>test</scope>
+			</dependency>
+			<dependency>
+				<groupId>org.junit.jupiter</groupId>
+				<artifactId>junit-jupiter-params</artifactId>
+				<version>${junit.jupiter.version}</version>
+				<scope>test</scope>
+			</dependency>
+			<dependency>
+				<groupId>org.junit.jupiter</groupId>
+				<artifactId>junit-jupiter-engine</artifactId>
+				<version>${junit.jupiter.version}</version>
+				<scope>test</scope>
+			</dependency>
+			<dependency>
+				<groupId>org.assertj</groupId>
+				<artifactId>assertj-core</artifactId>
+				<version>${assertj.version}</version>
+				<scope>test</scope>
+			</dependency>
+			<dependency>
+				<groupId>org.awaitility</groupId>
+				<artifactId>awaitility</artifactId>
+				<version>${awaitility.version}</version>
+				<scope>test</scope>
+			</dependency>
+			<dependency>
+				<groupId>org.mockito</groupId>
+				<artifactId>mockito-core</artifactId>
+				<version>${mockito.version}</version>
+				<scope>test</scope>
+			</dependency>
+		</dependencies>
+	</dependencyManagement>
 
-    <build>
-        <plugins>
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-compiler-plugin</artifactId>
-                <version>${compiler.plugin.version}</version>
-                <configuration>
-                    <source>${maven.compiler.source}</source>
-                    <target>${maven.compiler.target}</target>
-                    <testSource>${maven.compiler.test.source}</testSource>
-                    <testTarget>${maven.compiler.test.target}</testTarget>
-                </configuration>
-            </plugin>
+	<build>
+		<plugins>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-compiler-plugin</artifactId>
+				<version>${compiler.plugin.version}</version>
+				<configuration>
+					<source>${maven.compiler.source}</source>
+					<target>${maven.compiler.target}</target>
+					<testSource>${maven.compiler.test.source}</testSource>
+					<testTarget>${maven.compiler.test.target}</testTarget>
+				</configuration>
+			</plugin>
 
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-checkstyle-plugin</artifactId>
-                <version>3.1.0</version>
-                <dependencies>
-                    <dependency>
-                        <groupId>com.puppycrawl.tools</groupId>
-                        <artifactId>checkstyle</artifactId>
-                        <version>8.29</version>
-                    </dependency>
-                </dependencies>
-                <executions>
-                    <execution>
-                        <phase>process-sources</phase>
-                        <goals>
-                            <goal>check</goal>
-                        </goals>
-                    </execution>
-                </executions>
-                <configuration>
-                    <failsOnError>true</failsOnError>
-                    <failOnViolation>true</failOnViolation>
-                    <consoleOutput>true</consoleOutput>
-                    <configLocation>checkstyle.xml</configLocation>
-                    <suppressionsLocation>checkstyle_ignore.xml</suppressionsLocation>
-                </configuration>
-            </plugin>
+			<plugin>
+				<artifactId>maven-surefire-plugin</artifactId>
+				<version>3.0.0-M3</version>
+				<dependencies>
+					<!--                    <dependency>-->
+					<!--                        <groupId>org.apache.maven.surefire</groupId>-->
+					<!--                        <artifactId>surefire-junit3</artifactId>-->
+					<!--                        <version>3.0.0-M3</version>-->
+					<!--                    </dependency>-->
+					<!--                    <dependency>-->
+					<!--                        <groupId>org.apache.maven.surefire</groupId>-->
+					<!--                        <artifactId>surefire-testng</artifactId>-->
+					<!--                        <version>3.0.0-M3</version>-->
+					<!--                    </dependency>-->
+				</dependencies>
+				<configuration>
+					<argLine>-Xmx1024m -XX:MaxPermSize=256m</argLine>
+				</configuration>
+			</plugin>
+		</plugins>
+	</build>
 
-            <plugin>
-                <artifactId>maven-surefire-plugin</artifactId>
-                <version>3.0.0-M3</version>
-                <dependencies>
-<!--                    <dependency>-->
-<!--                        <groupId>org.apache.maven.surefire</groupId>-->
-<!--                        <artifactId>surefire-junit3</artifactId>-->
-<!--                        <version>3.0.0-M3</version>-->
-<!--                    </dependency>-->
-<!--                    <dependency>-->
-<!--                        <groupId>org.apache.maven.surefire</groupId>-->
-<!--                        <artifactId>surefire-testng</artifactId>-->
-<!--                        <version>3.0.0-M3</version>-->
-<!--                    </dependency>-->
-                </dependencies>
-                <configuration>
-                    <argLine>-Xmx1024m -XX:MaxPermSize=256m</argLine>
-                </configuration>
-            </plugin>
-        </plugins>
-    </build>
+	<profiles>
+		<profile>
+			<id>public-release</id>
+			<build>
+				<plugins>
+					<plugin>
+						<groupId>org.apache.maven.plugins</groupId>
+						<artifactId>maven-javadoc-plugin</artifactId>
+						<version>3.1.0</version>
+						<configuration>
+							<author>false</author>
+							<breakiterator>true</breakiterator>
+							<doclint>accessibility,html,reference,syntax</doclint>
+							<keywords>true</keywords>
+							<version>false</version>
+							<source>8</source>
+						</configuration>
+						<executions>
+							<execution>
+								<id>attach-javadocs</id>
+								<goals>
+									<goal>jar</goal>
+								</goals>
+							</execution>
+						</executions>
+					</plugin>
 
-    <profiles>
-        <profile>
-            <id>public-release</id>
-            <build>
-                <plugins>
-                    <plugin>
-                        <groupId>org.apache.maven.plugins</groupId>
-                        <artifactId>maven-javadoc-plugin</artifactId>
-                        <version>3.1.0</version>
-                        <configuration>
-                            <author>false</author>
-                            <breakiterator>true</breakiterator>
-                            <doclint>accessibility,html,reference,syntax</doclint>
-                            <keywords>true</keywords>
-                            <version>false</version>
-                            <source>8</source>
-                        </configuration>
-                        <executions>
-                            <execution>
-                                <id>attach-javadocs</id>
-                                <goals>
-                                    <goal>jar</goal>
-                                </goals>
-                            </execution>
-                        </executions>
-                    </plugin>
+					<plugin>
+						<groupId>org.apache.maven.plugins</groupId>
+						<artifactId>maven-source-plugin</artifactId>
+						<version>3.0.1</version>
+						<executions>
+							<execution>
+								<id>attach-sources</id>
+								<goals>
+									<goal>jar</goal>
+								</goals>
+							</execution>
+						</executions>
+					</plugin>
 
-                    <plugin>
-                        <groupId>org.apache.maven.plugins</groupId>
-                        <artifactId>maven-source-plugin</artifactId>
-                        <version>3.0.1</version>
-                        <executions>
-                            <execution>
-                                <id>attach-sources</id>
-                                <goals>
-                                    <goal>jar</goal>
-                                </goals>
-                            </execution>
-                        </executions>
-                    </plugin>
+					<plugin>
+						<groupId>org.apache.maven.plugins</groupId>
+						<artifactId>maven-gpg-plugin</artifactId>
+						<version>1.6</version>
+						<executions>
+							<execution>
+								<id>sign-artifacts</id>
+								<phase>verify</phase>
+								<goals>
+									<goal>sign</goal>
+								</goals>
+							</execution>
+						</executions>
+					</plugin>
 
-                    <plugin>
-                        <groupId>org.apache.maven.plugins</groupId>
-                        <artifactId>maven-gpg-plugin</artifactId>
-                        <version>1.6</version>
-                        <executions>
-                            <execution>
-                                <id>sign-artifacts</id>
-                                <phase>verify</phase>
-                                <goals>
-                                    <goal>sign</goal>
-                                </goals>
-                            </execution>
-                        </executions>
-                    </plugin>
-
-                    <plugin>
-                        <groupId>org.sonatype.plugins</groupId>
-                        <artifactId>nexus-staging-maven-plugin</artifactId>
-                        <version>1.6.8</version>
-                        <extensions>true</extensions>
-                        <configuration>
-                            <serverId>ossrh</serverId>
-                            <nexusUrl>https://oss.sonatype.org/</nexusUrl>
-                            <autoReleaseAfterClose>false</autoReleaseAfterClose>
-                        </configuration>
-                    </plugin>
-                </plugins>
-            </build>
-        </profile>
-    </profiles>
+					<plugin>
+						<groupId>org.sonatype.plugins</groupId>
+						<artifactId>nexus-staging-maven-plugin</artifactId>
+						<version>1.6.8</version>
+						<extensions>true</extensions>
+						<configuration>
+							<serverId>ossrh</serverId>
+							<nexusUrl>https://oss.sonatype.org/</nexusUrl>
+							<autoReleaseAfterClose>false</autoReleaseAfterClose>
+						</configuration>
+					</plugin>
+				</plugins>
+			</build>
+		</profile>
+	</profiles>
 </project>

@@ -4,8 +4,8 @@ import io.grpc.Channel;
 import io.grpc.ManagedChannelBuilder;
 import io.grpc.Server;
 import io.grpc.ServerBuilder;
-import io.reactivex.Flowable;
-import io.reactivex.Single;
+import io.reactivex.rxjava3.core.Flowable;
+import io.reactivex.rxjava3.core.Single;
 import io.reactivex.rxjavafx.schedulers.JavaFxScheduler;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
@@ -50,7 +50,7 @@ public class BackpressureController extends RxBackpressureDemoGrpc.BackpressureD
                 // Construct request
                 .map(i -> NumbersProto.HowMany.newBuilder().setNumber(i).build())
                 // Call service
-                .as(stub::sendNumbers)
+                .to(stub::sendNumbers)
                 // Parse response
                 .map(i -> i.getNumber(0))
                 // Introduce a synthetic three millisecond delay per read

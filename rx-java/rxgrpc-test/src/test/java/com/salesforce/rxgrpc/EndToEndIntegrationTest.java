@@ -7,20 +7,21 @@
 
 package com.salesforce.rxgrpc;
 
-import io.grpc.ManagedChannel;
-import io.grpc.ManagedChannelBuilder;
-import io.grpc.Server;
-import io.grpc.ServerBuilder;
-import io.reactivex.Flowable;
-import io.reactivex.Single;
-import io.reactivex.observers.TestObserver;
-import io.reactivex.subscribers.TestSubscriber;
+import java.util.concurrent.TimeUnit;
+
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Rule;
 import org.junit.Test;
 
-import java.util.concurrent.TimeUnit;
+import io.grpc.ManagedChannel;
+import io.grpc.ManagedChannelBuilder;
+import io.grpc.Server;
+import io.grpc.ServerBuilder;
+import io.reactivex.rxjava3.core.Flowable;
+import io.reactivex.rxjava3.core.Single;
+import io.reactivex.rxjava3.observers.TestObserver;
+import io.reactivex.rxjava3.subscribers.TestSubscriber;
 
 @SuppressWarnings("Duplicates")
 public class EndToEndIntegrationTest {
@@ -87,44 +88,44 @@ public class EndToEndIntegrationTest {
     }
 
     @Test
-    public void oneToOne() {
+    public void oneToOne() throws InterruptedException {
         RxGreeterGrpc.RxGreeterStub stub = RxGreeterGrpc.newRxStub(channel);
         Single<HelloRequest> req = Single.just(HelloRequest.newBuilder().setName("rxjava").build());
         Single<HelloResponse> resp = req.compose(stub::sayHello);
 
         TestObserver<String> testObserver = resp.map(HelloResponse::getMessage).test();
-        testObserver.awaitTerminalEvent(3, TimeUnit.SECONDS);
+        testObserver.await(3, TimeUnit.SECONDS);
         testObserver.assertValue("Hello rxjava");
     }
 
     @Test
-    public void oneToMany() {
+    public void oneToMany() throws InterruptedException {
         RxGreeterGrpc.RxGreeterStub stub = RxGreeterGrpc.newRxStub(channel);
         Single<HelloRequest> req = Single.just(HelloRequest.newBuilder().setName("rxjava").build());
-        Flowable<HelloResponse> resp = req.as(stub::sayHelloRespStream);
+        Flowable<HelloResponse> resp = req.to(stub::sayHelloRespStream);
 
         TestSubscriber<String> testSubscriber = resp.map(HelloResponse::getMessage).test();
-        testSubscriber.awaitTerminalEvent(3, TimeUnit.SECONDS);
+        testSubscriber.await(3, TimeUnit.SECONDS);
         testSubscriber.assertValues("Hello rxjava", "Hi rxjava", "Greetings rxjava");
     }
 
     @Test
-    public void manyToOne() {
+    public void manyToOne() throws InterruptedException {
         RxGreeterGrpc.RxGreeterStub stub = RxGreeterGrpc.newRxStub(channel);
         Flowable<HelloRequest> req = Flowable.just(
                 HelloRequest.newBuilder().setName("a").build(),
                 HelloRequest.newBuilder().setName("b").build(),
                 HelloRequest.newBuilder().setName("c").build());
 
-        Single<HelloResponse> resp = req.as(stub::sayHelloReqStream);
+        Single<HelloResponse> resp = req.to(stub::sayHelloReqStream);
 
         TestObserver<String> testObserver = resp.map(HelloResponse::getMessage).test();
-        testObserver.awaitTerminalEvent(3, TimeUnit.SECONDS);
+        testObserver.await(3, TimeUnit.SECONDS);
         testObserver.assertValue("Hello a and b and c");
     }
 
     @Test
-    public void manyToMany() {
+    public void manyToMany() throws InterruptedException {
         RxGreeterGrpc.RxGreeterStub stub = RxGreeterGrpc.newRxStub(channel);
         Flowable<HelloRequest> req = Flowable.just(
                 HelloRequest.newBuilder().setName("a").build(),
@@ -136,7 +137,7 @@ public class EndToEndIntegrationTest {
         Flowable<HelloResponse> resp = req.compose(stub::sayHelloBothStream);
 
         TestSubscriber<String> testSubscriber = resp.map(HelloResponse::getMessage).test();
-        testSubscriber.awaitTerminalEvent(3, TimeUnit.SECONDS);
+        testSubscriber.await(3, TimeUnit.SECONDS);
         testSubscriber.assertValues("Hello a and b", "Hello c and d", "Hello e");
         testSubscriber.assertComplete();
     }

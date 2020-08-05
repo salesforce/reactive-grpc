@@ -18,7 +18,7 @@ import demo.proto.RxChatGrpc;
 import io.grpc.ManagedChannel;
 import io.grpc.ManagedChannelBuilder;
 import io.reactivex.Scheduler;
-import io.reactivex.Single;
+import io.reactivex.rxjava3.core.Single;
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.disposables.CompositeDisposable;
 import io.reactivex.disposables.Disposable;
@@ -65,7 +65,7 @@ public class ChatActivity extends AppCompatActivity {
                 .just(Empty.getDefaultInstance())
                 .observeOn(Schedulers.io())
                 // Invoke
-                .as(stub::getMessages)
+                .to(stub::getMessages)
                 .map(this::fromMessage)
                 // Execute
                 .observeOn(AndroidSchedulers.mainThread())

@@ -8,6 +8,7 @@
 package com.salesforce.rxgrpc.stub;
 
 import com.salesforce.reactivegrpc.common.AbstractStreamObserverAndPublisher;
+
 import io.grpc.CallOptions;
 
 /**
@@ -15,41 +16,40 @@ import io.grpc.CallOptions;
  */
 public final class RxCallOptions {
 
-    private RxCallOptions() {
-    }
+	private RxCallOptions() {
+	}
 
-    /**
-     * Sets Prefetch size of queue.
-     */
-    public static final io.grpc.CallOptions.Key<Integer> CALL_OPTIONS_PREFETCH =
-        io.grpc.CallOptions.Key.createWithDefault("reactivegrpc.internal.PREFETCH",
-            Integer.valueOf(AbstractStreamObserverAndPublisher.DEFAULT_CHUNK_SIZE));
+	/**
+	 * Sets Prefetch size of queue.
+	 */
+	public static final io.grpc.CallOptions.Key<Integer> CALL_OPTIONS_PREFETCH =
+			io.grpc.CallOptions.Key.createWithDefault("reactivegrpc.internal.PREFETCH",
+					Integer.valueOf(AbstractStreamObserverAndPublisher.DEFAULT_CHUNK_SIZE));
 
-    /**
-     * Sets Low Tide of prefetch queue.
-     */
-    public static final io.grpc.CallOptions.Key<Integer> CALL_OPTIONS_LOW_TIDE =
-        io.grpc.CallOptions.Key.createWithDefault("reactivegrpc.internal.LOW_TIDE",
-            Integer.valueOf(AbstractStreamObserverAndPublisher.TWO_THIRDS_OF_DEFAULT_CHUNK_SIZE));
+	/**
+	 * Sets Low Tide of prefetch queue.
+	 */
+	public static final io.grpc.CallOptions.Key<Integer> CALL_OPTIONS_LOW_TIDE =
+			io.grpc.CallOptions.Key.createWithDefault("reactivegrpc.internal.LOW_TIDE",
+					Integer.valueOf(AbstractStreamObserverAndPublisher.TWO_THIRDS_OF_DEFAULT_CHUNK_SIZE));
 
+	/**
+	 * Utility function to get prefetch option.
+	 */
+	public static int getPrefetch(final CallOptions options) {
+		return options == null ? CALL_OPTIONS_PREFETCH.getDefault() : options.getOption(CALL_OPTIONS_PREFETCH);
+	}
 
-    /**
-     * Utility function to get prefetch option.
-     */
-    public static int getPrefetch(final CallOptions options) {
-        return options == null ? CALL_OPTIONS_PREFETCH.getDefault() : options.getOption(CALL_OPTIONS_PREFETCH);
-    }
-
-    /**
-     * Utility function to get low tide option together with validation.
-     */
-    public static int getLowTide(final CallOptions options) {
-        int prefetch = getPrefetch(options);
-        int lowTide = options == null ? CALL_OPTIONS_LOW_TIDE.getDefault() : options.getOption(CALL_OPTIONS_LOW_TIDE);
-        if (lowTide >= prefetch) {
-            throw new IllegalArgumentException(CALL_OPTIONS_LOW_TIDE + " must be less than " + CALL_OPTIONS_PREFETCH);
-        }
-        return lowTide;
-    }
+	/**
+	 * Utility function to get low tide option together with validation.
+	 */
+	public static int getLowTide(final CallOptions options) {
+		int prefetch = getPrefetch(options);
+		int lowTide = options == null ? CALL_OPTIONS_LOW_TIDE.getDefault() : options.getOption(CALL_OPTIONS_LOW_TIDE);
+		if (lowTide >= prefetch) {
+			throw new IllegalArgumentException(CALL_OPTIONS_LOW_TIDE + " must be less than " + CALL_OPTIONS_PREFETCH);
+		}
+		return lowTide;
+	}
 
 }

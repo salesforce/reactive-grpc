@@ -9,8 +9,8 @@ package com.salesforce.reactivegrpc.examples;
 
 import io.grpc.Server;
 import io.grpc.netty.NettyServerBuilder;
-import io.reactivex.Flowable;
-import io.reactivex.Single;
+import io.reactivex.rxjava3.core.Flowable;
+import io.reactivex.rxjava3.core.Single;
 
 import java.util.Iterator;
 import java.util.concurrent.atomic.AtomicInteger;

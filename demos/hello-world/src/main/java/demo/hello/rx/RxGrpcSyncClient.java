@@ -5,8 +5,8 @@ import demo.proto.HelloResponse;
 import demo.proto.RxGreeterGrpc;
 import io.grpc.ManagedChannel;
 import io.grpc.ManagedChannelBuilder;
-import io.reactivex.Flowable;
-import io.reactivex.Single;
+import io.reactivex.rxjava3.core.Flowable;
+import io.reactivex.rxjava3.core.Single;
 
 import java.time.Duration;
 
@@ -27,7 +27,7 @@ public class RxGrpcSyncClient {
          */
         System.out.println(request
                 // Call service
-                .as(stub::greet)
+                .to(stub::greet)
                 // Map response
                 .map(HelloResponse::getMessage)
                 .blockingGet());
@@ -39,7 +39,7 @@ public class RxGrpcSyncClient {
          */
         request
                 // Call service
-                .as(stub::multiGreet)
+                .to(stub::multiGreet)
                 // Map response
                 .map(HelloResponse::getMessage)
                 .blockingSubscribe(System.out::println);
@@ -53,7 +53,7 @@ public class RxGrpcSyncClient {
                 // Call service
                 .just("Alpha", "Beta", "Gamma")
                 .map(name -> HelloRequest.newBuilder().setName(name).build())
-                .as(stub::streamGreet)
+                .to(stub::streamGreet)
                 // Map response
                 .map(HelloResponse::getMessage)
                 .blockingSubscribe(System.out::println);

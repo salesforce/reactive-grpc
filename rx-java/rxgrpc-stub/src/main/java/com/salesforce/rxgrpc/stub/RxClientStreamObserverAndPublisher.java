@@ -9,39 +9,41 @@ package com.salesforce.rxgrpc.stub;
 
 import com.salesforce.reactivegrpc.common.AbstractClientStreamObserverAndPublisher;
 import com.salesforce.reactivegrpc.common.Consumer;
+
 import io.grpc.stub.CallStreamObserver;
-import io.reactivex.internal.fuseable.QueueFuseable;
-import io.reactivex.internal.fuseable.QueueSubscription;
-import io.reactivex.internal.queue.SpscArrayQueue;
+import io.reactivex.rxjava3.internal.fuseable.QueueFuseable;
+import io.reactivex.rxjava3.internal.fuseable.QueueSubscription;
+import io.reactivex.rxjava3.internal.queue.SpscArrayQueue;
 
 /**
  * TODO: Explain what this class does.
+ *
  * @param <T> T
  */
 class RxClientStreamObserverAndPublisher<T>
-        extends AbstractClientStreamObserverAndPublisher<T>
-        implements QueueSubscription<T> {
+		extends AbstractClientStreamObserverAndPublisher<T>
+		implements QueueSubscription<T> {
 
-    RxClientStreamObserverAndPublisher(
-            Consumer<CallStreamObserver<?>> onSubscribe,
-            Runnable onTerminate) {
-        super(new SimpleQueueAdapter<T>(new SpscArrayQueue<T>(DEFAULT_CHUNK_SIZE)), onSubscribe, onTerminate);
-    }
+	RxClientStreamObserverAndPublisher(
+			Consumer<CallStreamObserver<?>> onSubscribe,
+			Runnable onTerminate) {
+		super(new SimpleQueueAdapter<T>(new SpscArrayQueue<T>(DEFAULT_CHUNK_SIZE)), onSubscribe, onTerminate);
+	}
 
-    RxClientStreamObserverAndPublisher(
-            Consumer<CallStreamObserver<?>> onSubscribe,
-            Runnable onTerminate,
-            int prefetch,
-            int lowTide) {
-        super(new SimpleQueueAdapter<T>(new SpscArrayQueue<T>(prefetch)), onSubscribe, onTerminate, prefetch, lowTide);
-    }
+	RxClientStreamObserverAndPublisher(
+			Consumer<CallStreamObserver<?>> onSubscribe,
+			Runnable onTerminate,
+			int prefetch,
+			int lowTide) {
+		super(new SimpleQueueAdapter<T>(new SpscArrayQueue<T>(prefetch)), onSubscribe, onTerminate, prefetch, lowTide);
+	}
 
-    @Override
-    public int requestFusion(int requestedMode) {
-        if ((requestedMode & QueueFuseable.ASYNC) != 0) {
-            outputFused = true;
-            return QueueFuseable.ASYNC;
-        }
-        return QueueFuseable.NONE;
-    }
+	@Override
+	public int requestFusion(int requestedMode) {
+		if ((requestedMode & QueueFuseable.ASYNC) != 0) {
+			outputFused = true;
+			return QueueFuseable.ASYNC;
+		}
+		return QueueFuseable.NONE;
+	}
 }

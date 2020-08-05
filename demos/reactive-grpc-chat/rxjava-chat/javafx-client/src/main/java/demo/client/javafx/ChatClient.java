@@ -5,7 +5,7 @@ import demo.proto.ChatProto;
 import demo.proto.RxChatGrpc;
 import io.grpc.ManagedChannel;
 import io.grpc.ManagedChannelBuilder;
-import io.reactivex.Single;
+import io.reactivex.rxjava3.core.Single;
 import io.reactivex.disposables.CompositeDisposable;
 import io.reactivex.rxjavafx.observables.JavaFxObservable;
 import io.reactivex.rxjavafx.schedulers.JavaFxScheduler;
@@ -71,7 +71,7 @@ public class ChatClient extends Application {
                 .just(Empty.getDefaultInstance())
                 .subscribeOn(Schedulers.io())
                 // Invoke
-                .as(stub::getMessages)
+                .to(stub::getMessages)
                 .map(this::fromMessage)
                 // Execute
                 .observeOn(JavaFxScheduler.platform())

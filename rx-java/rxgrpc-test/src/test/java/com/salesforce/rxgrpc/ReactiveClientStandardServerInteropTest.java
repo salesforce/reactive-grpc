@@ -7,23 +7,24 @@
 
 package com.salesforce.rxgrpc;
 
-import io.grpc.ManagedChannel;
-import io.grpc.ManagedChannelBuilder;
-import io.grpc.Server;
-import io.grpc.ServerBuilder;
-import io.grpc.stub.StreamObserver;
-import io.reactivex.Flowable;
-import io.reactivex.Single;
-import io.reactivex.observers.TestObserver;
-import io.reactivex.subscribers.TestSubscriber;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.concurrent.TimeUnit;
+
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Rule;
 import org.junit.Test;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.concurrent.TimeUnit;
+import io.grpc.ManagedChannel;
+import io.grpc.ManagedChannelBuilder;
+import io.grpc.Server;
+import io.grpc.ServerBuilder;
+import io.grpc.stub.StreamObserver;
+import io.reactivex.rxjava3.core.Flowable;
+import io.reactivex.rxjava3.core.Single;
+import io.reactivex.rxjava3.observers.TestObserver;
+import io.reactivex.rxjava3.subscribers.TestSubscriber;
 
 @SuppressWarnings("Duplicates")
 public class ReactiveClientStandardServerInteropTest {
@@ -118,7 +119,7 @@ public class ReactiveClientStandardServerInteropTest {
     }
 
     @Test
-    public void oneToOne() {
+    public void oneToOne() throws InterruptedException {
         RxGreeterGrpc.RxGreeterStub stub = RxGreeterGrpc.newRxStub(channel);
         Single<String> rxRequest = Single.just("World");
         Single<String> rxResponse = rxRequest
@@ -127,46 +128,46 @@ public class ReactiveClientStandardServerInteropTest {
                 .map(this::fromResponse);
 
         TestObserver<String> test = rxResponse.test();
-        test.awaitTerminalEvent(1, TimeUnit.SECONDS);
+        test.await(1, TimeUnit.SECONDS);
 
         test.assertNoErrors();
         test.assertValue("Hello World");
     }
 
     @Test
-    public void oneToMany() {
+    public void oneToMany() throws InterruptedException {
         RxGreeterGrpc.RxGreeterStub stub = RxGreeterGrpc.newRxStub(channel);
         Single<String> rxRequest = Single.just("World");
         Flowable<String> rxResponse = rxRequest
                 .map(this::toRequest)
-                .as(stub::sayHelloRespStream)
+                .to(stub::sayHelloRespStream)
                 .map(this::fromResponse);
 
         TestSubscriber<String> test = rxResponse.test();
-        test.awaitTerminalEvent(1, TimeUnit.SECONDS);
+        test.await(1, TimeUnit.SECONDS);
 
         test.assertNoErrors();
         test.assertValues("Hello World", "Hi World", "Greetings World");
     }
 
     @Test
-    public void manyToOne() {
+    public void manyToOne() throws InterruptedException {
         RxGreeterGrpc.RxGreeterStub stub = RxGreeterGrpc.newRxStub(channel);
         Flowable<String> rxRequest = Flowable.just("A", "B", "C");
         Single<String> rxResponse = rxRequest
                 .map(this::toRequest)
-                .as(stub::sayHelloReqStream)
+                .to(stub::sayHelloReqStream)
                 .map(this::fromResponse);
 
         TestObserver<String> test = rxResponse.test();
-        test.awaitTerminalEvent(1, TimeUnit.SECONDS);
+        test.await(1, TimeUnit.SECONDS);
 
         test.assertNoErrors();
         test.assertValue("Hello A and B and C");
     }
 
     @Test
-    public void manyToMany() {
+    public void manyToMany() throws InterruptedException {
         RxGreeterGrpc.RxGreeterStub stub = RxGreeterGrpc.newRxStub(channel);
         Flowable<String> rxRequest = Flowable.just("A", "B", "C", "D");
         Flowable<String> rxResponse = rxRequest
@@ -175,7 +176,7 @@ public class ReactiveClientStandardServerInteropTest {
                 .map(this::fromResponse);
 
         TestSubscriber<String> test = rxResponse.test();
-        test.awaitTerminalEvent(1, TimeUnit.SECONDS);
+        test.await(1, TimeUnit.SECONDS);
 
         test.assertNoErrors();
         test.assertValues("Hello A and B", "Hello C and D");

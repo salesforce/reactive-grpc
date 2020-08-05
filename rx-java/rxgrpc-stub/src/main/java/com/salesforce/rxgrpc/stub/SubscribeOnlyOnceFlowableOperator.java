@@ -8,15 +8,16 @@
 package com.salesforce.rxgrpc.stub;
 
 
-import io.reactivex.FlowableOperator;
+import java.util.concurrent.atomic.AtomicBoolean;
+
 import org.reactivestreams.Subscriber;
 import org.reactivestreams.Subscription;
 
-import java.util.concurrent.atomic.AtomicBoolean;
+import io.reactivex.rxjava3.core.FlowableOperator;
 
 /**
  * SubscribeOnlyOnceFlowableOperator throws an exception if a user attempts to subscribe more than once to a
- * {@link io.reactivex.Flowable}.
+ * {@link io.reactivex.rxjava3.core.Flowable}.
  *
  * @param <T> T
  */

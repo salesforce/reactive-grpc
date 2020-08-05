@@ -25,14 +25,7 @@
 
     <build>
         <plugins>
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-checkstyle-plugin</artifactId>
-                <configuration>
-                    <configLocation>../../checkstyle.xml</configLocation>
-                    <suppressionsLocation>../../checkstyle_ignore.xml</suppressionsLocation>
-                </configuration>
-            </plugin>
+
         </plugins>
     </build>
 </project>

@@ -7,22 +7,23 @@
 
 package com.salesforce.rxgrpc;
 
-import com.google.common.collect.Lists;
-import com.salesforce.grpc.testing.contrib.NettyGrpcServerRule;
-import io.reactivex.BackpressureStrategy;
-import io.reactivex.Flowable;
-import io.reactivex.Observable;
-import io.reactivex.Single;
-import io.reactivex.flowables.ConnectableFlowable;
-import io.reactivex.observers.TestObserver;
-import org.junit.Rule;
-import org.junit.Test;
+import static org.assertj.core.api.Assertions.assertThat;
 
 import java.util.ArrayList;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicReference;
 
-import static org.assertj.core.api.Assertions.assertThat;
+import org.junit.Rule;
+import org.junit.Test;
+
+import com.google.common.collect.Lists;
+import com.salesforce.grpc.testing.contrib.NettyGrpcServerRule;
+
+import io.reactivex.rxjava3.core.BackpressureStrategy;
+import io.reactivex.rxjava3.core.Flowable;
+import io.reactivex.rxjava3.core.Observable;
+import io.reactivex.rxjava3.core.Single;
+import io.reactivex.rxjava3.observers.TestObserver;
 
 /**
  * Test to demonstrate splitting the output of an RxGrpc stream in RxJava.
@@ -33,7 +34,7 @@ public class ShareIntegrationTest {
     public NettyGrpcServerRule serverRule = new NettyGrpcServerRule();
 
     @Test
-    public void serverPublishShouldWork() {
+    public void serverPublishShouldWork() throws InterruptedException {
         RxGreeterGrpc.GreeterImplBase svc = new RxGreeterGrpc.GreeterImplBase() {
             @Override
             public Single<HelloResponse> sayHelloReqStream(Flowable<HelloRequest> rxRequest) {
@@ -66,17 +67,17 @@ public class ShareIntegrationTest {
 
         TestObserver<String> resp = Flowable.just("Alpha", "Bravo", "Charlie")
                 .map(s -> HelloRequest.newBuilder().setName(s).build())
-                .as(stub::sayHelloReqStream)
+                .to(stub::sayHelloReqStream)
                 .map(HelloResponse::getMessage)
                 .test();
 
-        resp.awaitTerminalEvent(5, TimeUnit.SECONDS);
+        resp.await(5, TimeUnit.SECONDS);
         resp.assertComplete();
         resp.assertValue("Hello Alpha and Bravo and Charlie");
     }
 
     @Test
-    public void clientPublishShouldWork() {
+    public void clientPublishShouldWork() throws InterruptedException {
         RxGreeterGrpc.GreeterImplBase svc = new RxGreeterGrpc.GreeterImplBase() {
             @Override
             public Flowable<HelloResponse> sayHelloRespStream(Single<HelloRequest> request) {
@@ -114,13 +115,13 @@ public class ShareIntegrationTest {
             .singleOrError()
             .test();
 
-        resp.awaitTerminalEvent(5, TimeUnit.SECONDS);
+        resp.await(5, TimeUnit.SECONDS);
         resp.assertComplete();
         resp.assertValue("Hello Alpha and Bravo and Charlie");
     }
 
     @Test
-    public void serverShareShouldWork() {
+    public void serverShareShouldWork() throws InterruptedException {
         AtomicReference<String> other = new AtomicReference<>();
 
         RxGreeterGrpc.GreeterImplBase svc = new RxGreeterGrpc.GreeterImplBase() {
@@ -146,11 +147,11 @@ public class ShareIntegrationTest {
 
         TestObserver<String> resp = Flowable.just("Alpha", "Bravo", "Charlie")
                 .map(n -> HelloRequest.newBuilder().setName(n).build())
-                .as(stub::sayHelloReqStream)
+                .to(stub::sayHelloReqStream)
                 .map(HelloResponse::getMessage)
                 .test();
 
-        resp.awaitTerminalEvent(1, TimeUnit.SECONDS);
+        resp.await(1, TimeUnit.SECONDS);
         resp.assertComplete();
         resp.assertValue("&Alpha&Bravo&Charlie");
 
@@ -158,7 +159,7 @@ public class ShareIntegrationTest {
     }
 
     @Test
-    public void clientShareShouldWork() {
+    public void clientShareShouldWork() throws InterruptedException {
         RxGreeterGrpc.GreeterImplBase svc = new RxGreeterGrpc.GreeterImplBase() {
             @Override
             public Flowable<HelloResponse> sayHelloRespStream(Single<HelloRequest> request) {
@@ -176,7 +177,7 @@ public class ShareIntegrationTest {
         RxGreeterGrpc.RxGreeterStub stub = RxGreeterGrpc.newRxStub(serverRule.getChannel());
 
         Flowable<HelloResponse> share = Single.just(HelloRequest.getDefaultInstance())
-                .as(stub::sayHelloRespStream)
+                .to(stub::sayHelloRespStream)
                 .share();
 
         // Split the response stream!
@@ -190,11 +191,11 @@ public class ShareIntegrationTest {
                 .reduce("", (l, r) -> l + "&" + r)
                 .test();
 
-        resp1.awaitTerminalEvent(1, TimeUnit.SECONDS);
+        resp1.await(1, TimeUnit.SECONDS);
         resp1.assertComplete();
         resp1.assertValue("+Alpha+Bravo+Charlie");
 
-        resp2.awaitTerminalEvent(1, TimeUnit.SECONDS);
+        resp2.await(1, TimeUnit.SECONDS);
         resp2.assertComplete();
         resp2.assertValue("&Alpha&Bravo&Charlie");
     }

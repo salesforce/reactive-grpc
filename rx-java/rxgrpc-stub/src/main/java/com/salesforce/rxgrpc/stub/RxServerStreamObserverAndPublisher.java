@@ -9,11 +9,12 @@ package com.salesforce.rxgrpc.stub;
 
 import com.salesforce.reactivegrpc.common.AbstractServerStreamObserverAndPublisher;
 import com.salesforce.reactivegrpc.common.Consumer;
+
 import io.grpc.stub.CallStreamObserver;
 import io.grpc.stub.ServerCallStreamObserver;
-import io.reactivex.internal.fuseable.QueueFuseable;
-import io.reactivex.internal.fuseable.QueueSubscription;
-import io.reactivex.internal.queue.SpscArrayQueue;
+import io.reactivex.rxjava3.internal.fuseable.QueueFuseable;
+import io.reactivex.rxjava3.internal.fuseable.QueueSubscription;
+import io.reactivex.rxjava3.internal.queue.SpscArrayQueue;
 
 /**
  * TODO: Explain what this class does.

@@ -7,18 +7,8 @@
 
 package com.salesforce.rxgrpc;
 
-import com.google.protobuf.Empty;
-import com.salesforce.grpc.testing.contrib.NettyGrpcServerRule;
-import com.salesforce.servicelibs.NumberProto;
-import com.salesforce.servicelibs.RxNumbersGrpc;
-import io.reactivex.Flowable;
-import io.reactivex.Single;
-import io.reactivex.disposables.Disposable;
-import io.reactivex.observers.TestObserver;
-import io.reactivex.subscribers.TestSubscriber;
-import org.awaitility.Duration;
-import org.junit.Rule;
-import org.junit.Test;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.awaitility.Awaitility.await;
 
 import java.util.Arrays;
 import java.util.concurrent.TimeUnit;
@@ -26,8 +16,21 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.IntStream;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.awaitility.Awaitility.await;
+import org.awaitility.Duration;
+import org.junit.Rule;
+import org.junit.Test;
+
+import com.google.protobuf.Empty;
+import com.salesforce.grpc.testing.contrib.NettyGrpcServerRule;
+import com.salesforce.servicelibs.NumberProto;
+import com.salesforce.servicelibs.NumberProto.Number;
+import com.salesforce.servicelibs.RxNumbersGrpc;
+
+import io.reactivex.rxjava3.core.Flowable;
+import io.reactivex.rxjava3.core.Single;
+import io.reactivex.rxjava3.disposables.Disposable;
+import io.reactivex.rxjava3.observers.TestObserver;
+import io.reactivex.rxjava3.subscribers.TestSubscriber;
 
 @SuppressWarnings({"unchecked", "Duplicates"})
 public class CancellationPropagationIntegrationTest {
@@ -103,7 +106,7 @@ public class CancellationPropagationIntegrationTest {
 
         RxNumbersGrpc.RxNumbersStub stub = RxNumbersGrpc.newRxStub(serverRule.getChannel());
         TestSubscriber<NumberProto.Number> subscription = Single.just(Empty.getDefaultInstance())
-                .as(stub::responsePressure)
+                .to(stub::responsePressure)
                 .doOnNext(number -> System.out.println(number.getNumber(0)))
                 .doOnError(throwable -> System.out.println(throwable.getMessage()))
                 .doOnComplete(() -> System.out.println("Completed"))
@@ -111,12 +114,12 @@ public class CancellationPropagationIntegrationTest {
                 .test();
 
         Thread.sleep(250);
-        subscription.dispose();
+        subscription.cancel();
         Thread.sleep(250);
 
-        subscription.awaitTerminalEvent(3, TimeUnit.SECONDS);
+        subscription.await(3, TimeUnit.SECONDS);
         // Cancellation may or may not deliver the last generated message due to delays in the gRPC processing thread
-        assertThat(Math.abs(subscription.valueCount() - svc.getLastNumberProduced())).isLessThanOrEqualTo(3);
+        assertThat(Math.abs(subscription.values().size() - svc.getLastNumberProduced())).isLessThanOrEqualTo(3);
         assertThat(svc.wasCanceled()).isTrue();
 
         errorRule.verifyNoError();
@@ -129,7 +132,7 @@ public class CancellationPropagationIntegrationTest {
 
         RxNumbersGrpc.RxNumbersStub stub = RxNumbersGrpc.newRxStub(serverRule.getChannel());
         TestSubscriber<NumberProto.Number> subscription =  Single.just(Empty.getDefaultInstance())
-                .as(stub::responsePressure)
+                .to(stub::responsePressure)
                 .doOnNext(number -> System.out.println(number.getNumber(0)))
                 .doOnError(throwable -> System.out.println(throwable.getMessage()))
                 .doOnComplete(() -> System.out.println("Completed"))
@@ -139,18 +142,18 @@ public class CancellationPropagationIntegrationTest {
 
         // Consume some work
         Thread.sleep(TimeUnit.SECONDS.toMillis(1));
-        subscription.dispose();
+        subscription.cancel();
 
-        subscription.awaitTerminalEvent(3, TimeUnit.SECONDS);
+        subscription.await(3, TimeUnit.SECONDS);
         subscription.assertValueCount(10);
-        subscription.assertTerminated();
+        subscription.assertComplete();
         assertThat(svc.wasCanceled()).isTrue();
 
         errorRule.verifyNoError();
     }
 
     @Test
-    public void serverCanCancelClientStreamImplicitly() {
+    public void serverCanCancelClientStreamImplicitly() throws InterruptedException {
         TestService svc = new TestService();
         serverRule.getServiceRegistry().addService(svc);
 
@@ -174,15 +177,14 @@ public class CancellationPropagationIntegrationTest {
                     System.out.println("Client canceled");
                 });
 
-        TestObserver<NumberProto.Number> observer = request
-                .as(stub::requestPressure)
+        TestObserver<Number> observer = request
+                .to(stub::requestPressure)
                 .doOnSuccess(number -> System.out.println(number.getNumber(0)))
                 .doOnError(throwable -> System.out.println(throwable.getMessage()))
                 .test();
 
-        observer.awaitTerminalEvent(3, TimeUnit.SECONDS);
+        observer.await(3, TimeUnit.SECONDS);
         observer.assertComplete();
-        observer.assertTerminated();
 
         await().atMost(Duration.FIVE_HUNDRED_MILLISECONDS).untilTrue(requestWasCanceled);
 
@@ -193,7 +195,7 @@ public class CancellationPropagationIntegrationTest {
     }
 
     @Test
-    public void serverCanCancelClientStreamExplicitly() {
+    public void serverCanCancelClientStreamExplicitly() throws InterruptedException {
         TestService svc = new TestService();
         serverRule.getServiceRegistry().addService(svc);
 
@@ -218,14 +220,13 @@ public class CancellationPropagationIntegrationTest {
                 });
 
         TestObserver<NumberProto.Number> observer = request
-                .as(stub::requestPressure)
+                .to(stub::requestPressure)
                 .doOnSuccess(number -> System.out.println(number.getNumber(0)))
                 .doOnError(throwable -> System.out.println(throwable.getMessage()))
                 .test();
 
-        observer.awaitTerminalEvent();
+        observer.await(30, TimeUnit.SECONDS);
         observer.assertComplete();
-        observer.assertTerminated();
 
         await().atMost(Duration.FIVE_HUNDRED_MILLISECONDS).untilTrue(requestWasCanceled);
 
@@ -236,7 +237,7 @@ public class CancellationPropagationIntegrationTest {
     }
 
     @Test
-    public void serverCanCancelClientStreamImplicitlyBidi() {
+    public void serverCanCancelClientStreamImplicitlyBidi() throws InterruptedException {
         TestService svc = new TestService();
         serverRule.getServiceRegistry().addService(svc);
 
@@ -266,8 +267,7 @@ public class CancellationPropagationIntegrationTest {
                 .doOnError(throwable -> System.out.println(throwable.getMessage()))
                 .test();
 
-        observer.awaitTerminalEvent(3, TimeUnit.SECONDS);
-        observer.assertTerminated();
+        observer.await(3, TimeUnit.SECONDS);
         assertThat(requestWasCanceled.get()).isTrue();
         assertThat(requestDidProduce.get()).isTrue();
 
@@ -275,7 +275,7 @@ public class CancellationPropagationIntegrationTest {
     }
 
     @Test
-    public void serverCanCancelClientStreamExplicitlyBidi() {
+    public void serverCanCancelClientStreamExplicitlyBidi() throws InterruptedException {
         TestService svc = new TestService();
         serverRule.getServiceRegistry().addService(svc);
 
@@ -305,8 +305,7 @@ public class CancellationPropagationIntegrationTest {
                 .doOnError(throwable -> System.out.println(throwable.getMessage()))
                 .test();
 
-        observer.awaitTerminalEvent();
-        observer.assertTerminated();
+        observer.await(30, TimeUnit.SECONDS);
         assertThat(requestWasCanceled.get()).isTrue();
         assertThat(requestDidProduce.get()).isTrue();
 

@@ -5,7 +5,7 @@ import demo.proto.HelloResponse;
 import demo.proto.RxGreeterGrpc;
 import io.grpc.ManagedChannel;
 import io.grpc.ManagedChannelBuilder;
-import io.reactivex.Single;
+import io.reactivex.rxjava3.core.Single;
 
 import java.time.Duration;
 
@@ -17,17 +17,17 @@ public class RxgrpcAsyncChainClient {
         Single.just("World")
                 // Call UNARY service asynchronously
                 .map(RxgrpcAsyncChainClient::request)
-                .as(stub::greet)
+                .to(stub::greet)
                 .map(HelloResponse::getMessage)
 
                 // Call STREAMING RESPONSE service asynchronously
                 .map(RxgrpcAsyncChainClient::request)
-                .as(stub::multiGreet)
+                .to(stub::multiGreet)
                 .map(HelloResponse::getMessage)
 
                 // Call BI-DIRECTIONAL STREAMING service asynchronously
                 .map(RxgrpcAsyncChainClient::request)
-                .as(stub::streamGreet)
+                .to(stub::streamGreet)
                 .map(HelloResponse::getMessage)
 
                 // Final processing

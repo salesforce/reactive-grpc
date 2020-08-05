@@ -5,8 +5,8 @@ import demo.proto.HelloResponse;
 import demo.proto.RxGreeterGrpc;
 import io.grpc.Server;
 import io.grpc.ServerBuilder;
-import io.reactivex.Flowable;
-import io.reactivex.Single;
+import io.reactivex.rxjava3.core.Flowable;
+import io.reactivex.rxjava3.core.Single;
 
 /**
  * This server implements a unary operation, a streaming response operation, and a bi-directional streaming operation.

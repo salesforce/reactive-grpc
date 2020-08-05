@@ -8,38 +8,39 @@ package com.salesforce.reactivegrpc.common;
 import java.util.Queue;
 
 import io.grpc.stub.CallStreamObserver;
-import io.reactivex.internal.fuseable.QueueFuseable;
-import io.reactivex.internal.fuseable.QueueSubscription;
+import io.reactivex.rxjava3.internal.fuseable.QueueFuseable;
+import io.reactivex.rxjava3.internal.fuseable.QueueSubscription;
 
 /**
  * This class is a test-purpose implementation of the
  * {@link AbstractStreamObserverAndPublisher} class that supports fusion from RxJava 2
+ *
  * @param <T>
  */
 class TestStreamObserverAndPublisherWithFusion<T> extends AbstractStreamObserverAndPublisher<T>
-        implements QueueSubscription<T> {
+		implements QueueSubscription<T> {
 
-    TestStreamObserverAndPublisherWithFusion(Queue<T> queue, Consumer<CallStreamObserver<?>> onSubscribe) {
-        super(queue, onSubscribe);
-    }
+	TestStreamObserverAndPublisherWithFusion(Queue<T> queue, Consumer<CallStreamObserver<?>> onSubscribe) {
+		super(queue, onSubscribe);
+	}
 
-    TestStreamObserverAndPublisherWithFusion(Queue<T> queue,
-            Consumer<CallStreamObserver<?>> onSubscribe,
-            Runnable onTerminate) {
-        super(queue, onSubscribe, onTerminate);
-    }
+	TestStreamObserverAndPublisherWithFusion(Queue<T> queue,
+			Consumer<CallStreamObserver<?>> onSubscribe,
+			Runnable onTerminate) {
+		super(queue, onSubscribe, onTerminate);
+	}
 
-    @Override
-    public int requestFusion(int requestedMode) {
-        if ((requestedMode & QueueFuseable.ASYNC) != 0) {
-            outputFused = true;
-            return QueueFuseable.ASYNC;
-        }
-        return QueueFuseable.NONE;
-    }
+	@Override
+	public int requestFusion(int requestedMode) {
+		if ((requestedMode & QueueFuseable.ASYNC) != 0) {
+			outputFused = true;
+			return QueueFuseable.ASYNC;
+		}
+		return QueueFuseable.NONE;
+	}
 
-    @Override
-    public boolean offer(T t, T t1) {
-        throw new UnsupportedOperationException();
-    }
+	@Override
+	public boolean offer(T t, T t1) {
+		throw new UnsupportedOperationException();
+	}
 }

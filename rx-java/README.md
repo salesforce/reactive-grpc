@@ -99,8 +99,8 @@ Flowable<HelloResponse> flowableResponse = flowableRequest.compose(stub::sayHell
 
 #### One→Many, Many→One
 ```java
-Single<HelloResponse> singleResponse = flowableRequest.as(stub::sayHelloRequestStream);
-Flowable<HelloResponse> flowableResponse = singleRequest.as(stub::sayHelloResponseStream);
+Single<HelloResponse> singleResponse = flowableRequest.to(stub::sayHelloRequestStream);
+Flowable<HelloResponse> flowableResponse = singleRequest.to(stub::sayHelloResponseStream);
 ```
   
 ## Retrying streaming requests

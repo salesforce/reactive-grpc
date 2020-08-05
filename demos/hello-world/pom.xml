@@ -13,16 +13,17 @@
         <rxjava.version>2.1.10</rxjava.version>
         <reactive.grpc.version>1.0.0</reactive.grpc.version>
         <grpc.contrib.version>0.8.0</grpc.contrib.version>
-        <grpc.version>1.23.0</grpc.version>
-        <protoc.version>3.9.0</protoc.version>
+        <grpc.version>1.31.0</grpc.version>
+        <protoc.version>3.12.0</protoc.version>
     </properties>
 
     <dependencies>
         <dependency>
-            <groupId>io.reactivex.rxjava2</groupId>
-            <artifactId>rxjava</artifactId>
-            <version>${rxjava.version}</version>
-        </dependency>
+    <groupId>io.reactivex.rxjava3</groupId>
+    <artifactId>rxjava</artifactId>
+    <version>${rxjava.version}</version>
+</dependency>
+
         <dependency>
             <groupId>io.grpc</groupId>
             <artifactId>grpc-netty</artifactId>

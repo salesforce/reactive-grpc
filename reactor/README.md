@@ -101,8 +101,8 @@ Flux<HelloResponse> fluxResponse = fluxRequest.transform(stub::sayHelloBothStrea
 
 #### One→Many, Many→One
 ```java
-Mono<HelloResponse> monoResponse = fluxRequest.as(stub::sayHelloRequestStream);
-Flux<HelloResponse> fluxResponse = monoRequest.as(stub::sayHelloResponseStream);
+Mono<HelloResponse> monoResponse = fluxRequest.to(stub::sayHelloRequestStream);
+Flux<HelloResponse> fluxResponse = monoRequest.to(stub::sayHelloResponseStream);
 ```
 
 ## Retrying streaming requests

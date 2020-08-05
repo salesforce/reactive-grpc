@@ -7,14 +7,36 @@
 
 package com.salesforce.rxgrpc;
 
-import io.grpc.*;
-import io.reactivex.Single;
-import io.reactivex.observers.TestObserver;
-import org.junit.*;
+import static org.assertj.core.api.Assertions.assertThat;
 
 import java.util.concurrent.TimeUnit;
 
-import static org.assertj.core.api.Assertions.assertThat;
+import org.junit.AfterClass;
+import org.junit.Before;
+import org.junit.BeforeClass;
+import org.junit.Rule;
+import org.junit.Test;
+
+import io.grpc.CallOptions;
+import io.grpc.Channel;
+import io.grpc.ClientCall;
+import io.grpc.ClientInterceptor;
+import io.grpc.Context;
+import io.grpc.Contexts;
+import io.grpc.ForwardingClientCall;
+import io.grpc.ForwardingClientCallListener;
+import io.grpc.ManagedChannel;
+import io.grpc.ManagedChannelBuilder;
+import io.grpc.Metadata;
+import io.grpc.MethodDescriptor;
+import io.grpc.Server;
+import io.grpc.ServerBuilder;
+import io.grpc.ServerCall;
+import io.grpc.ServerCallHandler;
+import io.grpc.ServerInterceptor;
+import io.grpc.ServerInterceptors;
+import io.reactivex.rxjava3.core.Single;
+import io.reactivex.rxjava3.observers.TestObserver;
 
 @SuppressWarnings("Duplicates")
 public class ContextPropagationIntegrationTest {
@@ -119,13 +141,19 @@ public class ContextPropagationIntegrationTest {
         RxGreeterGrpc.RxGreeterStub stub = RxGreeterGrpc.newRxStub(channel);
         Context.current()
                 .withValue(ctxKey, "ClientSendsContext")
-                .run(() -> worldReq.compose(stub::sayHello).test().awaitTerminalEvent(1, TimeUnit.SECONDS));
+                .run(() -> {
+                    try {
+                        worldReq.compose(stub::sayHello).test().await(1, TimeUnit.SECONDS);
+                    } catch (InterruptedException e) {
+                        e.printStackTrace();
+                    }
+                });
 
         assertThat(clientInterceptor.getSendMessageCtxValue()).isEqualTo("ClientSendsContext");
     }
 
     @Test
-    public void ClientGetsContext() {
+    public void ClientGetsContext() throws InterruptedException {
         RxGreeterGrpc.RxGreeterStub stub = RxGreeterGrpc.newRxStub(channel);
 
         TestObserver<HelloResponse> testObserver = worldReq
@@ -136,15 +164,15 @@ public class ContextPropagationIntegrationTest {
                 })
                 .test();
 
-        testObserver.awaitTerminalEvent(1, TimeUnit.SECONDS);
+        testObserver.await(1, TimeUnit.SECONDS);
         testObserver.assertComplete();
     }
 
     @Test
-    public void ServerAcceptsContext() {
+    public void ServerAcceptsContext() throws InterruptedException {
         RxGreeterGrpc.RxGreeterStub stub = RxGreeterGrpc.newRxStub(channel);
 
-        worldReq.compose(stub::sayHello).test().awaitTerminalEvent(1, TimeUnit.SECONDS);
+        worldReq.compose(stub::sayHello).test().await(1, TimeUnit.SECONDS);
 
         assertThat(svc.getReceivedCtxValue()).isEqualTo("ServerAcceptsContext");
     }

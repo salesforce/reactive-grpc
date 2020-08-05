@@ -21,10 +21,11 @@
 
     <dependencies>
         <dependency>
-            <groupId>io.reactivex.rxjava2</groupId>
-            <artifactId>rxjava</artifactId>
-            <version>${rxjava.version}</version>
-        </dependency>
+    <groupId>io.reactivex.rxjava3</groupId>
+    <artifactId>rxjava</artifactId>
+    <version>${rxjava.version}</version>
+</dependency>
+
         <dependency>
             <groupId>${project.groupId}</groupId>
             <artifactId>reactor-grpc-stub</artifactId>

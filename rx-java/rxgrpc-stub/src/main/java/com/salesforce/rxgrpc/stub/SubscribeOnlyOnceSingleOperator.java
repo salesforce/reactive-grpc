@@ -7,15 +7,15 @@
 
 package com.salesforce.rxgrpc.stub;
 
-import io.reactivex.SingleObserver;
-import io.reactivex.SingleOperator;
-import io.reactivex.disposables.Disposable;
-
 import java.util.concurrent.atomic.AtomicBoolean;
+
+import io.reactivex.rxjava3.core.SingleObserver;
+import io.reactivex.rxjava3.core.SingleOperator;
+import io.reactivex.rxjava3.disposables.Disposable;
 
 /**
  * SubscribeOnlyOnceSingleOperator throws an exception if a user attempts to subscribe more than once to a
- * {@link io.reactivex.Single}.
+ * {@link io.reactivex.rxjava3.core.Single}.
  *
  * @param <T> T
  */

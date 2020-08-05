@@ -10,8 +10,8 @@ import java.util.Arrays;
 
 import com.salesforce.reactivegrpc.jmh.proto.Messages;
 import com.salesforce.reactivegrpc.jmh.proto.RxBenchmarkServiceGrpc;
-import io.reactivex.Flowable;
-import io.reactivex.Single;
+import io.reactivex.rxjava3.core.Flowable;
+import io.reactivex.rxjava3.core.Single;
 
 /**
  * RxJava benchmarking service.

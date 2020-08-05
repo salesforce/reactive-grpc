@@ -6,7 +6,7 @@ import demo.proto.RxChatGrpc;
 import io.grpc.ManagedChannel;
 import io.grpc.ManagedChannelBuilder;
 import io.reactivex.Observable;
-import io.reactivex.Single;
+import io.reactivex.rxjava3.core.Single;
 import io.reactivex.disposables.CompositeDisposable;
 import io.reactivex.disposables.Disposable;
 import jline.console.ConsoleReader;
@@ -42,7 +42,7 @@ public final class ChatClient {
          * Subscribe to incoming messages
          * ******************************/
         disposables.add(Single.just(Empty.getDefaultInstance())
-                .as(stub::getMessages)
+                .to(stub::getMessages)
                 .filter(message -> !message.getAuthor().equals(author))
                 .subscribe(message -> printLine(console, message.getAuthor(), message.getMessage())));
 

@@ -6,10 +6,11 @@
  */
 package com.salesforce.rxgrpc.stub;
 
-import com.salesforce.reactivegrpc.common.FusionModeAwareSubscription;
 import com.salesforce.reactivegrpc.common.AbstractUnimplementedQueue;
-import io.reactivex.exceptions.Exceptions;
-import io.reactivex.internal.fuseable.QueueSubscription;
+import com.salesforce.reactivegrpc.common.FusionModeAwareSubscription;
+
+import io.reactivex.rxjava3.exceptions.Exceptions;
+import io.reactivex.rxjava3.internal.fuseable.QueueSubscription;
 
 /**
  * Implementation of FusionModeAwareSubscription which encapsulate
@@ -51,7 +52,7 @@ class FusionAwareQueueSubscriptionAdapter<T> extends AbstractUnimplementedQueue<
     public T poll() {
         try {
             return delegate.poll();
-        } catch (Exception e) {
+        } catch (Throwable e) {
             throw Exceptions.propagate(e);
         }
     }

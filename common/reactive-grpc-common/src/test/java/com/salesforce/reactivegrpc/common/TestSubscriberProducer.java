@@ -6,9 +6,10 @@
  */
 package com.salesforce.reactivegrpc.common;
 
-import io.reactivex.FlowableSubscriber;
-import io.reactivex.internal.fuseable.QueueSubscription;
 import org.reactivestreams.Subscription;
+
+import io.reactivex.rxjava3.core.FlowableSubscriber;
+import io.reactivex.rxjava3.internal.fuseable.QueueSubscription;
 
 /**
  * This class is a test-purpose implementation of the
