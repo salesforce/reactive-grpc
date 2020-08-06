@@ -8,8 +8,8 @@ package com.salesforce.reactivegrpc.common;
 import java.util.Queue;
 
 import io.grpc.stub.CallStreamObserver;
-import io.reactivex.internal.fuseable.QueueFuseable;
-import io.reactivex.internal.fuseable.QueueSubscription;
+import io.reactivex.rxjava3.internal.fuseable.QueueFuseable;
+import io.reactivex.rxjava3.internal.fuseable.QueueSubscription;
 
 /**
  * This class is a test-purpose implementation of the

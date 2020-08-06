@@ -19,24 +19,24 @@ import java.util.concurrent.atomic.AtomicLong;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.concurrent.locks.LockSupport;
 
-import io.grpc.StatusException;
-import io.grpc.stub.CallStreamObserver;
-import io.reactivex.Completable;
-import io.reactivex.CompletableSource;
-import io.reactivex.Flowable;
-import io.reactivex.Observable;
-import io.reactivex.functions.Action;
-import io.reactivex.functions.Consumer;
-import io.reactivex.functions.Function;
-import io.reactivex.functions.LongConsumer;
-import io.reactivex.plugins.RxJavaPlugins;
-import io.reactivex.schedulers.Schedulers;
 import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.RepeatedTest;
 import org.junit.jupiter.api.Tag;
-import org.junit.jupiter.api.Test;
 import org.reactivestreams.Subscription;
+
+import io.grpc.StatusException;
+import io.grpc.stub.CallStreamObserver;
+import io.reactivex.rxjava3.core.Completable;
+import io.reactivex.rxjava3.core.CompletableSource;
+import io.reactivex.rxjava3.core.Flowable;
+import io.reactivex.rxjava3.core.Observable;
+import io.reactivex.rxjava3.functions.Action;
+import io.reactivex.rxjava3.functions.Consumer;
+import io.reactivex.rxjava3.functions.Function;
+import io.reactivex.rxjava3.functions.LongConsumer;
+import io.reactivex.rxjava3.plugins.RxJavaPlugins;
+import io.reactivex.rxjava3.schedulers.Schedulers;
 
 public class AbstractSubscriberAndProducerTest {
 
@@ -45,16 +45,15 @@ public class AbstractSubscriberAndProducerTest {
     private static final ExecutorService executorService  =
         Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors());
 
-
-    @BeforeEach
-    public void setUp() {
-        RxJavaPlugins.setErrorHandler(new Consumer<Throwable>() {
-            @Override
-            public void accept(Throwable throwable) {
-                unhandledThrowable.offer(throwable);
-            }
-        });
-    }
+	@BeforeEach
+	public void setUp() {
+		RxJavaPlugins.setErrorHandler(new io.reactivex.rxjava3.functions.Consumer<Throwable>() {
+			@Override
+			public void accept(Throwable throwable) {
+				unhandledThrowable.offer(throwable);
+			}
+		});
+	}
 
     @RepeatedTest(2)
     public void shouldSupportOnlySingleSubscribersTest() throws InterruptedException {

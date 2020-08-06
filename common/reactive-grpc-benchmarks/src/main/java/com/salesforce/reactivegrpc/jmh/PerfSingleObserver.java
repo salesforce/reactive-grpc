@@ -8,9 +8,10 @@ package com.salesforce.reactivegrpc.jmh;
 
 import java.util.concurrent.CountDownLatch;
 
-import io.reactivex.SingleObserver;
-import io.reactivex.disposables.Disposable;
 import org.openjdk.jmh.infra.Blackhole;
+
+import io.reactivex.rxjava3.core.SingleObserver;
+import io.reactivex.rxjava3.disposables.Disposable;
 
 /**
  * PerfSingleObserver is a sink for gRPC requests that blackholes all messages.

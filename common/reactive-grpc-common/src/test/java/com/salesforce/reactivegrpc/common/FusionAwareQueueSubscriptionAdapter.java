@@ -10,8 +10,8 @@ import java.util.Collection;
 import java.util.Iterator;
 import java.util.Queue;
 
-import io.reactivex.exceptions.Exceptions;
-import io.reactivex.internal.fuseable.QueueSubscription;
+import io.reactivex.rxjava3.exceptions.Exceptions;
+import io.reactivex.rxjava3.internal.fuseable.QueueSubscription;
 
 /**
  * Implementation of FusionModeAwareSubscription which encapsulate
@@ -57,7 +57,7 @@ public class FusionAwareQueueSubscriptionAdapter<T> implements Queue<T>, QueueSu
     public T poll() {
         try {
             return delegate.poll();
-        } catch (Exception e) {
+        } catch (Throwable e) {
             throw Exceptions.propagate(e);
         }
     }

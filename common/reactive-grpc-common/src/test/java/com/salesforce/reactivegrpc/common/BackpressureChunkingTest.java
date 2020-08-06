@@ -6,24 +6,25 @@
 
 package com.salesforce.reactivegrpc.common;
 
-import java.util.concurrent.ConcurrentLinkedQueue;
-import java.util.concurrent.Executors;
-import java.util.concurrent.TimeUnit;
-
-import io.reactivex.Flowable;
-import io.reactivex.functions.Function;
-import io.reactivex.schedulers.Schedulers;
-import io.reactivex.subscribers.TestSubscriber;
-import org.junit.jupiter.api.Test;
-import org.reactivestreams.Publisher;
-
 import static com.salesforce.reactivegrpc.common.AbstractStreamObserverAndPublisher.DEFAULT_CHUNK_SIZE;
 import static com.salesforce.reactivegrpc.common.AbstractStreamObserverAndPublisher.TWO_THIRDS_OF_DEFAULT_CHUNK_SIZE;
 import static org.assertj.core.api.Assertions.assertThat;
 
+import java.util.concurrent.ConcurrentLinkedQueue;
+import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
+
+import org.junit.jupiter.api.Test;
+import org.reactivestreams.Publisher;
+
+import io.reactivex.rxjava3.core.Flowable;
+import io.reactivex.rxjava3.functions.Function;
+import io.reactivex.rxjava3.schedulers.Schedulers;
+import io.reactivex.rxjava3.subscribers.TestSubscriber;
+
 public class BackpressureChunkingTest {
     @Test
-    public void chunkOperatorCorrectlyChunksInfiniteRequest() {
+    public void chunkOperatorCorrectlyChunksInfiniteRequest() throws InterruptedException {
         int chunkSize = DEFAULT_CHUNK_SIZE;
 
         int partOfChunk = TWO_THIRDS_OF_DEFAULT_CHUNK_SIZE;
@@ -36,17 +37,16 @@ public class BackpressureChunkingTest {
         TestSubscriber<Long> testSubscriber = Flowable.fromPublisher(source)
                                                       .test();
 
-
-        testSubscriber.awaitTerminalEvent();
-        testSubscriber.assertComplete();
+		testSubscriber.await(30, TimeUnit.SECONDS);
+		testSubscriber.assertComplete();
 
         assertThat(observer.requestsQueue).containsExactly(chunkSize, partOfChunk, partOfChunk, partOfChunk);
         assertThat(source.outputFused).isFalse();
     }
 
-    @Test
-    public void chunkOperatorCorrectlyChunksFiniteRequest() {
-        int chunkSize = DEFAULT_CHUNK_SIZE;
+	@Test
+	public void chunkOperatorCorrectlyChunksFiniteRequest() throws InterruptedException {
+		int chunkSize = DEFAULT_CHUNK_SIZE;
 
         int partOfChunk = TWO_THIRDS_OF_DEFAULT_CHUNK_SIZE;
         int num = chunkSize * 2;
@@ -58,16 +58,16 @@ public class BackpressureChunkingTest {
         TestSubscriber<Long> testSubscriber = Flowable.fromPublisher(source)
                                                       .test(num);
 
-        testSubscriber.awaitTerminalEvent();
-        testSubscriber.assertComplete();
+		testSubscriber.await(30, TimeUnit.SECONDS);
+		testSubscriber.assertComplete();
 
         assertThat(observer.requestsQueue).containsExactly(chunkSize, partOfChunk, partOfChunk, partOfChunk);
         assertThat(source.outputFused).isFalse();
     }
 
-    @Test
-    public void chunkOperatorCorrectlyChunksInfiniteRequestFusion() {
-        int chunkSize = DEFAULT_CHUNK_SIZE;
+	@Test
+	public void chunkOperatorCorrectlyChunksInfiniteRequestFusion() throws InterruptedException {
+		int chunkSize = DEFAULT_CHUNK_SIZE;
 
         int partOfChunk = TWO_THIRDS_OF_DEFAULT_CHUNK_SIZE;
         int num = chunkSize * 2;
@@ -80,17 +80,16 @@ public class BackpressureChunkingTest {
                                                       .observeOn(Schedulers.trampoline())
                                                       .test();
 
-
-        testSubscriber.awaitTerminalEvent();
-        testSubscriber.assertComplete();
+		testSubscriber.await(30, TimeUnit.SECONDS);
+		testSubscriber.assertComplete();
 
         assertThat(observer.requestsQueue).containsExactly(chunkSize, partOfChunk, partOfChunk, partOfChunk);
         assertThat(source.outputFused).isTrue();
     }
 
-    @Test
-    public void chunkOperatorCorrectlyChunksFiniteRequestFusion() {
-        int chunkSize = DEFAULT_CHUNK_SIZE;
+	@Test
+	public void chunkOperatorCorrectlyChunksFiniteRequestFusion() throws InterruptedException {
+		int chunkSize = DEFAULT_CHUNK_SIZE;
 
         int partOfChunk = TWO_THIRDS_OF_DEFAULT_CHUNK_SIZE;
         int num = chunkSize * 2;
@@ -103,8 +102,8 @@ public class BackpressureChunkingTest {
                                                       .observeOn(Schedulers.trampoline())
                                                       .test(num);
 
-        testSubscriber.awaitTerminalEvent();
-        testSubscriber.assertComplete();
+		testSubscriber.await(30, TimeUnit.SECONDS);
+		testSubscriber.assertComplete();
 
         assertThat(observer.requestsQueue).containsExactly(chunkSize, partOfChunk, partOfChunk, partOfChunk);
         assertThat(source.outputFused).isTrue();
@@ -114,7 +113,7 @@ public class BackpressureChunkingTest {
      * https://github.com/salesforce/reactive-grpc/issues/120
      */
     @Test
-    public void chunkOperatorWorksWithConcatMap() {
+    public void chunkOperatorWorksWithConcatMap() throws InterruptedException {
         int chunkSize = DEFAULT_CHUNK_SIZE;
 
         AbstractStreamObserverAndPublisher<Long> source =
@@ -130,8 +129,8 @@ public class BackpressureChunkingTest {
                                                       })
                                                       .test();
 
-        testSubscriber.awaitTerminalEvent();
-        testSubscriber.assertNoErrors();
+		testSubscriber.await(30, TimeUnit.SECONDS);
+		testSubscriber.assertNoErrors();
 
         assertThat(observer.requestsQueue).containsExactly(chunkSize);
     }
