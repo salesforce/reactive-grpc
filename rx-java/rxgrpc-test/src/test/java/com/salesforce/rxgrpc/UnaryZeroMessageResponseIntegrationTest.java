@@ -7,16 +7,19 @@
 
 package com.salesforce.rxgrpc;
 
-import com.salesforce.grpc.testing.contrib.NettyGrpcServerRule;
-import io.grpc.*;
-import io.grpc.stub.StreamObserver;
-import io.reactivex.Flowable;
-import io.reactivex.Single;
-import io.reactivex.observers.TestObserver;
+import java.util.concurrent.TimeUnit;
+
 import org.junit.Rule;
 import org.junit.Test;
 
-import java.util.concurrent.TimeUnit;
+import com.salesforce.grpc.testing.contrib.NettyGrpcServerRule;
+
+import io.grpc.Status;
+import io.grpc.StatusRuntimeException;
+import io.grpc.stub.StreamObserver;
+import io.reactivex.rxjava3.core.Flowable;
+import io.reactivex.rxjava3.core.Single;
+import io.reactivex.rxjava3.observers.TestObserver;
 
 @SuppressWarnings("Duplicates")
 public class UnaryZeroMessageResponseIntegrationTest {
@@ -54,7 +57,7 @@ public class UnaryZeroMessageResponseIntegrationTest {
     }
 
     @Test
-    public void zeroMessageResponseOneToOne() {
+    public void zeroMessageResponseOneToOne() throws InterruptedException {
         serverRule.getServiceRegistry().addService(new MissingUnaryResponseService());
 
         RxGreeterGrpc.RxGreeterStub stub = RxGreeterGrpc.newRxStub(serverRule.getChannel());
@@ -62,13 +65,13 @@ public class UnaryZeroMessageResponseIntegrationTest {
         Single<HelloResponse> resp = req.compose(stub::sayHello);
 
         TestObserver<String> testObserver = resp.map(HelloResponse::getMessage).test();
-        testObserver.awaitTerminalEvent(3, TimeUnit.SECONDS);
+        testObserver.await(3, TimeUnit.SECONDS);
         testObserver.assertError(StatusRuntimeException.class);
         testObserver.assertError(t -> ((StatusRuntimeException) t).getStatus().getCode() == Status.CANCELLED.getCode());
     }
 
     @Test
-    public void zeroMessageResponseManyToOne() {
+    public void zeroMessageResponseManyToOne() throws InterruptedException {
         serverRule.getServiceRegistry().addService(new MissingUnaryResponseService());
 
         RxGreeterGrpc.RxGreeterStub stub = RxGreeterGrpc.newRxStub(serverRule.getChannel());
@@ -77,10 +80,10 @@ public class UnaryZeroMessageResponseIntegrationTest {
                 HelloRequest.newBuilder().setName("b").build(),
                 HelloRequest.newBuilder().setName("c").build());
 
-        Single<HelloResponse> resp = req.as(stub::sayHelloReqStream);
+        Single<HelloResponse> resp = req.to(stub::sayHelloReqStream);
 
         TestObserver<String> testObserver = resp.map(HelloResponse::getMessage).test();
-        testObserver.awaitTerminalEvent(3, TimeUnit.SECONDS);
+        testObserver.await(3, TimeUnit.SECONDS);
         testObserver.assertError(StatusRuntimeException.class);
         testObserver.assertError(t -> ((StatusRuntimeException) t).getStatus().getCode() == Status.CANCELLED.getCode());
     }

@@ -7,29 +7,31 @@
 
 package com.salesforce.rxgrpc;
 
-import com.google.common.collect.Lists;
-import com.google.common.util.concurrent.Futures;
-import com.google.common.util.concurrent.ListenableFuture;
-import com.google.common.util.concurrent.ListeningExecutorService;
-import com.google.common.util.concurrent.MoreExecutors;
-import io.grpc.ManagedChannel;
-import io.grpc.ManagedChannelBuilder;
-import io.grpc.Server;
-import io.grpc.ServerBuilder;
-import io.reactivex.Flowable;
-import io.reactivex.Single;
-import io.reactivex.observers.TestObserver;
-import io.reactivex.subscribers.TestSubscriber;
-import org.junit.AfterClass;
-import org.junit.BeforeClass;
-import org.junit.Rule;
-import org.junit.Test;
+import static org.assertj.core.api.Assertions.assertThat;
 
 import java.util.List;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 
-import static org.assertj.core.api.Assertions.assertThat;
+import org.junit.AfterClass;
+import org.junit.BeforeClass;
+import org.junit.Rule;
+import org.junit.Test;
+
+import com.google.common.collect.Lists;
+import com.google.common.util.concurrent.Futures;
+import com.google.common.util.concurrent.ListenableFuture;
+import com.google.common.util.concurrent.ListeningExecutorService;
+import com.google.common.util.concurrent.MoreExecutors;
+
+import io.grpc.ManagedChannel;
+import io.grpc.ManagedChannelBuilder;
+import io.grpc.Server;
+import io.grpc.ServerBuilder;
+import io.reactivex.rxjava3.core.Flowable;
+import io.reactivex.rxjava3.core.Single;
+import io.reactivex.rxjava3.observers.TestObserver;
+import io.reactivex.rxjava3.subscribers.TestSubscriber;
 
 @SuppressWarnings("Duplicates")
 public class ConcurrentRequestIntegrationTest {
@@ -112,7 +114,7 @@ public class ConcurrentRequestIntegrationTest {
 
         // One to Many
         Single<HelloRequest> req2 = Single.just(HelloRequest.newBuilder().setName("rxjava").build());
-        Flowable<HelloResponse> resp2 = req2.as(stub::sayHelloRespStream);
+        Flowable<HelloResponse> resp2 = req2.to(stub::sayHelloRespStream);
 
         // Many to One
         Flowable<HelloRequest> req3 = Flowable.just(
@@ -120,7 +122,7 @@ public class ConcurrentRequestIntegrationTest {
                 HelloRequest.newBuilder().setName("b").build(),
                 HelloRequest.newBuilder().setName("c").build());
 
-        Single<HelloResponse> resp3 = req3.as(stub::sayHelloReqStream);
+        Single<HelloResponse> resp3 = req3.to(stub::sayHelloReqStream);
 
         // Many to Many
         Flowable<HelloRequest> req4 = Flowable.just(
@@ -140,7 +142,7 @@ public class ConcurrentRequestIntegrationTest {
             // One to One
             ListenableFuture<Boolean> oneToOne = executorService.submit(() -> {
                 TestObserver<String> testObserver1 = resp1.map(HelloResponse::getMessage).test();
-                testObserver1.awaitTerminalEvent(1, TimeUnit.SECONDS);
+                testObserver1.await(1, TimeUnit.SECONDS);
                 testObserver1.assertValue("Hello rxjava");
                 return true;
             });
@@ -148,7 +150,7 @@ public class ConcurrentRequestIntegrationTest {
             // One to Many
             ListenableFuture<Boolean> oneToMany = executorService.submit(() -> {
                 TestSubscriber<String> testSubscriber1 = resp2.map(HelloResponse::getMessage).test();
-                testSubscriber1.awaitTerminalEvent(1, TimeUnit.SECONDS);
+                testSubscriber1.await(1, TimeUnit.SECONDS);
                 testSubscriber1.assertValues("Hello rxjava", "Hi rxjava", "Greetings rxjava");
                 return true;
             });
@@ -156,7 +158,7 @@ public class ConcurrentRequestIntegrationTest {
             // Many to One
             ListenableFuture<Boolean> manyToOne = executorService.submit(() -> {
                 TestObserver<String> testObserver2 = resp3.map(HelloResponse::getMessage).test();
-                testObserver2.awaitTerminalEvent(1, TimeUnit.SECONDS);
+                testObserver2.await(1, TimeUnit.SECONDS);
                 testObserver2.assertValue("Hello a and b and c");
                 return true;
             });
@@ -164,7 +166,7 @@ public class ConcurrentRequestIntegrationTest {
             // Many to Many
             ListenableFuture<Boolean> manyToMany = executorService.submit(() -> {
                 TestSubscriber<String> testSubscriber2 = resp4.map(HelloResponse::getMessage).test();
-                testSubscriber2.awaitTerminalEvent(1, TimeUnit.SECONDS);
+                testSubscriber2.await(1, TimeUnit.SECONDS);
                 testSubscriber2.assertValues("Hello a and b", "Hello c and d", "Hello e");
                 testSubscriber2.assertComplete();
                 return true;

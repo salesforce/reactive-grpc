@@ -6,11 +6,12 @@
 
 package com.salesforce.rxgrpc;
 
+import java.util.function.Predicate;
+
 import org.junit.Assert;
 import org.junit.rules.ExternalResource;
-import io.reactivex.plugins.RxJavaPlugins;
 
-import java.util.function.Predicate;
+import io.reactivex.rxjava3.plugins.RxJavaPlugins;
 
 /**
  * {@code UnhandledRxJavaErrorRule} is a JUnit rule that captures unhandled RxJava exceptions.`

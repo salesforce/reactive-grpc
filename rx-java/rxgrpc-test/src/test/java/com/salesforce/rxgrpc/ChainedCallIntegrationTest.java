@@ -7,19 +7,20 @@
 
 package com.salesforce.rxgrpc;
 
-import io.grpc.ManagedChannel;
-import io.grpc.ManagedChannelBuilder;
-import io.grpc.Server;
-import io.grpc.ServerBuilder;
-import io.reactivex.Flowable;
-import io.reactivex.Single;
-import io.reactivex.observers.TestObserver;
+import java.util.concurrent.TimeUnit;
+
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 
-import java.util.concurrent.TimeUnit;
+import io.grpc.ManagedChannel;
+import io.grpc.ManagedChannelBuilder;
+import io.grpc.Server;
+import io.grpc.ServerBuilder;
+import io.reactivex.rxjava3.core.Flowable;
+import io.reactivex.rxjava3.core.Single;
+import io.reactivex.rxjava3.observers.TestObserver;
 
 @SuppressWarnings("Duplicates")
 public class ChainedCallIntegrationTest {
@@ -55,7 +56,7 @@ public class ChainedCallIntegrationTest {
                 return rxRequest
                         .map(HelloRequest::getName)
                         .reduce((l, r) -> l + " :: " + r)
-                        .toSingle("EMPTY")
+                        .defaultIfEmpty("EMPTY")
                         .map(ChainedCallIntegrationTest::response);
             }
 
@@ -92,7 +93,7 @@ public class ChainedCallIntegrationTest {
                 .map(ChainedCallIntegrationTest::bridge)
                 .doOnSuccess(System.out::println)
                 // one -> many
-                .as(stub::sayHelloRespStream)
+                .to(stub::sayHelloRespStream)
                 .map(ChainedCallIntegrationTest::bridge)
                 .doOnNext(System.out::println)
                 // many -> many
@@ -100,7 +101,7 @@ public class ChainedCallIntegrationTest {
                 .map(ChainedCallIntegrationTest::bridge)
                 .doOnNext(System.out::println)
                 // many -> one
-                .as(stub::sayHelloReqStream)
+                .to(stub::sayHelloReqStream)
                 .map(ChainedCallIntegrationTest::bridge)
                 .doOnSuccess(System.out::println)
                 // one -> one
@@ -111,7 +112,7 @@ public class ChainedCallIntegrationTest {
 
         TestObserver<String> test = chain.test();
 
-        test.awaitTerminalEvent(2, TimeUnit.SECONDS);
+        test.await(2, TimeUnit.SECONDS);
         test.assertComplete();
         test.assertValue("[<{[X]}> :: </[X]/> :: <\\[X]\\> :: <([X])>]");
     }

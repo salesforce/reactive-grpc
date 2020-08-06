@@ -7,25 +7,27 @@
 
 package com.salesforce.rxgrpc;
 
-import com.google.common.util.concurrent.ThreadFactoryBuilder;
-import io.grpc.ManagedChannel;
-import io.grpc.ManagedChannelBuilder;
-import io.grpc.Server;
-import io.grpc.ServerBuilder;
-import io.reactivex.Flowable;
-import io.reactivex.Single;
-import io.reactivex.observers.TestObserver;
-import io.reactivex.subscribers.TestSubscriber;
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Rule;
-import org.junit.Test;
+import static org.assertj.core.api.Assertions.assertThat;
 
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicReference;
 
-import static org.assertj.core.api.Assertions.assertThat;
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Rule;
+import org.junit.Test;
+
+import com.google.common.util.concurrent.ThreadFactoryBuilder;
+
+import io.grpc.ManagedChannel;
+import io.grpc.ManagedChannelBuilder;
+import io.grpc.Server;
+import io.grpc.ServerBuilder;
+import io.reactivex.rxjava3.core.Flowable;
+import io.reactivex.rxjava3.core.Single;
+import io.reactivex.rxjava3.observers.TestObserver;
+import io.reactivex.rxjava3.subscribers.TestSubscriber;
 
 /**
  * This test verifies that the thread pools passed to gRPC are the same thread pools used by downstream reactive code.
@@ -94,7 +96,7 @@ public class ClientThreadIntegrationTest {
     }
 
     @Test
-    public void oneToOne() {
+    public void oneToOne() throws InterruptedException {
         RxGreeterGrpc.RxGreeterStub stub = RxGreeterGrpc.newRxStub(channel);
         Single<HelloRequest> req = Single.just(HelloRequest.newBuilder().setName("rxjava").build());
         Single<HelloResponse> resp = req.compose(stub::sayHello);
@@ -105,14 +107,14 @@ public class ClientThreadIntegrationTest {
                 .map(HelloResponse::getMessage)
                 .doOnSuccess(x -> clientThreadName.set(Thread.currentThread().getName()))
                 .test();
-        testObserver.awaitTerminalEvent(3, TimeUnit.SECONDS);
+        testObserver.await(3, TimeUnit.SECONDS);
 
         assertThat(clientThreadName.get()).isEqualTo("TheGrpcClient");
         assertThat(serverThreadName.get()).isEqualTo("TheGrpcServer");
     }
 
     @Test
-    public void manyToMany() {
+    public void manyToMany() throws InterruptedException {
         RxGreeterGrpc.RxGreeterStub stub = RxGreeterGrpc.newRxStub(channel);
         Flowable<HelloRequest> req = Flowable.just(
                 HelloRequest.newBuilder().setName("a").build(),
@@ -129,7 +131,7 @@ public class ClientThreadIntegrationTest {
                 .map(HelloResponse::getMessage)
                 .doOnNext(x -> clientThreadName.set(Thread.currentThread().getName()))
                 .test();
-        testSubscriber.awaitTerminalEvent(3, TimeUnit.SECONDS);
+        testSubscriber.await(3, TimeUnit.SECONDS);
         testSubscriber.assertComplete();
 
         assertThat(clientThreadName.get()).isEqualTo("TheGrpcClient");

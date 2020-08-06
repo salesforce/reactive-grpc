@@ -7,17 +7,23 @@
 
 package com.salesforce.rxgrpc;
 
-import io.grpc.*;
-import io.reactivex.Flowable;
-import io.reactivex.Single;
-import io.reactivex.observers.TestObserver;
-import io.reactivex.subscribers.TestSubscriber;
+import java.util.concurrent.TimeUnit;
+
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Rule;
 import org.junit.Test;
 
-import java.util.concurrent.TimeUnit;
+import io.grpc.ManagedChannel;
+import io.grpc.ManagedChannelBuilder;
+import io.grpc.Server;
+import io.grpc.ServerBuilder;
+import io.grpc.Status;
+import io.grpc.StatusRuntimeException;
+import io.reactivex.rxjava3.core.Flowable;
+import io.reactivex.rxjava3.core.Single;
+import io.reactivex.rxjava3.observers.TestObserver;
+import io.reactivex.rxjava3.subscribers.TestSubscriber;
 
 @SuppressWarnings("unchecked")
 public class ServerErrorIntegrationTest {
@@ -65,20 +71,20 @@ public class ServerErrorIntegrationTest {
     }
 
     @Test
-    public void oneToOne() {
+    public void oneToOne() throws InterruptedException {
         RxGreeterGrpc.RxGreeterStub stub = RxGreeterGrpc.newRxStub(channel);
         Single<HelloResponse> resp = Single.just(HelloRequest.getDefaultInstance()).compose(stub::sayHello);
         TestObserver<HelloResponse> test = resp.test();
 
-        test.awaitTerminalEvent(3, TimeUnit.SECONDS);
+        test.await(3, TimeUnit.SECONDS);
         test.assertError(t -> t instanceof StatusRuntimeException);
         test.assertError(t -> ((StatusRuntimeException)t).getStatus() == Status.INTERNAL);
     }
 
     @Test
-    public void oneToMany() {
+    public void oneToMany() throws InterruptedException {
         RxGreeterGrpc.RxGreeterStub stub = RxGreeterGrpc.newRxStub(channel);
-        Flowable<HelloResponse> resp = Single.just(HelloRequest.getDefaultInstance()).as(stub::sayHelloRespStream);
+        Flowable<HelloResponse> resp = Single.just(HelloRequest.getDefaultInstance()).to(stub::sayHelloRespStream);
         TestSubscriber<HelloResponse> test = resp
                 .doOnNext(System.out::println)
                 .doOnError(throwable -> System.out.println(throwable.getMessage()))
@@ -86,29 +92,29 @@ public class ServerErrorIntegrationTest {
                 .doOnCancel(() -> System.out.println("Client canceled"))
                 .test();
 
-        test.awaitTerminalEvent(3, TimeUnit.SECONDS);
+        test.await(3, TimeUnit.SECONDS);
         test.assertError(t -> t instanceof StatusRuntimeException);
         test.assertError(t -> ((StatusRuntimeException)t).getStatus() == Status.INTERNAL);
     }
 
     @Test
-    public void manyToOne() {
+    public void manyToOne() throws InterruptedException {
         RxGreeterGrpc.RxGreeterStub stub = RxGreeterGrpc.newRxStub(channel);
-        Single<HelloResponse> resp = Flowable.just(HelloRequest.getDefaultInstance()).as(stub::sayHelloReqStream);
+        Single<HelloResponse> resp = Flowable.just(HelloRequest.getDefaultInstance()).to(stub::sayHelloReqStream);
         TestObserver<HelloResponse> test = resp.test();
 
-        test.awaitTerminalEvent(3, TimeUnit.SECONDS);
+        test.await(3, TimeUnit.SECONDS);
         test.assertError(t -> t instanceof StatusRuntimeException);
         test.assertError(t -> ((StatusRuntimeException)t).getStatus() == Status.INTERNAL);
     }
 
     @Test
-    public void manyToMany() {
+    public void manyToMany() throws InterruptedException {
         RxGreeterGrpc.RxGreeterStub stub = RxGreeterGrpc.newRxStub(channel);
         Flowable<HelloResponse> resp = Flowable.just(HelloRequest.getDefaultInstance()).compose(stub::sayHelloBothStream);
         TestSubscriber<HelloResponse> test = resp.test();
 
-        test.awaitTerminalEvent(3, TimeUnit.SECONDS);
+        test.await(3, TimeUnit.SECONDS);
         test.assertError(t -> t instanceof StatusRuntimeException);
         test.assertError(t -> ((StatusRuntimeException)t).getStatus() == Status.INTERNAL);
     }

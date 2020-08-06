@@ -7,25 +7,28 @@
 
 package com.salesforce.rxgrpc;
 
-import com.google.protobuf.Empty;
-import com.salesforce.servicelibs.NumberProto;
-import com.salesforce.servicelibs.RxNumbersGrpc;
-import io.grpc.testing.GrpcServerRule;
-import io.reactivex.Flowable;
-import io.reactivex.Single;
-import io.reactivex.observers.TestObserver;
-import io.reactivex.subscribers.TestSubscriber;
-import org.junit.Before;
-import org.junit.Ignore;
-import org.junit.Rule;
-import org.junit.Test;
+import static org.assertj.core.api.Assertions.assertThat;
 
 import java.util.Arrays;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.stream.IntStream;
 
-import static org.assertj.core.api.Assertions.assertThat;
+import org.junit.Before;
+import org.junit.Ignore;
+import org.junit.Rule;
+import org.junit.Test;
+
+import com.google.protobuf.Empty;
+import com.salesforce.servicelibs.NumberProto;
+import com.salesforce.servicelibs.NumberProto.Number;
+import com.salesforce.servicelibs.RxNumbersGrpc;
+
+import io.grpc.testing.GrpcServerRule;
+import io.reactivex.rxjava3.core.Flowable;
+import io.reactivex.rxjava3.core.Single;
+import io.reactivex.rxjava3.observers.TestObserver;
+import io.reactivex.rxjava3.subscribers.TestSubscriber;
 
 @SuppressWarnings("Duplicates")
 @Ignore
@@ -80,7 +83,7 @@ public class BackpressureIntegrationTest {
     }
 
     @Test
-    public void clientToServerBackpressure() {
+    public void clientToServerBackpressure() throws InterruptedException {
         serverRule.getServiceRegistry().addService(new TestService());
         RxNumbersGrpc.RxNumbersStub stub = RxNumbersGrpc.newRxStub(serverRule.getChannel());
 
@@ -90,9 +93,9 @@ public class BackpressureIntegrationTest {
                 .doOnNext(i -> updateNumberOfWaits(lastValueTime, numberOfWaits))
                 .map(BackpressureIntegrationTest::protoNum);
 
-        TestObserver<NumberProto.Number> rxResponse = rxRequest.as(stub::requestPressure).test();
+        TestObserver<Number> rxResponse = rxRequest.to(stub::requestPressure).test();
 
-        rxResponse.awaitTerminalEvent(15, TimeUnit.SECONDS);
+        rxResponse.await(15, TimeUnit.SECONDS);
         rxResponse.assertComplete()
                 .assertValue(v -> v.getNumber(0) == NUMBER_OF_STREAM_ELEMENTS - 1);
 
@@ -100,18 +103,18 @@ public class BackpressureIntegrationTest {
     }
 
     @Test
-    public void serverToClientBackpressure() {
+    public void serverToClientBackpressure() throws InterruptedException {
         serverRule.getServiceRegistry().addService(new TestService());
         RxNumbersGrpc.RxNumbersStub stub = RxNumbersGrpc.newRxStub(serverRule.getChannel());
 
         Single<Empty> rxRequest = Single.just(Empty.getDefaultInstance());
 
-        TestSubscriber<NumberProto.Number> rxResponse = rxRequest.as(stub::responsePressure)
+        TestSubscriber<NumberProto.Number> rxResponse = rxRequest.to(stub::responsePressure)
                 .doOnNext(n -> System.out.println(n.getNumber(0) + "  <--"))
                 .doOnNext(n -> waitIfValuesAreEqual(n.getNumber(0), 3))
                 .test();
 
-        rxResponse.awaitTerminalEvent(15, TimeUnit.SECONDS);
+        rxResponse.await(15, TimeUnit.SECONDS);
         rxResponse.assertComplete()
                 .assertValueCount(NUMBER_OF_STREAM_ELEMENTS);
 
@@ -119,7 +122,7 @@ public class BackpressureIntegrationTest {
     }
 
     @Test
-    public void bidiResponseBackpressure() {
+    public void bidiResponseBackpressure() throws InterruptedException {
         serverRule.getServiceRegistry().addService(new TestService());
         RxNumbersGrpc.RxNumbersStub stub = RxNumbersGrpc.newRxStub(serverRule.getChannel());
 
@@ -129,7 +132,7 @@ public class BackpressureIntegrationTest {
                 .doOnNext(n -> waitIfValuesAreEqual(n.getNumber(0), 3))
                 .test();
 
-        rxResponse.awaitTerminalEvent(15, TimeUnit.SECONDS);
+        rxResponse.await(15, TimeUnit.SECONDS);
         rxResponse.assertComplete()
                 .assertValueCount(NUMBER_OF_STREAM_ELEMENTS);
 
@@ -137,7 +140,7 @@ public class BackpressureIntegrationTest {
     }
 
     @Test
-    public void bidiRequestBackpressure() {
+    public void bidiRequestBackpressure() throws InterruptedException {
         serverRule.getServiceRegistry().addService(new TestService());
         RxNumbersGrpc.RxNumbersStub stub = RxNumbersGrpc.newRxStub(serverRule.getChannel());
 
@@ -149,7 +152,7 @@ public class BackpressureIntegrationTest {
 
         TestSubscriber<NumberProto.Number> rxResponse = rxRequest.compose(stub::twoWayRequestPressure).test();
 
-        rxResponse.awaitTerminalEvent(15, TimeUnit.SECONDS);
+        rxResponse.await(15, TimeUnit.SECONDS);
         rxResponse.assertComplete()
                 .assertValue(v -> v.getNumber(0) == NUMBER_OF_STREAM_ELEMENTS - 1);
 
