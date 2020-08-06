@@ -7,8 +7,8 @@
 
 package com.salesforce.rxgrpc.tck;
 
-import io.reactivex.Flowable;
-import io.reactivex.Single;
+import io.reactivex.rxjava3.core.Flowable;
+import io.reactivex.rxjava3.core.Single;
 
 public class TckService extends RxTckGrpc.TckImplBase {
     public static final int KABOOM = -1;
