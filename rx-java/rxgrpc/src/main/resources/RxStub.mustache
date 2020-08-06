@@ -50,7 +50,7 @@ public final class {{className}} {
             {{#deprecated}}
         @java.lang.Deprecated
             {{/deprecated}}
-        public {{#isManyOutput}}io.reactivex.Flowable{{/isManyOutput}}{{^isManyOutput}}io.reactivex.Single{{/isManyOutput}}<{{outputType}}> {{methodName}}({{#isManyInput}}io.reactivex.Flowable{{/isManyInput}}{{^isManyInput}}io.reactivex.Single{{/isManyInput}}<{{inputType}}> rxRequest) {
+        public {{#isManyOutput}}io.reactivex.rxjava3.core.Flowable{{/isManyOutput}}{{^isManyOutput}}io.reactivex.rxjava3.core.Single{{/isManyOutput}}<{{outputType}}> {{methodName}}({{#isManyInput}}io.reactivex.rxjava3.core.Flowable{{/isManyInput}}{{^isManyInput}}io.reactivex.rxjava3.core.Single{{/isManyInput}}<{{inputType}}> rxRequest) {
             return com.salesforce.rxgrpc.stub.ClientCalls.{{reactiveCallsMethodName}}(rxRequest,
             {{^isManyInput}}
                 new com.salesforce.reactivegrpc.common.BiConsumer<{{inputType}}, io.grpc.stub.StreamObserver<{{outputType}}>>() {
@@ -78,8 +78,8 @@ public final class {{className}} {
            {{#deprecated}}
         @java.lang.Deprecated
            {{/deprecated}}
-        public {{#isManyOutput}}io.reactivex.Flowable{{/isManyOutput}}{{^isManyOutput}}io.reactivex.Single{{/isManyOutput}}<{{outputType}}> {{methodName}}({{inputType}} rxRequest) {
-            return com.salesforce.rxgrpc.stub.ClientCalls.{{reactiveCallsMethodName}}(io.reactivex.Single.just(rxRequest),
+        public {{#isManyOutput}}io.reactivex.rxjava3.core.Flowable{{/isManyOutput}}{{^isManyOutput}}io.reactivex.rxjava3.core.Single{{/isManyOutput}}<{{outputType}}> {{methodName}}({{inputType}} rxRequest) {
+            return com.salesforce.rxgrpc.stub.ClientCalls.{{reactiveCallsMethodName}}(io.reactivex.rxjava3.core.Single.just(rxRequest),
                 new com.salesforce.reactivegrpc.common.BiConsumer<{{inputType}}, io.grpc.stub.StreamObserver<{{outputType}}>>() {
                     @java.lang.Override
                     public void accept({{inputType}} request, io.grpc.stub.StreamObserver<{{outputType}}> observer) {
@@ -103,7 +103,7 @@ public final class {{className}} {
             {{#deprecated}}
         @java.lang.Deprecated
             {{/deprecated}}
-        public {{#isManyOutput}}io.reactivex.Flowable{{/isManyOutput}}{{^isManyOutput}}io.reactivex.Single{{/isManyOutput}}<{{outputType}}> {{methodNameCamelCase}}({{#isManyInput}}io.reactivex.Flowable{{/isManyInput}}{{^isManyInput}}io.reactivex.Single{{/isManyInput}}<{{inputType}}> request) {
+        public {{#isManyOutput}}io.reactivex.rxjava3.core.Flowable{{/isManyOutput}}{{^isManyOutput}}io.reactivex.rxjava3.core.Single{{/isManyOutput}}<{{outputType}}> {{methodNameCamelCase}}({{#isManyInput}}io.reactivex.rxjava3.core.Flowable{{/isManyInput}}{{^isManyInput}}io.reactivex.rxjava3.core.Single{{/isManyInput}}<{{inputType}}> request) {
             throw new io.grpc.StatusRuntimeException(io.grpc.Status.UNIMPLEMENTED);
         }
 
@@ -154,9 +154,9 @@ public final class {{className}} {
                 case METHODID_{{methodNameUpperUnderscore}}:
                     com.salesforce.rxgrpc.stub.ServerCalls.{{reactiveCallsMethodName}}(({{inputType}}) request,
                             (io.grpc.stub.StreamObserver<{{outputType}}>) responseObserver,
-                            new com.salesforce.reactivegrpc.common.Function<{{#isManyInput}}io.reactivex.Flowable{{/isManyInput}}{{^isManyInput}}io.reactivex.Single{{/isManyInput}}<{{inputType}}>, {{#isManyOutput}}io.reactivex.Flowable{{/isManyOutput}}{{^isManyOutput}}io.reactivex.Single{{/isManyOutput}}<{{outputType}}>>() {
+                            new com.salesforce.reactivegrpc.common.Function<{{#isManyInput}}io.reactivex.rxjava3.core.Flowable{{/isManyInput}}{{^isManyInput}}io.reactivex.rxjava3.core.Single{{/isManyInput}}<{{inputType}}>, {{#isManyOutput}}io.reactivex.rxjava3.core.Flowable{{/isManyOutput}}{{^isManyOutput}}io.reactivex.rxjava3.core.Single{{/isManyOutput}}<{{outputType}}>>() {
                                 @java.lang.Override
-                                public {{#isManyOutput}}io.reactivex.Flowable{{/isManyOutput}}{{^isManyOutput}}io.reactivex.Single{{/isManyOutput}}<{{outputType}}> apply({{#isManyInput}}io.reactivex.Flowable{{/isManyInput}}{{^isManyInput}}io.reactivex.Single{{/isManyInput}}<{{inputType}}> single) {
+                                public {{#isManyOutput}}io.reactivex.rxjava3.core.Flowable{{/isManyOutput}}{{^isManyOutput}}io.reactivex.rxjava3.core.Single{{/isManyOutput}}<{{outputType}}> apply({{#isManyInput}}io.reactivex.rxjava3.core.Flowable{{/isManyInput}}{{^isManyInput}}io.reactivex.rxjava3.core.Single{{/isManyInput}}<{{inputType}}> single) {
                                     return serviceImpl.{{methodNameCamelCase}}(single);
                                 }
                             });
