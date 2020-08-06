@@ -9,15 +9,16 @@ package com.salesforce.rxgrpc.stub;
 
 import com.google.common.base.Preconditions;
 import com.salesforce.reactivegrpc.common.Function;
+
 import io.grpc.CallOptions;
 import io.grpc.Status;
 import io.grpc.StatusException;
 import io.grpc.StatusRuntimeException;
 import io.grpc.stub.ServerCallStreamObserver;
 import io.grpc.stub.StreamObserver;
-import io.reactivex.Flowable;
-import io.reactivex.Single;
-import io.reactivex.functions.Consumer;
+import io.reactivex.rxjava3.core.Flowable;
+import io.reactivex.rxjava3.core.Single;
+import io.reactivex.rxjava3.functions.Consumer;
 
 /**
  * Utility functions for processing different server call idioms. We have one-to-one correspondence

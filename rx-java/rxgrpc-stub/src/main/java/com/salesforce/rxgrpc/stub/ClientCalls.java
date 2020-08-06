@@ -7,17 +7,19 @@
 
 package com.salesforce.rxgrpc.stub;
 
+import org.reactivestreams.Publisher;
+
 import com.salesforce.reactivegrpc.common.BiConsumer;
 import com.salesforce.reactivegrpc.common.Function;
+
 import io.grpc.CallOptions;
 import io.grpc.stub.CallStreamObserver;
 import io.grpc.stub.StreamObserver;
-import io.reactivex.Flowable;
-import io.reactivex.Single;
-import io.reactivex.SingleEmitter;
-import io.reactivex.SingleOnSubscribe;
-import io.reactivex.functions.Consumer;
-import org.reactivestreams.Publisher;
+import io.reactivex.rxjava3.core.Flowable;
+import io.reactivex.rxjava3.core.Single;
+import io.reactivex.rxjava3.core.SingleEmitter;
+import io.reactivex.rxjava3.core.SingleOnSubscribe;
+import io.reactivex.rxjava3.functions.Consumer;
 
 /**
  * Utility functions for processing different client call idioms. We have one-to-one correspondence
@@ -92,7 +94,7 @@ public final class ClientCalls {
             final int lowTide = RxCallOptions.getLowTide(options);
 
             return rxRequest
-                    .flatMapPublisher(new io.reactivex.functions.Function<TRequest, Publisher<? extends TResponse>>() {
+                    .flatMapPublisher(new io.reactivex.rxjava3.functions.Function<TRequest, Publisher<? extends TResponse>>() {
                         @Override
                         public Publisher<? extends TResponse> apply(TRequest request) {
                             final RxClientStreamObserverAndPublisher<TResponse> consumerStreamObserver =

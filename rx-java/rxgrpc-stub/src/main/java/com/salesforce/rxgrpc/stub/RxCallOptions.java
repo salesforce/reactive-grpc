@@ -8,6 +8,7 @@
 package com.salesforce.rxgrpc.stub;
 
 import com.salesforce.reactivegrpc.common.AbstractStreamObserverAndPublisher;
+
 import io.grpc.CallOptions;
 
 /**

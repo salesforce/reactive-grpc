@@ -7,12 +7,18 @@
 
 package com.salesforce.rxgrpc;
 
-import io.reactivex.*;
-import io.reactivex.functions.Function;
+import java.util.concurrent.TimeUnit;
+
 import org.reactivestreams.Publisher;
 
-import java.util.concurrent.Callable;
-import java.util.concurrent.TimeUnit;
+import io.reactivex.rxjava3.core.Flowable;
+import io.reactivex.rxjava3.core.FlowableConverter;
+import io.reactivex.rxjava3.core.FlowableTransformer;
+import io.reactivex.rxjava3.core.Single;
+import io.reactivex.rxjava3.core.SingleConverter;
+import io.reactivex.rxjava3.core.SingleSource;
+import io.reactivex.rxjava3.functions.Function;
+import io.reactivex.rxjava3.functions.Supplier;
 
 /**
  * {@code GrpcRetry} is used to transparently re-establish a streaming gRPC request in the event of a server error.
@@ -46,9 +52,9 @@ public final class GrpcRetry {
             return new SingleConverter<I, Flowable<O>>() {
                 @Override
                 public Flowable<O> apply(final Single<I> request) {
-                    return Flowable.defer(new Callable<Publisher<O>>() {
+                    return Flowable.defer(new Supplier<Publisher<O>>() {
                         @Override
-                        public Publisher<O> call() throws Exception {
+                        public Publisher<O> get() throws Throwable {
                             return operation.apply(request);
                         }
                     }).retryWhen(handler);
@@ -119,9 +125,9 @@ public final class GrpcRetry {
             return new FlowableTransformer<I, O>() {
                 @Override
                 public Flowable<O> apply(final Flowable<I> request) {
-                    return Flowable.defer(new Callable<Publisher<O>>() {
+                    return Flowable.defer(new Supplier<Publisher<O>>() {
                         @Override
-                        public Publisher<O> call() throws Exception {
+                        public Publisher<O> get() throws Throwable {
                             return operation.apply(request);
                         }
                     }).retryWhen(handler);
@@ -192,9 +198,9 @@ public final class GrpcRetry {
             return new FlowableConverter<I, Single<O>>() {
                 @Override
                 public Single<O> apply(final Flowable<I> request) {
-                    return Single.defer(new Callable<SingleSource<O>>() {
+                    return Single.defer(new Supplier<SingleSource<O>>() {
                         @Override
-                        public SingleSource<O> call() throws Exception {
+                        public SingleSource<O> get() throws Throwable {
                             return operation.apply(request);
                         }
                     }).retryWhen(handler);

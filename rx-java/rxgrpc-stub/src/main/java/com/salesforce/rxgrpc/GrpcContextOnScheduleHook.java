@@ -8,7 +8,7 @@
 package com.salesforce.rxgrpc;
 
 import io.grpc.Context;
-import io.reactivex.functions.Function;
+import io.reactivex.rxjava3.functions.Function;
 
 /**
  * {@code GrpcContextOnScheduleHook} is a RxJava scheduler handler hook implementation for transferring the gRPC

@@ -7,7 +7,8 @@
 package com.salesforce.rxgrpc.stub;
 
 import com.salesforce.reactivegrpc.common.AbstractUnimplementedQueue;
-import io.reactivex.internal.fuseable.SimplePlainQueue;
+
+import io.reactivex.rxjava3.internal.fuseable.SimplePlainQueue;
 
 /**
  * Adapts the RxJava {@code SimpleQueue} interface to a common java {@link java.util.Queue}.

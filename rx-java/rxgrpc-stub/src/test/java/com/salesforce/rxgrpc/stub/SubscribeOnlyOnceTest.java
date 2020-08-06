@@ -7,15 +7,18 @@
 
 package com.salesforce.rxgrpc.stub;
 
-import io.reactivex.SingleObserver;
-import io.reactivex.disposables.Disposable;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+
 import org.assertj.core.api.ThrowableAssert;
 import org.junit.jupiter.api.Test;
 import org.reactivestreams.Subscriber;
 import org.reactivestreams.Subscription;
 
-import static org.mockito.Mockito.*;
-import static org.assertj.core.api.Assertions.*;
+import io.reactivex.rxjava3.core.SingleObserver;
+import io.reactivex.rxjava3.disposables.Disposable;
 
 @SuppressWarnings("unchecked")
 public class SubscribeOnlyOnceTest {
