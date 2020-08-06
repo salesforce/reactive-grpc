@@ -37,16 +37,17 @@ public class BackpressureChunkingTest {
         TestSubscriber<Long> testSubscriber = Flowable.fromPublisher(source)
                                                       .test();
 
+
 		testSubscriber.await(30, TimeUnit.SECONDS);
-		testSubscriber.assertComplete();
+        testSubscriber.assertComplete();
 
         assertThat(observer.requestsQueue).containsExactly(chunkSize, partOfChunk, partOfChunk, partOfChunk);
         assertThat(source.outputFused).isFalse();
     }
 
-	@Test
-	public void chunkOperatorCorrectlyChunksFiniteRequest() throws InterruptedException {
-		int chunkSize = DEFAULT_CHUNK_SIZE;
+    @Test
+    public void chunkOperatorCorrectlyChunksFiniteRequest() throws InterruptedException {
+        int chunkSize = DEFAULT_CHUNK_SIZE;
 
         int partOfChunk = TWO_THIRDS_OF_DEFAULT_CHUNK_SIZE;
         int num = chunkSize * 2;
@@ -59,15 +60,15 @@ public class BackpressureChunkingTest {
                                                       .test(num);
 
 		testSubscriber.await(30, TimeUnit.SECONDS);
-		testSubscriber.assertComplete();
+        testSubscriber.assertComplete();
 
         assertThat(observer.requestsQueue).containsExactly(chunkSize, partOfChunk, partOfChunk, partOfChunk);
         assertThat(source.outputFused).isFalse();
     }
 
-	@Test
-	public void chunkOperatorCorrectlyChunksInfiniteRequestFusion() throws InterruptedException {
-		int chunkSize = DEFAULT_CHUNK_SIZE;
+    @Test
+    public void chunkOperatorCorrectlyChunksInfiniteRequestFusion() throws InterruptedException {
+        int chunkSize = DEFAULT_CHUNK_SIZE;
 
         int partOfChunk = TWO_THIRDS_OF_DEFAULT_CHUNK_SIZE;
         int num = chunkSize * 2;
@@ -80,16 +81,17 @@ public class BackpressureChunkingTest {
                                                       .observeOn(Schedulers.trampoline())
                                                       .test();
 
+
 		testSubscriber.await(30, TimeUnit.SECONDS);
-		testSubscriber.assertComplete();
+        testSubscriber.assertComplete();
 
         assertThat(observer.requestsQueue).containsExactly(chunkSize, partOfChunk, partOfChunk, partOfChunk);
         assertThat(source.outputFused).isTrue();
     }
 
-	@Test
-	public void chunkOperatorCorrectlyChunksFiniteRequestFusion() throws InterruptedException {
-		int chunkSize = DEFAULT_CHUNK_SIZE;
+    @Test
+    public void chunkOperatorCorrectlyChunksFiniteRequestFusion() throws InterruptedException {
+        int chunkSize = DEFAULT_CHUNK_SIZE;
 
         int partOfChunk = TWO_THIRDS_OF_DEFAULT_CHUNK_SIZE;
         int num = chunkSize * 2;
@@ -103,7 +105,7 @@ public class BackpressureChunkingTest {
                                                       .test(num);
 
 		testSubscriber.await(30, TimeUnit.SECONDS);
-		testSubscriber.assertComplete();
+        testSubscriber.assertComplete();
 
         assertThat(observer.requestsQueue).containsExactly(chunkSize, partOfChunk, partOfChunk, partOfChunk);
         assertThat(source.outputFused).isTrue();
@@ -130,7 +132,7 @@ public class BackpressureChunkingTest {
                                                       .test();
 
 		testSubscriber.await(30, TimeUnit.SECONDS);
-		testSubscriber.assertNoErrors();
+        testSubscriber.assertNoErrors();
 
         assertThat(observer.requestsQueue).containsExactly(chunkSize);
     }
