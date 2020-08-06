@@ -88,7 +88,7 @@ public class UnexpectedServerErrorIntegrationTest {
     @Test
     public void oneToMany() throws InterruptedException {
         RxGreeterGrpc.RxGreeterStub stub = RxGreeterGrpc.newRxStub(channel);
-        Flowable<HelloResponse> resp = Single.just(HelloRequest.getDefaultInstance()).as(stub::sayHelloRespStream);
+        Flowable<HelloResponse> resp = Single.just(HelloRequest.getDefaultInstance()).to(stub::sayHelloRespStream);
         TestSubscriber<HelloResponse> test = resp
                 .doOnNext(System.out::println)
                 .doOnError(throwable -> System.out.println(throwable.getMessage()))
@@ -105,7 +105,7 @@ public class UnexpectedServerErrorIntegrationTest {
     public void manyToOne() throws InterruptedException {
         RxGreeterGrpc.RxGreeterStub stub = RxGreeterGrpc.newRxStub(channel);
         Flowable<HelloRequest> req = Flowable.just(HelloRequest.getDefaultInstance());
-        Single<HelloResponse> resp = req.as(stub::sayHelloReqStream);
+        Single<HelloResponse> resp = req.to(stub::sayHelloReqStream);
         TestObserver<HelloResponse> test = resp.test();
 
         test.await(3, TimeUnit.SECONDS);
@@ -115,13 +115,13 @@ public class UnexpectedServerErrorIntegrationTest {
     }
 
     @Test
-    public void manyToMany() {
+    public void manyToMany() throws InterruptedException {
         RxGreeterGrpc.RxGreeterStub stub = RxGreeterGrpc.newRxStub(channel);
         Flowable<HelloRequest> req = Flowable.just(HelloRequest.getDefaultInstance());
         Flowable<HelloResponse> resp = req.compose(stub::sayHelloBothStream);
         TestSubscriber<HelloResponse> test = resp.test();
 
-        test.awaitTerminalEvent(3, TimeUnit.SECONDS);
+        test.await(3, TimeUnit.SECONDS);
         test.assertError(t -> t instanceof StatusRuntimeException);
         test.assertError(t -> ((StatusRuntimeException)t).getStatus().getCode() == Status.Code.INTERNAL);
     }
