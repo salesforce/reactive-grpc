@@ -10,7 +10,7 @@ package com.salesforce.rx3grpc.tck;
 import io.reactivex.rxjava3.core.Flowable;
 import io.reactivex.rxjava3.core.Single;
 
-public class FusedTckService extends RxTckGrpc.TckImplBase {
+public class FusedTckService extends Rx3TckGrpc.TckImplBase {
     public static final int KABOOM = -1;
 
     @Override

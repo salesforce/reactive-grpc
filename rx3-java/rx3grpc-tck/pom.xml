@@ -95,7 +95,7 @@
                                     <groupId>${project.groupId}</groupId>
                                     <artifactId>rx3grpc</artifactId>
                                     <version>${project.version}</version>
-                                    <mainClass>com.salesforce.rx3grpc.rx3grpcGenerator</mainClass>
+                                    <mainClass>com.salesforce.rx3grpc.Rx3GrpcGenerator</mainClass>
                                 </protocPlugin>
                             </protocPlugins>
                         </configuration>

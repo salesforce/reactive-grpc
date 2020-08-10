@@ -7,17 +7,18 @@
 
 package com.salesforce.rx3grpc.tck;
 
-import io.grpc.ManagedChannel;
-import io.grpc.Server;
-import io.grpc.inprocess.InProcessChannelBuilder;
-import io.grpc.inprocess.InProcessServerBuilder;
-import io.reactivex.rxjava3.core.Single;
 import org.reactivestreams.Publisher;
 import org.reactivestreams.tck.PublisherVerification;
 import org.reactivestreams.tck.TestEnvironment;
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
+
+import io.grpc.ManagedChannel;
+import io.grpc.Server;
+import io.grpc.inprocess.InProcessChannelBuilder;
+import io.grpc.inprocess.InProcessServerBuilder;
+import io.reactivex.rxjava3.core.Single;
 
 /**
  * Publisher tests from the Reactive Streams Technology Compatibility Kit.
@@ -54,7 +55,7 @@ public class RxGrpcPublisherOneToManyVerificationFussedTest extends PublisherVer
 
     @Override
     public Publisher<Message> createPublisher(long elements) {
-        RxTckGrpc.RxTckStub stub = RxTckGrpc.newRxStub(channel);
+        Rx3TckGrpc.RxTckStub stub = Rx3TckGrpc.newRxStub(channel);
         Single<Message> request = Single.just(toMessage((int) elements));
         Publisher<Message> publisher = request.to(stub::oneToMany);
 
@@ -63,7 +64,7 @@ public class RxGrpcPublisherOneToManyVerificationFussedTest extends PublisherVer
 
     @Override
     public Publisher<Message> createFailedPublisher() {
-        RxTckGrpc.RxTckStub stub = RxTckGrpc.newRxStub(channel);
+        Rx3TckGrpc.RxTckStub stub = Rx3TckGrpc.newRxStub(channel);
         Single<Message> request = Single.just(toMessage(TckService.KABOOM));
         Publisher<Message> publisher = request.to(stub::oneToMany);
 
