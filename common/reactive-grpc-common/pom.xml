@@ -79,6 +79,12 @@
             <scope>test</scope>
         </dependency>
         <dependency>
+			<groupId>com.github.akarnokd</groupId>
+			<artifactId>rxjava3-extensions</artifactId>
+    		<version>3.0.0</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
             <groupId>org.awaitility</groupId>
             <artifactId>awaitility</artifactId>
             <version>${awaitility.version}</version>
