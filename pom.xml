@@ -42,10 +42,17 @@
     <modules>
         <module>common/reactive-grpc-common</module>
         <module>common/reactive-grpc-gencommon</module>
+        
         <module>rx-java/rxgrpc</module>
         <module>rx-java/rxgrpc-stub</module>
         <module>rx-java/rxgrpc-tck</module>
         <module>rx-java/rxgrpc-test</module>
+
+        <module>rx3-java/rx3grpc</module>
+        <module>rx3-java/rx3grpc-stub</module>
+        <module>rx3-java/rx3grpc-tck</module>
+        <module>rx3-java/rx3grpc-test</module>
+
         <module>reactor/reactor-grpc</module>
         <module>reactor/reactor-grpc-stub</module>
         <module>reactor/reactor-grpc-tck</module>
@@ -59,13 +66,14 @@
         <protobuf.plugin.version>0.6.1</protobuf.plugin.version>
         <compiler.plugin.version>3.8.0</compiler.plugin.version>
 
-        <!-- Dependency Versions -->
-        <reactive.streams.version>1.0.2</reactive.streams.version>
-        <grpc.version>1.23.0</grpc.version>
-        <protoc.version>3.9.0</protoc.version> <!-- Same version as grpc-proto -->
-        <jprotoc.version>0.9.1</jprotoc.version>
-        <rxjava.version>2.2.12</rxjava.version>
-        <reactor.version>3.2.12.RELEASE</reactor.version>
+		<!-- Dependency Versions -->
+		<reactive.streams.version>1.0.2</reactive.streams.version>
+		<grpc.version>1.31.0</grpc.version>
+		<protoc.version>3.12.0</protoc.version> <!-- Same version as grpc-proto -->
+		<jprotoc.version>1.0.1</jprotoc.version>
+		<rxjava.version>2.2.19</rxjava.version>
+		<reactor.version>3.3.8.RELEASE</reactor.version>
+        <rx3java.version>3.0.5</rx3java.version>
 
         <!-- Test Dependency Versions -->
         <grpc.contrib.version>0.8.1</grpc.contrib.version>
@@ -73,7 +81,7 @@
         <assertj.version>3.12.2</assertj.version>
         <awaitility.version>3.1.6</awaitility.version>
         <mockito.version>2.27.0</mockito.version>
-        <reactor.extra.version>3.1.9.RELEASE</reactor.extra.version>
+		<reactor.extra.version>3.1.9.RELEASE</reactor.extra.version>
 
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <java.version>1.8</java.version>
@@ -119,6 +127,11 @@
             <dependency>
                 <groupId>${project.groupId}</groupId>
                 <artifactId>reactor-grpc-stub</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>${project.groupId}</groupId>
+                <artifactId>rx3grpc-stub</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>
