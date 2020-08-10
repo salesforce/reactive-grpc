@@ -88,7 +88,7 @@ public class AbstractSubscriberAndProducerRx3Test {
 
             Assertions.assertThat(throwableAtomicReference.get())
                       .isExactlyInstanceOf(IllegalStateException.class)
-                      .hasMessage("TestSubscriberProducer does not support multiple subscribers");
+                      .hasMessage("TestSubscriberProducerRx3 does not support multiple subscribers");
         }
     }
 
