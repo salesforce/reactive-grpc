@@ -6,15 +6,16 @@
 
 package com.salesforce.rx3grpc;
 
-import io.grpc.Deadline;
-import io.grpc.ManagedChannel;
-import io.grpc.testing.GrpcServerRule;
-import org.junit.Rule;
-import org.junit.Test;
+import static org.assertj.core.api.Assertions.assertThat;
 
 import java.util.concurrent.TimeUnit;
 
-import static org.assertj.core.api.Assertions.assertThat;
+import org.junit.Rule;
+import org.junit.Test;
+
+import io.grpc.Deadline;
+import io.grpc.ManagedChannel;
+import io.grpc.testing.GrpcServerRule;
 
 public class AbstractStubTest {
     @Rule
@@ -26,7 +27,7 @@ public class AbstractStubTest {
     @Test
     public void getChannelWorks() {
         ManagedChannel channel = serverRule.getChannel();
-        RxGreeterGrpc.RxGreeterStub stub = RxGreeterGrpc.newRxStub(channel);
+        Rx3GreeterGrpc.RxGreeterStub stub = Rx3GreeterGrpc.newRxStub(channel);
 
         assertThat(stub.getChannel()).isEqualTo(channel);
     }
@@ -36,7 +37,7 @@ public class AbstractStubTest {
         ManagedChannel channel = serverRule.getChannel();
         Deadline deadline = Deadline.after(42, TimeUnit.SECONDS);
 
-        RxGreeterGrpc.RxGreeterStub stub = RxGreeterGrpc.newRxStub(channel).withDeadline(deadline);
+        Rx3GreeterGrpc.RxGreeterStub stub = Rx3GreeterGrpc.newRxStub(channel).withDeadline(deadline);
 
         assertThat(stub.getCallOptions().getDeadline()).isEqualTo(deadline);
     }

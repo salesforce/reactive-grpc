@@ -24,7 +24,8 @@ import com.google.protobuf.Empty;
 import com.salesforce.grpc.testing.contrib.NettyGrpcServerRule;
 import com.salesforce.servicelibs.NumberProto;
 import com.salesforce.servicelibs.NumberProto.Number;
-import com.salesforce.servicelibs.RxNumbersGrpc;
+import com.salesforce.servicelibs.Rx3NumbersGrpc;
+import com.salesforce.servicelibs.Rx3NumbersGrpc.RxNumbersStub;
 
 import io.reactivex.rxjava3.core.Flowable;
 import io.reactivex.rxjava3.core.Single;
@@ -42,7 +43,7 @@ public class CancellationPropagationIntegrationTest {
     @Rule
     public UnhandledRxJavaErrorRule errorRule = new UnhandledRxJavaErrorRule();
 
-    private static class TestService extends RxNumbersGrpc.NumbersImplBase {
+    private static class TestService extends Rx3NumbersGrpc.NumbersImplBase {
         private AtomicInteger lastNumberProduced = new AtomicInteger(Integer.MIN_VALUE);
         private AtomicBoolean wasCanceled = new AtomicBoolean(false);
         private AtomicBoolean explicitCancel = new AtomicBoolean(false);
@@ -104,7 +105,7 @@ public class CancellationPropagationIntegrationTest {
         TestService svc = new TestService();
         serverRule.getServiceRegistry().addService(svc);
 
-        RxNumbersGrpc.RxNumbersStub stub = RxNumbersGrpc.newRxStub(serverRule.getChannel());
+        RxNumbersStub stub = Rx3NumbersGrpc.newRxStub(serverRule.getChannel());
         TestSubscriber<NumberProto.Number> subscription = Single.just(Empty.getDefaultInstance())
                 .to(stub::responsePressure)
                 .doOnNext(number -> System.out.println(number.getNumber(0)))
@@ -130,7 +131,7 @@ public class CancellationPropagationIntegrationTest {
         TestService svc = new TestService();
         serverRule.getServiceRegistry().addService(svc);
 
-        RxNumbersGrpc.RxNumbersStub stub = RxNumbersGrpc.newRxStub(serverRule.getChannel());
+        RxNumbersStub stub = Rx3NumbersGrpc.newRxStub(serverRule.getChannel());
         TestSubscriber<NumberProto.Number> subscription =  Single.just(Empty.getDefaultInstance())
                 .to(stub::responsePressure)
                 .doOnNext(number -> System.out.println(number.getNumber(0)))
@@ -157,7 +158,7 @@ public class CancellationPropagationIntegrationTest {
         TestService svc = new TestService();
         serverRule.getServiceRegistry().addService(svc);
 
-        RxNumbersGrpc.RxNumbersStub stub = RxNumbersGrpc.newRxStub(serverRule.getChannel());
+        Rx3NumbersGrpc.RxNumbersStub stub = Rx3NumbersGrpc.newRxStub(serverRule.getChannel());
 
         svc.setExplicitCancel(false);
 
@@ -199,7 +200,7 @@ public class CancellationPropagationIntegrationTest {
         TestService svc = new TestService();
         serverRule.getServiceRegistry().addService(svc);
 
-        RxNumbersGrpc.RxNumbersStub stub = RxNumbersGrpc.newRxStub(serverRule.getChannel());
+        Rx3NumbersGrpc.RxNumbersStub stub = Rx3NumbersGrpc.newRxStub(serverRule.getChannel());
 
         svc.setExplicitCancel(true);
 
@@ -241,7 +242,7 @@ public class CancellationPropagationIntegrationTest {
         TestService svc = new TestService();
         serverRule.getServiceRegistry().addService(svc);
 
-        RxNumbersGrpc.RxNumbersStub stub = RxNumbersGrpc.newRxStub(serverRule.getChannel());
+        Rx3NumbersGrpc.RxNumbersStub stub = Rx3NumbersGrpc.newRxStub(serverRule.getChannel());
 
         svc.setExplicitCancel(false);
 
@@ -279,7 +280,7 @@ public class CancellationPropagationIntegrationTest {
         TestService svc = new TestService();
         serverRule.getServiceRegistry().addService(svc);
 
-        RxNumbersGrpc.RxNumbersStub stub = RxNumbersGrpc.newRxStub(serverRule.getChannel());
+        Rx3NumbersGrpc.RxNumbersStub stub = Rx3NumbersGrpc.newRxStub(serverRule.getChannel());
 
         svc.setExplicitCancel(true);
 
@@ -317,7 +318,7 @@ public class CancellationPropagationIntegrationTest {
         TestService svc = new TestService();
         serverRule.getServiceRegistry().addService(svc);
 
-        RxNumbersGrpc.RxNumbersStub stub = RxNumbersGrpc.newRxStub(serverRule.getChannel());
+        Rx3NumbersGrpc.RxNumbersStub stub = Rx3NumbersGrpc.newRxStub(serverRule.getChannel());
 
         // slowly process the response stream
         Disposable subscription = stub.responsePressure(Empty.getDefaultInstance()).subscribe(n -> {

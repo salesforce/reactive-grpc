@@ -43,7 +43,7 @@ public class ConcurrentRequestIntegrationTest {
 
     @BeforeClass
     public static void setupServer() throws Exception {
-        RxGreeterGrpc.GreeterImplBase svc = new RxGreeterGrpc.GreeterImplBase() {
+        Rx3GreeterGrpc.GreeterImplBase svc = new Rx3GreeterGrpc.GreeterImplBase() {
 
             @Override
             public Single<HelloResponse> sayHello(Single<HelloRequest> rxRequest) {
@@ -105,7 +105,7 @@ public class ConcurrentRequestIntegrationTest {
 
     @Test
     public void fourKindsOfRequestAtOnce() throws Exception {
-        RxGreeterGrpc.RxGreeterStub stub = RxGreeterGrpc.newRxStub(channel);
+        Rx3GreeterGrpc.RxGreeterStub stub = Rx3GreeterGrpc.newRxStub(channel);
 
         // == MAKE REQUESTS ==
         // One to One

@@ -35,7 +35,7 @@ public class ShareIntegrationTest {
 
     @Test
     public void serverPublishShouldWork() throws InterruptedException {
-        RxGreeterGrpc.GreeterImplBase svc = new RxGreeterGrpc.GreeterImplBase() {
+        Rx3GreeterGrpc.GreeterImplBase svc = new Rx3GreeterGrpc.GreeterImplBase() {
             @Override
             public Single<HelloResponse> sayHelloReqStream(Flowable<HelloRequest> rxRequest) {
                 return rxRequest
@@ -63,7 +63,7 @@ public class ShareIntegrationTest {
         };
 
         serverRule.getServiceRegistry().addService(svc);
-        RxGreeterGrpc.RxGreeterStub stub = RxGreeterGrpc.newRxStub(serverRule.getChannel());
+        Rx3GreeterGrpc.RxGreeterStub stub = Rx3GreeterGrpc.newRxStub(serverRule.getChannel());
 
         TestObserver<String> resp = Flowable.just("Alpha", "Bravo", "Charlie")
                 .map(s -> HelloRequest.newBuilder().setName(s).build())
@@ -78,7 +78,7 @@ public class ShareIntegrationTest {
 
     @Test
     public void clientPublishShouldWork() throws InterruptedException {
-        RxGreeterGrpc.GreeterImplBase svc = new RxGreeterGrpc.GreeterImplBase() {
+        Rx3GreeterGrpc.GreeterImplBase svc = new Rx3GreeterGrpc.GreeterImplBase() {
             @Override
             public Flowable<HelloResponse> sayHelloRespStream(Single<HelloRequest> request) {
                 return request.flatMapObservable(x -> Observable.just("Alpha", "Bravo", "Charlie"))
@@ -88,7 +88,7 @@ public class ShareIntegrationTest {
         };
 
         serverRule.getServiceRegistry().addService(svc);
-        RxGreeterGrpc.RxGreeterStub stub = RxGreeterGrpc.newRxStub(serverRule.getChannel());
+        Rx3GreeterGrpc.RxGreeterStub stub = Rx3GreeterGrpc.newRxStub(serverRule.getChannel());
 
         TestObserver<String> resp = stub.sayHelloRespStream(HelloRequest.getDefaultInstance())
             // a function that can use the multicasted source sequence as many times as needed, without causing
@@ -124,7 +124,7 @@ public class ShareIntegrationTest {
     public void serverShareShouldWork() throws InterruptedException {
         AtomicReference<String> other = new AtomicReference<>();
 
-        RxGreeterGrpc.GreeterImplBase svc = new RxGreeterGrpc.GreeterImplBase() {
+        Rx3GreeterGrpc.GreeterImplBase svc = new Rx3GreeterGrpc.GreeterImplBase() {
             @Override
             public Single<HelloResponse> sayHelloReqStream(Flowable<HelloRequest> request) {
                 Flowable<HelloRequest> share = request.share();
@@ -143,7 +143,7 @@ public class ShareIntegrationTest {
         };
 
         serverRule.getServiceRegistry().addService(svc);
-        RxGreeterGrpc.RxGreeterStub stub = RxGreeterGrpc.newRxStub(serverRule.getChannel());
+        Rx3GreeterGrpc.RxGreeterStub stub = Rx3GreeterGrpc.newRxStub(serverRule.getChannel());
 
         TestObserver<String> resp = Flowable.just("Alpha", "Bravo", "Charlie")
                 .map(n -> HelloRequest.newBuilder().setName(n).build())
@@ -160,7 +160,7 @@ public class ShareIntegrationTest {
 
     @Test
     public void clientShareShouldWork() throws InterruptedException {
-        RxGreeterGrpc.GreeterImplBase svc = new RxGreeterGrpc.GreeterImplBase() {
+        Rx3GreeterGrpc.GreeterImplBase svc = new Rx3GreeterGrpc.GreeterImplBase() {
             @Override
             public Flowable<HelloResponse> sayHelloRespStream(Single<HelloRequest> request) {
                 return request
@@ -174,7 +174,7 @@ public class ShareIntegrationTest {
         };
 
         serverRule.getServiceRegistry().addService(svc);
-        RxGreeterGrpc.RxGreeterStub stub = RxGreeterGrpc.newRxStub(serverRule.getChannel());
+        Rx3GreeterGrpc.RxGreeterStub stub = Rx3GreeterGrpc.newRxStub(serverRule.getChannel());
 
         Flowable<HelloResponse> share = Single.just(HelloRequest.getDefaultInstance())
                 .to(stub::sayHelloRespStream)

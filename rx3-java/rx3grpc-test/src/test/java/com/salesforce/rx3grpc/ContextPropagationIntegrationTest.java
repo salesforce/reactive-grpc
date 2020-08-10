@@ -94,7 +94,7 @@ public class ContextPropagationIntegrationTest {
         }
     }
 
-    private static class TestService extends RxGreeterGrpc.GreeterImplBase {
+    private static class TestService extends Rx3GreeterGrpc.GreeterImplBase {
         private String receivedCtxValue;
 
         public String getReceivedCtxValue() {
@@ -138,7 +138,7 @@ public class ContextPropagationIntegrationTest {
 
     @Test
     public void ClientSendsContext() {
-        RxGreeterGrpc.RxGreeterStub stub = RxGreeterGrpc.newRxStub(channel);
+        Rx3GreeterGrpc.RxGreeterStub stub = Rx3GreeterGrpc.newRxStub(channel);
         Context.current()
                 .withValue(ctxKey, "ClientSendsContext")
                 .run(() -> {
@@ -154,7 +154,7 @@ public class ContextPropagationIntegrationTest {
 
     @Test
     public void ClientGetsContext() throws InterruptedException {
-        RxGreeterGrpc.RxGreeterStub stub = RxGreeterGrpc.newRxStub(channel);
+        Rx3GreeterGrpc.RxGreeterStub stub = Rx3GreeterGrpc.newRxStub(channel);
 
         TestObserver<HelloResponse> testObserver = worldReq
                 .compose(stub::sayHello)
@@ -170,7 +170,7 @@ public class ContextPropagationIntegrationTest {
 
     @Test
     public void ServerAcceptsContext() throws InterruptedException {
-        RxGreeterGrpc.RxGreeterStub stub = RxGreeterGrpc.newRxStub(channel);
+        Rx3GreeterGrpc.RxGreeterStub stub = Rx3GreeterGrpc.newRxStub(channel);
 
         worldReq.compose(stub::sayHello).test().await(1, TimeUnit.SECONDS);
 

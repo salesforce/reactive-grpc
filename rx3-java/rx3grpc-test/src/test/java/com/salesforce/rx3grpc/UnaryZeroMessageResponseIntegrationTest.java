@@ -60,7 +60,7 @@ public class UnaryZeroMessageResponseIntegrationTest {
     public void zeroMessageResponseOneToOne() throws InterruptedException {
         serverRule.getServiceRegistry().addService(new MissingUnaryResponseService());
 
-        RxGreeterGrpc.RxGreeterStub stub = RxGreeterGrpc.newRxStub(serverRule.getChannel());
+        Rx3GreeterGrpc.RxGreeterStub stub = Rx3GreeterGrpc.newRxStub(serverRule.getChannel());
         Single<HelloRequest> req = Single.just(HelloRequest.newBuilder().setName("rxjava").build());
         Single<HelloResponse> resp = req.compose(stub::sayHello);
 
@@ -74,7 +74,7 @@ public class UnaryZeroMessageResponseIntegrationTest {
     public void zeroMessageResponseManyToOne() throws InterruptedException {
         serverRule.getServiceRegistry().addService(new MissingUnaryResponseService());
 
-        RxGreeterGrpc.RxGreeterStub stub = RxGreeterGrpc.newRxStub(serverRule.getChannel());
+        Rx3GreeterGrpc.RxGreeterStub stub = Rx3GreeterGrpc.newRxStub(serverRule.getChannel());
         Flowable<HelloRequest> req = Flowable.just(
                 HelloRequest.newBuilder().setName("a").build(),
                 HelloRequest.newBuilder().setName("b").build(),

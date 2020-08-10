@@ -22,7 +22,8 @@ import org.junit.Test;
 import com.google.protobuf.Empty;
 import com.salesforce.servicelibs.NumberProto;
 import com.salesforce.servicelibs.NumberProto.Number;
-import com.salesforce.servicelibs.RxNumbersGrpc;
+import com.salesforce.servicelibs.Rx3NumbersGrpc;
+import com.salesforce.servicelibs.Rx3NumbersGrpc.RxNumbersStub;
 
 import io.grpc.testing.GrpcServerRule;
 import io.reactivex.rxjava3.core.Flowable;
@@ -44,7 +45,7 @@ public class BackpressureIntegrationTest {
     private static AtomicLong lastValueTime;
     private static AtomicLong numberOfWaits;
 
-    private static class TestService extends RxNumbersGrpc.NumbersImplBase {
+    private static class TestService extends Rx3NumbersGrpc.NumbersImplBase {
         @Override
         public Single<NumberProto.Number> requestPressure(Flowable<NumberProto.Number> request) {
             return request
@@ -85,7 +86,7 @@ public class BackpressureIntegrationTest {
     @Test
     public void clientToServerBackpressure() throws InterruptedException {
         serverRule.getServiceRegistry().addService(new TestService());
-        RxNumbersGrpc.RxNumbersStub stub = RxNumbersGrpc.newRxStub(serverRule.getChannel());
+        RxNumbersStub stub = Rx3NumbersGrpc.newRxStub(serverRule.getChannel());
 
         Flowable<NumberProto.Number> rxRequest = Flowable
                 .fromIterable(IntStream.range(0, NUMBER_OF_STREAM_ELEMENTS)::iterator)
@@ -105,7 +106,7 @@ public class BackpressureIntegrationTest {
     @Test
     public void serverToClientBackpressure() throws InterruptedException {
         serverRule.getServiceRegistry().addService(new TestService());
-        RxNumbersGrpc.RxNumbersStub stub = RxNumbersGrpc.newRxStub(serverRule.getChannel());
+        RxNumbersStub stub = Rx3NumbersGrpc.newRxStub(serverRule.getChannel());
 
         Single<Empty> rxRequest = Single.just(Empty.getDefaultInstance());
 
@@ -124,7 +125,7 @@ public class BackpressureIntegrationTest {
     @Test
     public void bidiResponseBackpressure() throws InterruptedException {
         serverRule.getServiceRegistry().addService(new TestService());
-        RxNumbersGrpc.RxNumbersStub stub = RxNumbersGrpc.newRxStub(serverRule.getChannel());
+        RxNumbersStub stub = Rx3NumbersGrpc.newRxStub(serverRule.getChannel());
 
         TestSubscriber<NumberProto.Number> rxResponse = Flowable.<NumberProto.Number>empty()
                 .compose(stub::twoWayResponsePressure)
@@ -142,7 +143,7 @@ public class BackpressureIntegrationTest {
     @Test
     public void bidiRequestBackpressure() throws InterruptedException {
         serverRule.getServiceRegistry().addService(new TestService());
-        RxNumbersGrpc.RxNumbersStub stub = RxNumbersGrpc.newRxStub(serverRule.getChannel());
+        RxNumbersStub stub = Rx3NumbersGrpc.newRxStub(serverRule.getChannel());
 
         Flowable<NumberProto.Number> rxRequest = Flowable
                 .fromIterable(IntStream.range(0, NUMBER_OF_STREAM_ELEMENTS)::iterator)

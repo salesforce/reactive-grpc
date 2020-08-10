@@ -7,13 +7,18 @@
 
 package com.salesforce.rx3grpc;
 
-import io.grpc.*;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
+
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Rule;
 import org.junit.Test;
 
-import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import io.grpc.ManagedChannel;
+import io.grpc.ManagedChannelBuilder;
+import io.grpc.Server;
+import io.grpc.ServerBuilder;
+import io.grpc.StatusRuntimeException;
 
 @SuppressWarnings("Duplicates")
 public class UnimplementedMethodIntegrationTest {
@@ -25,7 +30,7 @@ public class UnimplementedMethodIntegrationTest {
 
     @BeforeClass
     public static void setupServer() throws Exception {
-        RxGreeterGrpc.GreeterImplBase svc = new RxGreeterGrpc.GreeterImplBase() {
+        Rx3GreeterGrpc.GreeterImplBase svc = new Rx3GreeterGrpc.GreeterImplBase() {
             // Don't implement anything
         };
 

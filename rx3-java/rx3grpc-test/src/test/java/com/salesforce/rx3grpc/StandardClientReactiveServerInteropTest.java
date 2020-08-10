@@ -40,7 +40,7 @@ public class StandardClientReactiveServerInteropTest {
 
     @BeforeClass
     public static void setupServer() throws Exception {
-        RxGreeterGrpc.GreeterImplBase svc = new RxGreeterGrpc.GreeterImplBase() {
+        Rx3GreeterGrpc.GreeterImplBase svc = new Rx3GreeterGrpc.GreeterImplBase() {
 
             @Override
             public Single<HelloResponse> sayHello(Single<HelloRequest> rxRequest) {

@@ -120,7 +120,7 @@ public class ReactiveClientStandardServerInteropTest {
 
     @Test
     public void oneToOne() throws InterruptedException {
-        RxGreeterGrpc.RxGreeterStub stub = RxGreeterGrpc.newRxStub(channel);
+        Rx3GreeterGrpc.RxGreeterStub stub = Rx3GreeterGrpc.newRxStub(channel);
         Single<String> rxRequest = Single.just("World");
         Single<String> rxResponse = rxRequest
                 .map(this::toRequest)
@@ -136,7 +136,7 @@ public class ReactiveClientStandardServerInteropTest {
 
     @Test
     public void oneToMany() throws InterruptedException {
-        RxGreeterGrpc.RxGreeterStub stub = RxGreeterGrpc.newRxStub(channel);
+        Rx3GreeterGrpc.RxGreeterStub stub = Rx3GreeterGrpc.newRxStub(channel);
         Single<String> rxRequest = Single.just("World");
         Flowable<String> rxResponse = rxRequest
                 .map(this::toRequest)
@@ -152,7 +152,7 @@ public class ReactiveClientStandardServerInteropTest {
 
     @Test
     public void manyToOne() throws InterruptedException {
-        RxGreeterGrpc.RxGreeterStub stub = RxGreeterGrpc.newRxStub(channel);
+        Rx3GreeterGrpc.RxGreeterStub stub = Rx3GreeterGrpc.newRxStub(channel);
         Flowable<String> rxRequest = Flowable.just("A", "B", "C");
         Single<String> rxResponse = rxRequest
                 .map(this::toRequest)
@@ -168,7 +168,7 @@ public class ReactiveClientStandardServerInteropTest {
 
     @Test
     public void manyToMany() throws InterruptedException {
-        RxGreeterGrpc.RxGreeterStub stub = RxGreeterGrpc.newRxStub(channel);
+        Rx3GreeterGrpc.RxGreeterStub stub = Rx3GreeterGrpc.newRxStub(channel);
         Flowable<String> rxRequest = Flowable.just("A", "B", "C", "D");
         Flowable<String> rxResponse = rxRequest
                 .map(this::toRequest)

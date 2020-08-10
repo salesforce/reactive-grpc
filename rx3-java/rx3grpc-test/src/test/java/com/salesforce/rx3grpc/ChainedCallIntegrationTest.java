@@ -32,7 +32,7 @@ public class ChainedCallIntegrationTest {
 
     @Before
     public void setupServer() throws Exception {
-        RxGreeterGrpc.GreeterImplBase svc = new RxGreeterGrpc.GreeterImplBase() {
+        Rx3GreeterGrpc.GreeterImplBase svc = new Rx3GreeterGrpc.GreeterImplBase() {
 
             @Override
             public Single<HelloResponse> sayHello(Single<HelloRequest> rxRequest) {
@@ -85,7 +85,7 @@ public class ChainedCallIntegrationTest {
 
     @Test
     public void servicesCanCallOtherServices() throws InterruptedException {
-        RxGreeterGrpc.RxGreeterStub stub = RxGreeterGrpc.newRxStub(channel);
+        Rx3GreeterGrpc.RxGreeterStub stub = Rx3GreeterGrpc.newRxStub(channel);
 
         Single<String> chain = Single.just(request("X"))
                 // one -> one

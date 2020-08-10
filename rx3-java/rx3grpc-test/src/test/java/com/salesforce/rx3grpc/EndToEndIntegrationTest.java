@@ -33,7 +33,7 @@ public class EndToEndIntegrationTest {
 
     @BeforeClass
     public static void setupServer() throws Exception {
-        RxGreeterGrpc.GreeterImplBase svc = new RxGreeterGrpc.GreeterImplBase() {
+        Rx3GreeterGrpc.GreeterImplBase svc = new Rx3GreeterGrpc.GreeterImplBase() {
 
             @Override
             public Single<HelloResponse> sayHello(Single<HelloRequest> rxRequest) {
@@ -89,7 +89,7 @@ public class EndToEndIntegrationTest {
 
     @Test
     public void oneToOne() throws InterruptedException {
-        RxGreeterGrpc.RxGreeterStub stub = RxGreeterGrpc.newRxStub(channel);
+        Rx3GreeterGrpc.RxGreeterStub stub = Rx3GreeterGrpc.newRxStub(channel);
         Single<HelloRequest> req = Single.just(HelloRequest.newBuilder().setName("rxjava").build());
         Single<HelloResponse> resp = req.compose(stub::sayHello);
 
@@ -100,7 +100,7 @@ public class EndToEndIntegrationTest {
 
     @Test
     public void oneToMany() throws InterruptedException {
-        RxGreeterGrpc.RxGreeterStub stub = RxGreeterGrpc.newRxStub(channel);
+        Rx3GreeterGrpc.RxGreeterStub stub = Rx3GreeterGrpc.newRxStub(channel);
         Single<HelloRequest> req = Single.just(HelloRequest.newBuilder().setName("rxjava").build());
         Flowable<HelloResponse> resp = req.to(stub::sayHelloRespStream);
 
@@ -111,7 +111,7 @@ public class EndToEndIntegrationTest {
 
     @Test
     public void manyToOne() throws InterruptedException {
-        RxGreeterGrpc.RxGreeterStub stub = RxGreeterGrpc.newRxStub(channel);
+        Rx3GreeterGrpc.RxGreeterStub stub = Rx3GreeterGrpc.newRxStub(channel);
         Flowable<HelloRequest> req = Flowable.just(
                 HelloRequest.newBuilder().setName("a").build(),
                 HelloRequest.newBuilder().setName("b").build(),
@@ -126,7 +126,7 @@ public class EndToEndIntegrationTest {
 
     @Test
     public void manyToMany() throws InterruptedException {
-        RxGreeterGrpc.RxGreeterStub stub = RxGreeterGrpc.newRxStub(channel);
+        Rx3GreeterGrpc.RxGreeterStub stub = Rx3GreeterGrpc.newRxStub(channel);
         Flowable<HelloRequest> req = Flowable.just(
                 HelloRequest.newBuilder().setName("a").build(),
                 HelloRequest.newBuilder().setName("b").build(),

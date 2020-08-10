@@ -20,7 +20,7 @@ import com.google.protobuf.Empty;
 import com.salesforce.grpc.testing.contrib.NettyGrpcServerRule;
 import com.salesforce.servicelibs.NumberProto;
 import com.salesforce.servicelibs.NumberProto.Number;
-import com.salesforce.servicelibs.RxNumbersGrpc;
+import com.salesforce.servicelibs.Rx3NumbersGrpc;
 
 import io.grpc.Status;
 import io.grpc.StatusRuntimeException;
@@ -36,7 +36,7 @@ public class ServerErrorUpstreamCancellationIntegrationTest {
     @Rule
     public UnhandledRxJavaErrorRule errorRule = new UnhandledRxJavaErrorRule().autoVerifyNoError();
 
-    private static class ExplodeAfterFiveService extends RxNumbersGrpc.NumbersImplBase {
+    private static class ExplodeAfterFiveService extends Rx3NumbersGrpc.NumbersImplBase {
         @Override
         public Flowable<NumberProto.Number> twoWayPressure(Flowable<NumberProto.Number> request) {
             return request.map(x -> kaboom());
@@ -60,7 +60,7 @@ public class ServerErrorUpstreamCancellationIntegrationTest {
     @Test
     public void serverErrorSignalsUpstreamCancellationManyToOne() throws InterruptedException {
         serverRule.getServiceRegistry().addService(new ExplodeAfterFiveService());
-        RxNumbersGrpc.RxNumbersStub stub = RxNumbersGrpc.newRxStub(serverRule.getChannel());
+        Rx3NumbersGrpc.RxNumbersStub stub = Rx3NumbersGrpc.newRxStub(serverRule.getChannel());
 
         AtomicBoolean upstreamCancel = new AtomicBoolean(false);
         AtomicReference<Throwable> throwable = new AtomicReference<>();
@@ -82,7 +82,7 @@ public class ServerErrorUpstreamCancellationIntegrationTest {
     @Test
     public void serverErrorSignalsUpstreamCancellationBidi() throws InterruptedException {
         serverRule.getServiceRegistry().addService(new ExplodeAfterFiveService());
-        RxNumbersGrpc.RxNumbersStub stub = RxNumbersGrpc.newRxStub(serverRule.getChannel());
+        Rx3NumbersGrpc.RxNumbersStub stub = Rx3NumbersGrpc.newRxStub(serverRule.getChannel());
 
         AtomicBoolean upstreamCancel = new AtomicBoolean(false);
 

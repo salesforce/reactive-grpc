@@ -35,7 +35,7 @@ public class ServerErrorIntegrationTest {
 
     @BeforeClass
     public static void setupServer() throws Exception {
-        RxGreeterGrpc.GreeterImplBase svc = new RxGreeterGrpc.GreeterImplBase() {
+        Rx3GreeterGrpc.GreeterImplBase svc = new Rx3GreeterGrpc.GreeterImplBase() {
             @Override
             public Single<HelloResponse> sayHello(Single<HelloRequest> rxRequest) {
                 return Single.error(new StatusRuntimeException(Status.INTERNAL));
@@ -72,7 +72,7 @@ public class ServerErrorIntegrationTest {
 
     @Test
     public void oneToOne() throws InterruptedException {
-        RxGreeterGrpc.RxGreeterStub stub = RxGreeterGrpc.newRxStub(channel);
+        Rx3GreeterGrpc.RxGreeterStub stub = Rx3GreeterGrpc.newRxStub(channel);
         Single<HelloResponse> resp = Single.just(HelloRequest.getDefaultInstance()).compose(stub::sayHello);
         TestObserver<HelloResponse> test = resp.test();
 
@@ -83,7 +83,7 @@ public class ServerErrorIntegrationTest {
 
     @Test
     public void oneToMany() throws InterruptedException {
-        RxGreeterGrpc.RxGreeterStub stub = RxGreeterGrpc.newRxStub(channel);
+        Rx3GreeterGrpc.RxGreeterStub stub = Rx3GreeterGrpc.newRxStub(channel);
         Flowable<HelloResponse> resp = Single.just(HelloRequest.getDefaultInstance()).to(stub::sayHelloRespStream);
         TestSubscriber<HelloResponse> test = resp
                 .doOnNext(System.out::println)
@@ -99,7 +99,7 @@ public class ServerErrorIntegrationTest {
 
     @Test
     public void manyToOne() throws InterruptedException {
-        RxGreeterGrpc.RxGreeterStub stub = RxGreeterGrpc.newRxStub(channel);
+        Rx3GreeterGrpc.RxGreeterStub stub = Rx3GreeterGrpc.newRxStub(channel);
         Single<HelloResponse> resp = Flowable.just(HelloRequest.getDefaultInstance()).to(stub::sayHelloReqStream);
         TestObserver<HelloResponse> test = resp.test();
 
@@ -110,7 +110,7 @@ public class ServerErrorIntegrationTest {
 
     @Test
     public void manyToMany() throws InterruptedException {
-        RxGreeterGrpc.RxGreeterStub stub = RxGreeterGrpc.newRxStub(channel);
+        Rx3GreeterGrpc.RxGreeterStub stub = Rx3GreeterGrpc.newRxStub(channel);
         Flowable<HelloResponse> resp = Flowable.just(HelloRequest.getDefaultInstance()).compose(stub::sayHelloBothStream);
         TestSubscriber<HelloResponse> test = resp.test();
 
