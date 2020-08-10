@@ -1,0 +1,16 @@
+java_library(
+    name = "rxgrpc",
+    srcs = glob(["src/main/**/*.java"]),
+    resources = ["src/main/resources/RxStub.mustache"],
+    deps = [
+        "//common/reactive-grpc-gencommon",
+        "@com_salesforce_servicelibs_jprotoc",
+    ],
+)
+
+java_binary(
+    name = "rxgrpc_bin",
+    main_class = "com.salesforce.rx3grpc.RxGrpcGenerator",
+    visibility = ["//visibility:public"],
+    runtime_deps = [":rxgrpc"],
+)
