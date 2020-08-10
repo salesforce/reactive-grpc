@@ -11,9 +11,9 @@ import com.salesforce.jprotoc.ProtocPlugin;
 import com.salesforce.reactivegrpc.gen.ReactiveGrpcGenerator;
 
 /**
- * A protoc generator for generating ReactiveX 2.0 bindings for gRPC.
+ * A protoc generator for generating ReactiveX 3.0 bindings for gRPC.
  */
-public class RxGrpcGenerator extends ReactiveGrpcGenerator {
+public class Rx3GrpcGenerator extends ReactiveGrpcGenerator {
 
     @Override
     protected String getClassPrefix() {
@@ -22,9 +22,9 @@ public class RxGrpcGenerator extends ReactiveGrpcGenerator {
 
     public static void main(String[] args) {
         if (args.length == 0) {
-            ProtocPlugin.generate(new RxGrpcGenerator());
+            ProtocPlugin.generate(new Rx3GrpcGenerator());
         } else {
-            ProtocPlugin.debug(new RxGrpcGenerator(), args[0]);
+            ProtocPlugin.debug(new Rx3GrpcGenerator(), args[0]);
         }
     }
 }
