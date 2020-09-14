@@ -683,6 +683,13 @@ public class AbstractSubscriberAndProducerTest {
                   .isSubsetOf(integers);
         Assertions.assertThat(unhandledThrowable).isEmpty();
     }
+    
+    @Test
+    public void canCancelBeforeOnSubscribeTest() {
+        TestSubscriberProducer<Integer> producer = new TestSubscriberProducer<Integer>();
+        producer.cancel();
+        Assertions.assertThat(producer.isCanceled()).isTrue();
+    }
 
     private static void racePauseResuming(final TestCallStreamObserver<?> downstream, int times) {
         Observable.range(0, times)
