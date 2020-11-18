@@ -1,19 +1,16 @@
-# Overview
-
+Overview
+========
 Reactor-gRPC is a set of gRPC bindings for reactive programming with [Reactor](http://projectreactor.io/).
 
 ### Android support
-
 Reactive gRPC supports Android to the same level of the underlying reactive technologies. Spring Reactor
 does [not officially support Android](http://projectreactor.io/docs/core/release/reference/docs/index.html#prerequisites),
 however, "it should work fine with Android SDK 26 (Android O) and above."
 
-# Installation
-
+Installation
+=====
 ### Maven
-
 To use Reactor-gRPC with the `protobuf-maven-plugin`, add a [custom protoc plugin configuration section](https://www.xolstice.org/protobuf-maven-plugin/examples/protoc-plugin.html).
-
 ```xml
 <protocPlugins>
     <protocPlugin>
@@ -27,9 +24,7 @@ To use Reactor-gRPC with the `protobuf-maven-plugin`, add a [custom protoc plugi
 ```
 
 ### Gradle
-
 To use Reactor-gRPC with the `protobuf-gradle-plugin`, add the reactor-grpc plugin to the protobuf `plugins` section.
-
 ```groovy
 protobuf {
     protoc {
@@ -52,15 +47,13 @@ protobuf {
     }
 }
 ```
-
 And add the following dependency: `"com.salesforce.servicelibs:reactor-grpc-stub:${reactiveGrpcVersion}"`
 
-_At this time, Reactor-gRPC with Gradle only supports bash-based environments. Windows users will need to build using
-Windows Subsystem for Linux (win 10) or invoke the Maven protobuf plugin with Gradle._
-
+*At this time, Reactor-gRPC with Gradle only supports bash-based environments. Windows users will need to build using 
+Windows Subsystem for Linux (win 10) or invoke the Maven protobuf plugin with Gradle.*
 ### Bazel
 
-To use Reactor-gRPC with Bazel, update your `WORKSPACE` file.
+To use RxGrpc with Bazel, update your `WORKSPACE` file.
 
 ```bazel
 load("@bazel_tools//tools/build_defs/repo:http.bzl", "http_archive")
@@ -76,24 +69,23 @@ load("@com_salesforce_servicelibs_reactive_grpc//bazel:repositories.bzl", "repos
 repositories()
 ```
 
-Then, add a `reactor_grpc_library()` rule to your proto's `BUILD` file, referencing both the `proto_library()` target and
+Then, add a `rx_grpc_library()` rule to your proto's `BUILD` file, referencing both the `proto_library()` target and
 the `java_proto_library()` target.
 
 ```bazel
-load("@com_salesforce_servicelibs_reactive_grpc//bazel:java_reactive_grpc_library.bzl", "reactor_grpc_library")
+load("@com_salesforce_servicelibs_reactive_grpc//bazel:java_reactive_grpc_library.bzl", "rx_grpc_library")
 
-reactor_grpc_library(
-    name = "foo_reactor_proto",
+rx_grpc_library(
+    name = "foo_rx_proto",
     proto = ":foo_proto",
     deps = [":foo_java_proto"],
 )
 ```
-
-# Usage
-
+Usage
+=====
 After installing the plugin, Reactor-gRPC service stubs will be generated along with your gRPC service stubs.
 
-- To implement a service using an Reactor-gRPC service, subclass `Reactor[Name]Grpc.[Name]ImplBase` and override the Reactor-based
+* To implement a service using an Reactor-gRPC service, subclass `Reactor[Name]Grpc.[Name]ImplBase` and override the Reactor-based
   methods.
 
   ```java
@@ -114,8 +106,7 @@ After installing the plugin, Reactor-gRPC service stubs will be generated along 
       }
   };
   ```
-
-- To call a service using an Reactor-gRPC client, call `Reactor[Name]Grpc.newReactorStub(Channel channel)`.
+* To call a service using an Reactor-gRPC client, call `Reactor[Name]Grpc.newReactorStub(Channel channel)`.
 
   ```java
   ReactorGreeterGrpc.ReactorGreeterStub stub = ReactorGreeterGrpc.newReactorStub(channel);
@@ -128,26 +119,22 @@ After installing the plugin, Reactor-gRPC service stubs will be generated along 
   ```
 
 ## Don't break the chain
-
 Used on their own, the generated Reactor stub methods do not cleanly chain with other Reactor operators.
 Using the `transform()` and `as()` methods of `Mono` and `Flux` are preferred over direct invocation.
 
 #### One→One, Many→Many
-
 ```java
 Mono<HelloResponse> monoResponse = monoRequest.transform(stub::sayHello);
 Flux<HelloResponse> fluxResponse = fluxRequest.transform(stub::sayHelloBothStream);
 ```
 
 #### One→Many, Many→One
-
 ```java
 Mono<HelloResponse> monoResponse = fluxRequest.as(stub::sayHelloRequestStream);
 Flux<HelloResponse> fluxResponse = monoRequest.as(stub::sayHelloResponseStream);
 ```
 
 ## Retrying streaming requests
-
 `GrpcRetry` is used to transparently re-establish a streaming gRPC request in the event of a server error. During a
 retry, the upstream rx pipeline is re-subscribed to acquire a request message and the RPC call re-issued. The downstream
 rx pipeline never sees the error.
@@ -159,7 +146,6 @@ Flux<HelloResponse> fluxResponse = fluxRequest.compose(GrpcRetry.ManyToMany.retr
 For complex retry scenarios, use the `Retry` builder from <a href="https://github.com/reactor/reactor-addons/blob/master/reactor-extra/src/main/java/reactor/retry/Retry.java">Reactor Extras</a>.
 
 ## gRPC Context propagation
-
 Reactor does not have a convenient mechanism for passing the `ThreadLocal` gRPC `Context` between threads in a reactive
 call chain. If you never use `observeOn()` or `subscribeOn()` the gRPC context _should_ propagate correctly. However,
 the use of a `Scheduler` will necessitate taking manual control over Context propagation.
@@ -172,7 +158,6 @@ Two context propagation techniques are:
    API to capture the gRPC context in the call chain.
 
 ## Configuration of flow control
-
 Reactor GRPC by default prefetch 512 items on client and server side. When the messages are bigger it
 can consume a lot of memory. One can override these default settings using ReactorCallOptions:
 
@@ -197,11 +182,12 @@ Prefetch on server side (server consumes too slow):
     }
 ```
 
-# Modules
+Modules
+=======
 
 Reactor-gRPC is broken down into four sub-modules:
 
-- _reactor-grpc_ - a protoc generator for generating gRPC bindings for Reactor.
-- _reactor-grpc-stub_ - stub classes supporting the generated Reactor bindings.
-- _reactor-grpc-test_ - integration tests for Reactor.
-- _reactor-grpc-tck_ - Reactive Streams TCK compliance tests for Reactor.
+* _reactor-grpc_ - a protoc generator for generating gRPC bindings for Reactor.
+* _reactor-grpc-stub_ - stub classes supporting the generated Reactor bindings.
+* _reactor-grpc-test_ - integration tests for Reactor.
+* _reactor-grpc-tck_ - Reactive Streams TCK compliance tests for Reactor.
