@@ -1,0 +1,189 @@
+{{#packageName}}
+package {{packageName}};
+{{/packageName}}
+
+import static {{packageName}}.{{serviceName}}Grpc.getServiceDescriptor;
+import static io.grpc.stub.ServerCalls.asyncUnaryCall;
+import static io.grpc.stub.ServerCalls.asyncServerStreamingCall;
+import static io.grpc.stub.ServerCalls.asyncClientStreamingCall;
+import static io.grpc.stub.ServerCalls.asyncBidiStreamingCall;
+
+
+{{#deprecated}}
+@java.lang.Deprecated
+{{/deprecated}}
+@javax.annotation.Generated(
+value = "by RxGrpc generator",
+comments = "Source: {{protoName}}")
+public final class {{className}} {
+    private {{className}}() {}
+
+    public static Rx{{serviceName}}Stub newRxStub(io.grpc.Channel channel) {
+        return new Rx{{serviceName}}Stub(channel);
+    }
+
+    {{#javaDoc}}
+    {{{javaDoc}}}
+    {{/javaDoc}}
+    public static final class Rx{{serviceName}}Stub extends io.grpc.stub.AbstractStub<Rx{{serviceName}}Stub> {
+        private {{serviceName}}Grpc.{{serviceName}}Stub delegateStub;
+
+        private Rx{{serviceName}}Stub(io.grpc.Channel channel) {
+            super(channel);
+            delegateStub = {{serviceName}}Grpc.newStub(channel);
+        }
+
+        private Rx{{serviceName}}Stub(io.grpc.Channel channel, io.grpc.CallOptions callOptions) {
+            super(channel, callOptions);
+            delegateStub = {{serviceName}}Grpc.newStub(channel).build(channel, callOptions);
+        }
+
+        @java.lang.Override
+        protected Rx{{serviceName}}Stub build(io.grpc.Channel channel, io.grpc.CallOptions callOptions) {
+            return new Rx{{serviceName}}Stub(channel, callOptions);
+        }
+
+        {{#methods}}
+            {{#javaDoc}}
+        {{{javaDoc}}}
+            {{/javaDoc}}
+            {{#deprecated}}
+        @java.lang.Deprecated
+            {{/deprecated}}
+        public {{#isManyOutput}}io.reactivex.rxjava3.core.Flowable{{/isManyOutput}}{{^isManyOutput}}io.reactivex.rxjava3.core.Single{{/isManyOutput}}<{{outputType}}> {{methodName}}({{#isManyInput}}io.reactivex.rxjava3.core.Flowable{{/isManyInput}}{{^isManyInput}}io.reactivex.rxjava3.core.Single{{/isManyInput}}<{{inputType}}> rxRequest) {
+            return com.salesforce.rx3grpc.stub.ClientCalls.{{reactiveCallsMethodName}}(rxRequest,
+            {{^isManyInput}}
+                new com.salesforce.reactivegrpc.common.BiConsumer<{{inputType}}, io.grpc.stub.StreamObserver<{{outputType}}>>() {
+                    @java.lang.Override
+                    public void accept({{inputType}} request, io.grpc.stub.StreamObserver<{{outputType}}> observer) {
+                        delegateStub.{{methodNameCamelCase}}(request, observer);
+                    }
+                }, getCallOptions());
+            {{/isManyInput}}
+            {{#isManyInput}}
+                new com.salesforce.reactivegrpc.common.Function<io.grpc.stub.StreamObserver<{{outputType}}>, io.grpc.stub.StreamObserver<{{inputType}}>>() {
+                    @java.lang.Override
+                    public io.grpc.stub.StreamObserver<{{inputType}}> apply(io.grpc.stub.StreamObserver<{{outputType}}> observer) {
+                        return delegateStub.{{methodNameCamelCase}}(observer);
+                    }
+                }, getCallOptions());
+            {{/isManyInput}}
+        }
+
+        {{/methods}}
+        {{#unaryRequestMethods}}
+           {{#javaDoc}}
+        {{{javaDoc}}}
+           {{/javaDoc}}
+           {{#deprecated}}
+        @java.lang.Deprecated
+           {{/deprecated}}
+        public {{#isManyOutput}}io.reactivex.rxjava3.core.Flowable{{/isManyOutput}}{{^isManyOutput}}io.reactivex.rxjava3.core.Single{{/isManyOutput}}<{{outputType}}> {{methodName}}({{inputType}} rxRequest) {
+            return com.salesforce.rx3grpc.stub.ClientCalls.{{reactiveCallsMethodName}}(io.reactivex.rxjava3.core.Single.just(rxRequest),
+                new com.salesforce.reactivegrpc.common.BiConsumer<{{inputType}}, io.grpc.stub.StreamObserver<{{outputType}}>>() {
+                    @java.lang.Override
+                    public void accept({{inputType}} request, io.grpc.stub.StreamObserver<{{outputType}}> observer) {
+                        delegateStub.{{methodNameCamelCase}}(request, observer);
+                    }
+                }, getCallOptions());
+        }
+
+        {{/unaryRequestMethods}}
+    }
+
+    {{#javaDoc}}
+    {{{javaDoc}}}
+    {{/javaDoc}}
+    public static abstract class {{serviceName}}ImplBase implements io.grpc.BindableService {
+
+        {{#methods}}
+            {{#javaDoc}}
+        {{{javaDoc}}}
+            {{/javaDoc}}
+            {{#deprecated}}
+        @java.lang.Deprecated
+            {{/deprecated}}
+        public {{#isManyOutput}}io.reactivex.rxjava3.core.Flowable{{/isManyOutput}}{{^isManyOutput}}io.reactivex.rxjava3.core.Single{{/isManyOutput}}<{{outputType}}> {{methodNameCamelCase}}({{#isManyInput}}io.reactivex.rxjava3.core.Flowable{{/isManyInput}}{{^isManyInput}}io.reactivex.rxjava3.core.Single{{/isManyInput}}<{{inputType}}> request) {
+            throw new io.grpc.StatusRuntimeException(io.grpc.Status.UNIMPLEMENTED);
+        }
+
+        {{/methods}}
+        @java.lang.Override public final io.grpc.ServerServiceDefinition bindService() {
+            return io.grpc.ServerServiceDefinition.builder(getServiceDescriptor())
+                    {{#methods}}
+                    .addMethod(
+                            {{packageName}}.{{serviceName}}Grpc.get{{methodNamePascalCase}}Method(),
+                            {{grpcCallsMethodName}}(
+                                    new MethodHandlers<
+                                            {{inputType}},
+                                            {{outputType}}>(
+                                            this, METHODID_{{methodNameUpperUnderscore}})))
+                    {{/methods}}
+                    .build();
+        }
+
+        protected io.grpc.CallOptions getCallOptions(int methodId) {
+            return null;
+        }
+
+    }
+
+    {{#methods}}
+    public static final int METHODID_{{methodNameUpperUnderscore}} = {{methodNumber}};
+    {{/methods}}
+
+    private static final class MethodHandlers<Req, Resp> implements
+            io.grpc.stub.ServerCalls.UnaryMethod<Req, Resp>,
+            io.grpc.stub.ServerCalls.ServerStreamingMethod<Req, Resp>,
+            io.grpc.stub.ServerCalls.ClientStreamingMethod<Req, Resp>,
+            io.grpc.stub.ServerCalls.BidiStreamingMethod<Req, Resp> {
+        private final {{serviceName}}ImplBase serviceImpl;
+        private final int methodId;
+
+        MethodHandlers({{serviceName}}ImplBase serviceImpl, int methodId) {
+            this.serviceImpl = serviceImpl;
+            this.methodId = methodId;
+        }
+
+        @java.lang.Override
+        @java.lang.SuppressWarnings("unchecked")
+        public void invoke(Req request, io.grpc.stub.StreamObserver<Resp> responseObserver) {
+            switch (methodId) {
+                {{#methods}}
+                {{^isManyInput}}
+                case METHODID_{{methodNameUpperUnderscore}}:
+                    com.salesforce.rx3grpc.stub.ServerCalls.{{reactiveCallsMethodName}}(({{inputType}}) request,
+                            (io.grpc.stub.StreamObserver<{{outputType}}>) responseObserver,
+                            new com.salesforce.reactivegrpc.common.Function<{{#isManyInput}}io.reactivex.rxjava3.core.Flowable{{/isManyInput}}{{^isManyInput}}io.reactivex.rxjava3.core.Single{{/isManyInput}}<{{inputType}}>, {{#isManyOutput}}io.reactivex.rxjava3.core.Flowable{{/isManyOutput}}{{^isManyOutput}}io.reactivex.rxjava3.core.Single{{/isManyOutput}}<{{outputType}}>>() {
+                                @java.lang.Override
+                                public {{#isManyOutput}}io.reactivex.rxjava3.core.Flowable{{/isManyOutput}}{{^isManyOutput}}io.reactivex.rxjava3.core.Single{{/isManyOutput}}<{{outputType}}> apply({{#isManyInput}}io.reactivex.rxjava3.core.Flowable{{/isManyInput}}{{^isManyInput}}io.reactivex.rxjava3.core.Single{{/isManyInput}}<{{inputType}}> single) {
+                                    return serviceImpl.{{methodNameCamelCase}}(single);
+                                }
+                            });
+                    break;
+                {{/isManyInput}}
+                {{/methods}}
+                default:
+                    throw new java.lang.AssertionError();
+            }
+        }
+
+        @java.lang.Override
+        @java.lang.SuppressWarnings("unchecked")
+        public io.grpc.stub.StreamObserver<Req> invoke(io.grpc.stub.StreamObserver<Resp> responseObserver) {
+            switch (methodId) {
+                {{#methods}}
+                {{#isManyInput}}
+                case METHODID_{{methodNameUpperUnderscore}}:
+                    return (io.grpc.stub.StreamObserver<Req>) com.salesforce.rx3grpc.stub.ServerCalls.{{reactiveCallsMethodName}}(
+                            (io.grpc.stub.StreamObserver<{{outputType}}>) responseObserver,
+                            serviceImpl::{{methodNameCamelCase}}, serviceImpl.getCallOptions(methodId));
+                {{/isManyInput}}
+                {{/methods}}
+                default:
+                    throw new java.lang.AssertionError();
+            }
+        }
+    }
+
+}

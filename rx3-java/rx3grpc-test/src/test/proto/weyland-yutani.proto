@@ -1,0 +1,17 @@
+syntax = "proto3";
+
+package com.salesforce.invalid.dash;
+
+import "google/protobuf/empty.proto";
+import "google/protobuf/timestamp.proto";
+
+// The time - as a service.
+service CurrentTime {
+    // Sends the current time
+    rpc SayTime (google.protobuf.Empty) returns (TimeResponse) {}
+}
+
+// The response message containing the time
+message TimeResponse {
+    google.protobuf.Timestamp time = 1;
+}

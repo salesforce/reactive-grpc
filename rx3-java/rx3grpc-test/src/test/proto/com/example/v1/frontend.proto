@@ -1,0 +1,13 @@
+syntax = "proto3";
+
+package com.example.v1;
+
+import "google/protobuf/timestamp.proto";
+import "google/protobuf/empty.proto";
+
+service Frontend {
+    rpc Heartbeat(HeartbeatRequest) returns (google.protobuf.Empty);
+}
+message HeartbeatRequest {
+    google.protobuf.Timestamp timestamp = 1;
+}

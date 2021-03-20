@@ -17,29 +17,24 @@
     </parent>
     <modelVersion>4.0.0</modelVersion>
 
-    <artifactId>reactive-grpc-common</artifactId>
+    <artifactId>rx3grpc-stub</artifactId>
 
     <properties>
         <java.version>1.7</java.version>
-        <java.test.version>1.8</java.test.version>
         <maven.compiler.source>${java.version}</maven.compiler.source>
         <maven.compiler.target>${java.version}</maven.compiler.target>
     </properties>
 
     <dependencies>
         <dependency>
-            <groupId>javax.annotation</groupId>
-            <artifactId>javax.annotation-api</artifactId>
-            <version>1.3.2</version>
+            <groupId>${project.groupId}</groupId>
+            <artifactId>reactive-grpc-common</artifactId>
+            <version>${project.version}</version>
         </dependency>
         <dependency>
-            <groupId>org.reactivestreams</groupId>
-            <artifactId>reactive-streams</artifactId>
-            <version>${reactive.streams.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>io.grpc</groupId>
-            <artifactId>grpc-stub</artifactId>
+            <groupId>io.reactivex.rxjava3</groupId>
+            <artifactId>rxjava</artifactId>
+            <version>${rx3java.version}</version>
         </dependency>
         <dependency>
             <groupId>org.junit.jupiter</groupId>
@@ -64,24 +59,6 @@
         <dependency>
             <groupId>org.mockito</groupId>
             <artifactId>mockito-core</artifactId>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>io.reactivex.rxjava2</groupId>
-            <artifactId>rxjava</artifactId>
-            <version>${rxjava.version}</version>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>com.github.davidmoten</groupId>
-            <artifactId>rxjava2-extras</artifactId>
-            <version>0.1.26</version>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
-			<groupId>com.github.akarnokd</groupId>
-			<artifactId>rxjava3-extensions</artifactId>
-    		<version>3.0.0</version>
             <scope>test</scope>
         </dependency>
         <dependency>
@@ -125,7 +102,6 @@
                     </signature>
                 </configuration>
             </plugin>
-
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-jar-plugin</artifactId>
@@ -152,5 +128,4 @@
             </plugin>
         </plugins>
     </build>
-
 </project>
