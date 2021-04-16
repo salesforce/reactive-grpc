@@ -27,7 +27,7 @@ See the readme in each technology-specific sub-directory for usage details.
 # Android support
 Reactive gRPC supports Android to the same level of the underlying reactive technologies.
 
-* Rx-Java - Generated code targets Java 6, so it _should_ work with all versions of Android >= 2.3 (SDK 9).
+* Rx-Java - Generated code targets Java 8, so it _should_ work with Android.
 * Spring Reactor - [Not officially supported.](http://projectreactor.io/docs/core/release/reference/docs/index.html#prerequisites) 
   "Reactor 3 does not officially support or target Android, however, it should work fine with Android SDK 26 (Android O) and above."
 
