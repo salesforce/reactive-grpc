@@ -21,6 +21,10 @@
             <groupId>com.salesforce.servicelibs</groupId>
             <artifactId>jprotoc</artifactId>
         </dependency>
+        <dependency>
+            <groupId>com.google.protobuf</groupId>
+            <artifactId>protobuf-java</artifactId>
+        </dependency>
     </dependencies>
 
     <build>
