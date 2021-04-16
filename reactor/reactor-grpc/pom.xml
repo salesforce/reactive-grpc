@@ -50,6 +50,46 @@
                         </goals>
                     </execution>
                 </executions>
+                <configuration>
+                    <relocations>
+                        <relocation>
+                            <pattern>android.annotation</pattern>
+                            <shadedPattern>com.salesforce.servicelibs.android.annotation</shadedPattern>
+                        </relocation>
+                        <relocation>
+                            <pattern>com.github.mustachejava</pattern>
+                            <shadedPattern>com.salesforce.servicelibs.com.github.mustachejava</shadedPattern>
+                        </relocation>
+                        <relocation>
+                            <pattern>com.google</pattern>
+                            <shadedPattern>com.salesforce.servicelibs.com.google</shadedPattern>
+                        </relocation>
+                        <relocation>
+                            <pattern>google.protobuf</pattern>
+                            <shadedPattern>com.salesforce.servicelibs.google.protobuf</shadedPattern>
+                        </relocation>
+                        <relocation>
+                            <pattern>io.grpc</pattern>
+                            <shadedPattern>com.salesforce.servicelibs.io.grpc</shadedPattern>
+                        </relocation>
+                        <relocation>
+                            <pattern>io.perfmark</pattern>
+                            <shadedPattern>com.salesforce.servicelibs.io.perfmark</shadedPattern>
+                        </relocation>
+                        <relocation>
+                            <pattern>javax.annotation</pattern>
+                            <shadedPattern>com.salesforce.servicelibs.javax.annotation</shadedPattern>
+                        </relocation>
+                        <relocation>
+                            <pattern>org.checkerframework</pattern>
+                            <shadedPattern>com.salesforce.servicelibs.org.checkerframework</shadedPattern>
+                        </relocation>
+                        <relocation>
+                            <pattern>org.codehaus</pattern>
+                            <shadedPattern>com.salesforce.servicelibs.org.codehaus</shadedPattern>
+                        </relocation>
+                    </relocations>
+                </configuration>
             </plugin>
 
             <plugin>
