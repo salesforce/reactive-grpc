@@ -12,18 +12,12 @@
     <parent>
         <groupId>com.salesforce.servicelibs</groupId>
         <artifactId>reactive-grpc</artifactId>
-        <version>1.0.2-SNAPSHOT</version>
+        <version>1.1.0-SNAPSHOT</version>
         <relativePath>../../pom.xml</relativePath>
     </parent>
     <modelVersion>4.0.0</modelVersion>
 
     <artifactId>rxgrpc-stub</artifactId>
-
-    <properties>
-        <java.version>1.7</java.version>
-        <maven.compiler.source>${java.version}</maven.compiler.source>
-        <maven.compiler.target>${java.version}</maven.compiler.target>
-    </properties>
 
     <dependencies>
         <dependency>
@@ -83,29 +77,6 @@
                 <configuration>
                     <configLocation>../../checkstyle.xml</configLocation>
                     <suppressionsLocation>../../checkstyle_ignore.xml</suppressionsLocation>
-                </configuration>
-            </plugin>
-
-            <!-- Fail the build if Java7+ sneak in, because Android -->
-            <plugin>
-                <groupId>org.codehaus.mojo</groupId>
-                <artifactId>animal-sniffer-maven-plugin</artifactId>
-                <version>1.7</version>
-                <executions>
-                    <execution>
-                        <id>signature-check</id>
-                        <phase>verify</phase>
-                        <goals>
-                            <goal>check</goal>
-                        </goals>
-                    </execution>
-                </executions>
-                <configuration>
-                    <signature>
-                        <groupId>org.codehaus.mojo.signature</groupId>
-                        <artifactId>java16</artifactId>
-                        <version>1.0</version>
-                    </signature>
                 </configuration>
             </plugin>
 
