@@ -89,6 +89,7 @@
                 </configuration>
             </plugin>
 
+            <!-- Jar and Bundle plugin used for OSGI support -->
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-jar-plugin</artifactId>
@@ -102,7 +103,7 @@
             <plugin>
                 <groupId>org.apache.felix</groupId>
                 <artifactId>maven-bundle-plugin</artifactId>
-                <version>4.1.0</version>
+                <version>5.1.2</version>
                 <executions>
                     <execution>
                         <id>bundle-manifest</id>
