@@ -1,0 +1,22 @@
+syntax = "proto3";
+
+package optional_helloworld;
+
+option java_package = "com.salesforce.rxgrpc";
+option java_outer_classname = "HelloWorldOptionalProto";
+
+// The greeting service definition.
+service OptionalGreeter {
+    // Sends a greeting
+    rpc SayHello (OptionalHelloRequest) returns (OptionalHelloResponse) {}
+}
+
+// The request message containing the user's name.
+message OptionalHelloRequest {
+    optional string name = 1;
+}
+
+// The response message containing the greetings
+message OptionalHelloResponse {
+    optional string message = 1;
+}

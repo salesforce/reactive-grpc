@@ -58,12 +58,13 @@
         <!-- Maven Plugin Versions -->
         <protobuf.plugin.version>0.6.1</protobuf.plugin.version>
         <compiler.plugin.version>3.8.0</compiler.plugin.version>
+        <canteen.plugin.version>1.1.0</canteen.plugin.version>
 
         <!-- Dependency Versions -->
         <reactive.streams.version>1.0.2</reactive.streams.version>
-        <grpc.version>1.23.0</grpc.version>
-        <protoc.version>3.9.0</protoc.version> <!-- Same version as grpc-proto -->
-        <jprotoc.version>0.9.1</jprotoc.version>
+        <grpc.version>1.37.0</grpc.version>
+        <protoc.version>3.15.8</protoc.version> <!-- Same version as grpc-proto -->
+        <jprotoc.version>1.1.0</jprotoc.version>
         <rxjava.version>2.2.12</rxjava.version>
         <reactor.version>3.2.12.RELEASE</reactor.version>
 
@@ -132,6 +133,11 @@
                 <version>${jprotoc.version}</version>
             </dependency>
             <dependency>
+                <groupId>com.google.protobuf</groupId>
+                <artifactId>protobuf-java</artifactId>
+                <version>${protoc.version}</version>
+            </dependency>
+            <dependency>
                 <groupId>io.grpc</groupId>
                 <artifactId>grpc-netty</artifactId>
                 <version>${grpc.version}</version>
@@ -144,6 +150,11 @@
             <dependency>
                 <groupId>io.grpc</groupId>
                 <artifactId>grpc-core</artifactId>
+                <version>${grpc.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>io.grpc</groupId>
+                <artifactId>grpc-api</artifactId>
                 <version>${grpc.version}</version>
             </dependency>
             <dependency>
