@@ -140,7 +140,7 @@ retry, the upstream rx pipeline is re-subscribed to acquire a request message an
 rx pipeline never sees the error.
 
 ```java
-Flux<HelloResponse> fluxResponse = fluxRequest.compose(GrpcRetry.ManyToMany.retry(stub::sayHelloBothStream));
+Flux<HelloResponse> fluxResponse = fluxRequest.transformDeferred(GrpcRetry.ManyToMany.retry(stub::sayHelloBothStream));
 ```
 
 For complex retry scenarios, use the `Retry` builder from <a href="https://github.com/reactor/reactor-addons/blob/master/reactor-extra/src/main/java/reactor/retry/Retry.java">Reactor Extras</a>.

@@ -4,9 +4,8 @@
  *  For full license text, see LICENSE.txt file in the repo root  or https://opensource.org/licenses/BSD-3-Clause
  */
 
-package com.salesforce.reactorgrpc.stub;
+package com.salesforce.reactorgrpc.retry;
 
-import com.salesforce.reactorgrpc.GrpcRetry;
 import org.junit.jupiter.api.Test;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.FluxSink;
@@ -108,7 +107,7 @@ public class GrpcRetryTest {
     @Test
     public void manyToManyRetryWhen() {
         Flux<Integer> test = newThreeErrorFlux()
-                .<Integer>compose(GrpcRetry.ManyToMany.retryWhen(Function.identity(), Retry.any().retryMax(4)));
+                .<Integer>transformDeferred(GrpcRetry.ManyToMany.retryWhen(Function.identity(), Retry.any().retryMax(4)));
 
         StepVerifier.create(test)
                 .expectNext(0)
@@ -119,7 +118,7 @@ public class GrpcRetryTest {
     @Test
     public void manyToManyRetryImmediately() {
         Flux<Integer> test = newThreeErrorFlux()
-                .<Integer>compose(GrpcRetry.ManyToMany.retryImmediately(Function.identity()));
+                .<Integer>transformDeferred(GrpcRetry.ManyToMany.retryImmediately(Function.identity()));
 
         StepVerifier.create(test)
                 .expectNext(0)
@@ -130,7 +129,7 @@ public class GrpcRetryTest {
     @Test
     public void manyToManyRetryAfter() {
         Flux<Integer> test = newThreeErrorFlux()
-                .<Integer>compose(GrpcRetry.ManyToMany.retryAfter(Function.identity(), Duration.ofMillis(10)));
+                .<Integer>transformDeferred(GrpcRetry.ManyToMany.retryAfter(Function.identity(), Duration.ofMillis(10)));
 
         StepVerifier.create(test)
                 .expectNext(0)

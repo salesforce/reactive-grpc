@@ -5,11 +5,12 @@
  *  For full license text, see LICENSE.txt file in the repo root  or https://opensource.org/licenses/BSD-3-Clause
  */
 
-package com.salesforce.reactorgrpc;
+package com.salesforce.reactorgrpc.retry;
 
 import org.reactivestreams.Publisher;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
+import reactor.util.retry.Retry;
 
 import java.time.Duration;
 import java.util.function.Function;
@@ -31,7 +32,7 @@ public final class GrpcRetry {
         }
 
         /**
-         * Retries a streaming gRPC call, using the same semantics as {@link Flux#retryWhen(Function)}.
+         * Retries a streaming gRPC call, using the same semantics as {@link Flux#retryWhen(Retry)}.
          *
          * For easier use, use the Retry builder from
          * <a href="https://github.com/reactor/reactor-addons/blob/master/reactor-extra/src/main/java/reactor/retry/Retry.java">Reactor Extras</a>.
@@ -41,10 +42,10 @@ public final class GrpcRetry {
          * @param <I> I
          * @param <O> O
          *
-         * @see Flux#retryWhen(Function)
+         * @see Flux#retryWhen(Retry)
          */
         public static <I, O> Function<? super Mono<I>, Flux<O>> retryWhen(final Function<Mono<I>, Flux<O>> operation, final Function<Flux<Throwable>, ? extends Publisher<?>> whenFactory) {
-            return request -> Flux.defer(() -> operation.apply(request)).retryWhen(whenFactory);
+            return request -> Flux.defer(() -> operation.apply(request)).retryWhen(Retry.withThrowable(whenFactory));
         }
 
         /**
@@ -79,7 +80,7 @@ public final class GrpcRetry {
         }
 
         /**
-         * Retries a streaming gRPC call, using the same semantics as {@link Flux#retryWhen(Function)}.
+         * Retries a streaming gRPC call, using the same semantics as {@link Flux#retryWhen(Retry)}.
          *
          * For easier use, use the Retry builder from
          * <a href="https://github.com/reactor/reactor-addons/blob/master/reactor-extra/src/main/java/reactor/retry/Retry.java">Reactor Extras</a>.
@@ -89,10 +90,10 @@ public final class GrpcRetry {
          * @param <I> I
          * @param <O> O
          *
-         * @see Flux#retryWhen(Function)
+         * @see Flux#retryWhen(Retry)
          */
         public static <I, O> Function<? super Flux<I>, ? extends Publisher<O>> retryWhen(final Function<Flux<I>, Flux<O>> operation, final Function<Flux<Throwable>, ? extends Publisher<?>> whenFactory) {
-            return request -> Flux.defer(() -> operation.apply(request)).retryWhen(whenFactory);
+            return request -> Flux.defer(() -> operation.apply(request)).retryWhen(Retry.withThrowable(whenFactory));
         }
 
         /**
@@ -127,7 +128,7 @@ public final class GrpcRetry {
         }
 
         /**
-         * Retries a streaming gRPC call, using the same semantics as {@link Flux#retryWhen(Function)}.
+         * Retries a streaming gRPC call, using the same semantics as {@link Flux#retryWhen(Retry)}.
          *
          * For easier use, use the Retry builder from
          * <a href="https://github.com/reactor/reactor-addons/blob/master/reactor-extra/src/main/java/reactor/retry/Retry.java">Reactor Extras</a>.
@@ -137,10 +138,10 @@ public final class GrpcRetry {
          * @param <I> I
          * @param <O> O
          *
-         * @see Flux#retryWhen(Function)
+         * @see Flux#retryWhen(Retry)
          */
         public static <I, O> Function<? super Flux<I>, Mono<O>> retryWhen(final Function<Flux<I>, Mono<O>> operation, final Function<Flux<Throwable>, ? extends Publisher<?>> whenFactory) {
-            return request -> Mono.defer(() -> operation.apply(request)).retryWhen(whenFactory);
+            return request -> Mono.defer(() -> operation.apply(request)).retryWhen(Retry.withThrowable(whenFactory));
         }
 
         /**
