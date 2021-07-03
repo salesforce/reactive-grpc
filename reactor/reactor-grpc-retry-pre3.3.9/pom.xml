@@ -33,7 +33,9 @@
             <groupId>io.projectreactor</groupId>
             <artifactId>reactor-core</artifactId>
             <version>${old.reactor.version}</version>
+            <scope>provided</scope>
         </dependency>
+        <!-- Test dependencies -->
         <dependency>
             <groupId>io.projectreactor</groupId>
             <artifactId>reactor-test</artifactId>
