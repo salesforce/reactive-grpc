@@ -48,6 +48,8 @@
         <module>rx-java/rxgrpc-test</module>
         <module>reactor/reactor-grpc</module>
         <module>reactor/reactor-grpc-stub</module>
+        <module>reactor/reactor-grpc-retry</module>
+        <module>reactor/reactor-grpc-retry-pre3.3.9</module>
         <module>reactor/reactor-grpc-tck</module>
         <module>reactor/reactor-grpc-test</module>
         <module>reactor/reactor-grpc-test-32</module>
@@ -65,8 +67,9 @@
         <grpc.version>1.37.0</grpc.version>
         <protoc.version>3.15.8</protoc.version> <!-- Same version as grpc-proto -->
         <jprotoc.version>1.1.0</jprotoc.version>
+
         <rxjava.version>2.2.21</rxjava.version>
-        <reactor.version>3.2.12.RELEASE</reactor.version>
+        <reactor.version>3.4.7</reactor.version>
 
         <!-- Test Dependency Versions -->
         <grpc.contrib.version>0.8.1</grpc.contrib.version>

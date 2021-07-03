@@ -17,7 +17,7 @@
     </parent>
     <modelVersion>4.0.0</modelVersion>
 
-    <artifactId>reactor-grpc-stub</artifactId>
+    <artifactId>reactor-grpc-retry</artifactId>
 
     <dependencies>
         <dependency>
@@ -34,6 +34,12 @@
             <groupId>io.projectreactor</groupId>
             <artifactId>reactor-test</artifactId>
             <version>${reactor.version}</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>io.projectreactor.addons</groupId>
+            <artifactId>reactor-extra</artifactId>
+            <version>${reactor.extra.version}</version>
             <scope>test</scope>
         </dependency>
         <dependency>

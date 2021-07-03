@@ -4,9 +4,8 @@
  *  For full license text, see LICENSE.txt file in the repo root  or https://opensource.org/licenses/BSD-3-Clause
  */
 
-package com.salesforce.reactorgrpc.stub;
+package com.salesforce.reactorgrpc.retry;
 
-import com.salesforce.reactorgrpc.GrpcRetry;
 import org.junit.jupiter.api.Test;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.FluxSink;
