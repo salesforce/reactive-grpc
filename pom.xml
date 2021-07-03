@@ -49,6 +49,7 @@
         <module>reactor/reactor-grpc</module>
         <module>reactor/reactor-grpc-stub</module>
         <module>reactor/reactor-grpc-retry</module>
+        <module>reactor/reactor-grpc-retry-pre3.3.9</module>
         <module>reactor/reactor-grpc-tck</module>
         <module>reactor/reactor-grpc-test</module>
         <module>reactor/reactor-grpc-test-32</module>
