@@ -26,10 +26,16 @@
             <version>${project.version}</version>
         </dependency>
         <dependency>
+            <groupId>io.grpc</groupId>
+            <artifactId>grpc-stub</artifactId>
+        </dependency>
+        <dependency>
             <groupId>io.reactivex.rxjava2</groupId>
             <artifactId>rxjava</artifactId>
             <version>${rxjava.version}</version>
+            <scope>provided</scope>
         </dependency>
+        <!-- Test Dependencies -->
         <dependency>
             <groupId>com.github.davidmoten</groupId>
             <artifactId>rxjava2-extras</artifactId>
