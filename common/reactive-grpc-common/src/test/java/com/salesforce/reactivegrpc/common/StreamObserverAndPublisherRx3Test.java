@@ -125,40 +125,76 @@ public class StreamObserverAndPublisherRx3Test {
         }
     }
 
-    //@RepeatedTest(2)
-    public void shouldSupportOnlySingleSubscriberTest() throws InterruptedException {
-        for (int i = 0; i < 1000; i++) {
-            final TestSubscriber<Integer> downstream1 = new TestSubscriber<Integer>(0);
-            final TestSubscriber<Integer> downstream2 = new TestSubscriber<Integer>(0);
-            final TestStreamObserverAndPublisher<Integer> processor = new TestStreamObserverAndPublisher<Integer>(null);
-            final CountDownLatch latch = new CountDownLatch(1);
-            executorService.execute(new Runnable() {
-                @Override
-                public void run() {
-                    latch.countDown();
-                    processor.subscribe(downstream1);
-                    processor.onCompleted();
-                }
-            });
-            latch.await();
-            processor.subscribe(downstream2);
-            processor.onCompleted();
+	public class TestRx3Subscriber extends TestSubscriber<Integer> {
 
-            // TODO FIX THIS TEST
-            /*downstream1.awaitTerminalEvent();
-            downstream2.awaitTerminalEvent();
+		public TestRx3Subscriber(int i) {
+			super(i);
+		}
 
-            if (downstream1.errorCount() > 0) {
-                downstream1.assertError(IllegalStateException.class)
-                           .assertErrorMessage(
-                               "TestStreamObserverAndPublisher allows only a single Subscriber");
-            } else {
-                downstream2.assertError(IllegalStateException.class)
-                           .assertErrorMessage(
-                               "TestStreamObserverAndPublisher allows only a single Subscriber");
-            }*/
-        }
-    }
+		public int errorCount() {
+			return errors.size();
+		}
+
+		public final boolean awaitTerminalEvent() {
+			try {
+				await();
+				return true;
+			} catch (InterruptedException ex) {
+				Thread.currentThread().interrupt();
+				return false;
+			}
+		}
+
+		public final TestRx3Subscriber assertError(Class<? extends Throwable> clazz, String message) {
+			super.assertError(clazz);
+			int s = errors.size();
+			if (s == 0) {
+				throw fail("No errors");
+			} else if (s == 1) {
+				Throwable e = errors.get(0);
+				String errorMessage = e.getMessage();
+				if (!(message.equals(errorMessage))) {
+					throw fail("Error message differs; exptected: " + message + " but was: " + errorMessage);
+				}
+			} else {
+				throw fail("Multiple errors");
+			}
+			return this;
+		}
+
+	}
+
+	@RepeatedTest(2)
+	public void shouldSupportOnlySingleSubscriberTest() throws InterruptedException {
+		for (int i = 0; i < 1000; i++) {
+			final TestRx3Subscriber downstream1 = new TestRx3Subscriber(0);
+			final TestRx3Subscriber downstream2 = new TestRx3Subscriber(0);
+			final TestStreamObserverAndPublisher<Integer> processor = new TestStreamObserverAndPublisher<Integer>(null);
+			final CountDownLatch latch = new CountDownLatch(1);
+			executorService.execute(new Runnable() {
+				@Override
+				public void run() {
+					latch.countDown();
+					processor.subscribe(downstream1);
+					processor.onCompleted();
+				}
+			});
+			latch.await();
+			processor.subscribe(downstream2);
+			processor.onCompleted();
+
+			downstream1.awaitTerminalEvent();
+			downstream2.awaitTerminalEvent();
+
+			if (downstream1.errorCount() > 0) {
+				downstream1.assertError(IllegalStateException.class,
+						"TestStreamObserverAndPublisher allows only a single Subscriber");
+			} else {
+				downstream2.assertError(IllegalStateException.class,
+						"TestStreamObserverAndPublisher allows only a single Subscriber");
+			}
+		}
+	}
 
     @RepeatedTest(2)
     public void shouldSupportOnlySingleSubscriptionTest() throws InterruptedException {
