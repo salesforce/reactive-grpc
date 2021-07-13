@@ -359,7 +359,7 @@ public class AbstractSubscriberAndProducerRx3Test {
     @RepeatedTest(2)
     public void syncModeWithRacingAndErrorTest() throws InterruptedException {
         final CountDownLatch cancellationLatch = new CountDownLatch(1);
-        List<Integer> integers = Flowable.range(0, 100000)
+        List<Integer> integers = Flowable.range(0, 1000)
                                          .toList()
                                          .blockingGet();
 
@@ -368,7 +368,7 @@ public class AbstractSubscriberAndProducerRx3Test {
                                                                  .map(new Function<Integer, Integer>() {
                                                                      @Override
                                                                      public Integer apply(Integer i) {
-                                                                         if (i == 99999) {
+                                                                         if (i == 999) {
                                                                              throw new NullPointerException();
                                                                          }
 
@@ -395,7 +395,7 @@ public class AbstractSubscriberAndProducerRx3Test {
 
         startedLatch.await();
 
-        racePauseResuming(downstream, 10000);
+        racePauseResuming(downstream, 100);
 
         Assertions.assertThat(downstream.awaitTerminal(1, TimeUnit.MINUTES)).isTrue();
         Assertions.assertThat(cancellationLatch.await(1, TimeUnit.MINUTES)).isTrue();
@@ -749,7 +749,7 @@ public class AbstractSubscriberAndProducerRx3Test {
 
             @Override
             public T next() {
-                LockSupport.parkNanos(100);
+                LockSupport.parkNanos(10);
                 return delegate.next();
             }
 

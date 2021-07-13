@@ -54,7 +54,7 @@ public class StreamObserverAndPublisherRx3Test {
     public void multithreadingRegularTest() throws InterruptedException {
         TestStreamObserverAndPublisher<Integer> processor =
             new TestStreamObserverAndPublisher<Integer>(null);
-        int countPerThread = 1000000;
+        int countPerThread = 10000;
         TestCallStreamObserverRx3Producer observer =
             new TestCallStreamObserverRx3Producer(executorService, processor, countPerThread);
         processor.onSubscribe(observer);
@@ -72,11 +72,12 @@ public class StreamObserverAndPublisherRx3Test {
             });
         }
 
-        Assertions.assertThat(testSubscriber.await(10, TimeUnit.MINUTES)).isTrue();
+        Assertions.assertThat(testSubscriber.await(1, TimeUnit.MINUTES)).isTrue();
         testSubscriber.assertValueCount(countPerThread);
 
         Assertions.assertThat(processor.outputFused).isFalse();
-        Assertions.assertThat(observer.requestsQueue.size()).isBetween((countPerThread - DEFAULT_CHUNK_SIZE) / PART_OF_CHUNK + 1, (countPerThread - DEFAULT_CHUNK_SIZE) / PART_OF_CHUNK + 2);
+        int prop1 = (countPerThread / PART_OF_CHUNK) - (DEFAULT_CHUNK_SIZE / PART_OF_CHUNK) + 1;
+        Assertions.assertThat(observer.requestsQueue.size()).isBetween(prop1, prop1 + 1);
 
         Integer i = observer.requestsQueue.poll();
 
