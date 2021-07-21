@@ -21,6 +21,7 @@ import com.salesforce.jprotoc.ProtoTypeMap;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -52,6 +53,11 @@ public abstract class ReactiveGrpcGenerator extends Generator {
 
         List<ServiceContext> services = findServices(protosToGenerate, typeMap);
         return generateFiles(services);
+    }
+
+    @Override
+    protected List<PluginProtos.CodeGeneratorResponse.Feature> supportedFeatures() {
+        return Collections.singletonList(PluginProtos.CodeGeneratorResponse.Feature.FEATURE_PROTO3_OPTIONAL);
     }
 
     private List<ServiceContext> findServices(List<FileDescriptorProto> protos, ProtoTypeMap typeMap) {

@@ -6,7 +6,7 @@
 
     <groupId>com.salesforce.servicelibs</groupId>
     <artifactId>reactive-grpc</artifactId>
-    <version>1.0.2-SNAPSHOT</version>
+    <version>1.1.1-SNAPSHOT</version>
     <packaging>pom</packaging>
 
     <name>reactive-grpc</name>
@@ -55,6 +55,8 @@
 
         <module>reactor/reactor-grpc</module>
         <module>reactor/reactor-grpc-stub</module>
+        <module>reactor/reactor-grpc-retry</module>
+        <module>reactor/reactor-grpc-retry-pre3.3.9</module>
         <module>reactor/reactor-grpc-tck</module>
         <module>reactor/reactor-grpc-test</module>
         <module>reactor/reactor-grpc-test-32</module>
@@ -65,6 +67,7 @@
         <!-- Maven Plugin Versions -->
         <protobuf.plugin.version>0.6.1</protobuf.plugin.version>
         <compiler.plugin.version>3.8.0</compiler.plugin.version>
+        <canteen.plugin.version>1.1.0</canteen.plugin.version>
 
         <!-- Dependency Versions -->
         <reactive.streams.version>1.0.3</reactive.streams.version>
@@ -145,29 +148,46 @@
                 <version>${jprotoc.version}</version>
             </dependency>
             <dependency>
+                <groupId>com.google.protobuf</groupId>
+                <artifactId>protobuf-java</artifactId>
+                <version>${protoc.version}</version>
+                <scope>provided</scope>
+            </dependency>
+            <dependency>
                 <groupId>io.grpc</groupId>
                 <artifactId>grpc-netty</artifactId>
                 <version>${grpc.version}</version>
+                <scope>provided</scope>
             </dependency>
             <dependency>
                 <groupId>io.grpc</groupId>
                 <artifactId>grpc-protobuf</artifactId>
                 <version>${grpc.version}</version>
+                <scope>provided</scope>
             </dependency>
             <dependency>
                 <groupId>io.grpc</groupId>
                 <artifactId>grpc-core</artifactId>
                 <version>${grpc.version}</version>
+                <scope>provided</scope>
+            </dependency>
+            <dependency>
+                <groupId>io.grpc</groupId>
+                <artifactId>grpc-api</artifactId>
+                <version>${grpc.version}</version>
+                <scope>provided</scope>
             </dependency>
             <dependency>
                 <groupId>io.grpc</groupId>
                 <artifactId>grpc-context</artifactId>
                 <version>${grpc.version}</version>
+                <scope>provided</scope>
             </dependency>
             <dependency>
                 <groupId>io.grpc</groupId>
                 <artifactId>grpc-stub</artifactId>
                 <version>${grpc.version}</version>
+                <scope>provided</scope>
             </dependency>
             <!-- Test dependencies -->
             <dependency>
@@ -235,6 +255,29 @@
                 </configuration>
             </plugin>
 
+            <!-- Fail the build if >Java8 sneak in -->
+            <plugin>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>animal-sniffer-maven-plugin</artifactId>
+                <version>1.20</version>
+                <executions>
+                    <execution>
+                        <id>signature-check</id>
+                        <phase>verify</phase>
+                        <goals>
+                            <goal>check</goal>
+                        </goals>
+                    </execution>
+                </executions>
+                <configuration>
+                    <signature>
+                        <groupId>org.codehaus.mojo.signature</groupId>
+                        <artifactId>java18</artifactId>
+                        <version>1.0</version>
+                    </signature>
+                </configuration>
+            </plugin>
+
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-checkstyle-plugin</artifactId>
@@ -266,18 +309,6 @@
             <plugin>
                 <artifactId>maven-surefire-plugin</artifactId>
                 <version>3.0.0-M3</version>
-                <dependencies>
-<!--                    <dependency>-->
-<!--                        <groupId>org.apache.maven.surefire</groupId>-->
-<!--                        <artifactId>surefire-junit3</artifactId>-->
-<!--                        <version>3.0.0-M3</version>-->
-<!--                    </dependency>-->
-<!--                    <dependency>-->
-<!--                        <groupId>org.apache.maven.surefire</groupId>-->
-<!--                        <artifactId>surefire-testng</artifactId>-->
-<!--                        <version>3.0.0-M3</version>-->
-<!--                    </dependency>-->
-                </dependencies>
                 <configuration>
                     <argLine>-Xmx1024m -XX:MaxPermSize=256m</argLine>
                 </configuration>

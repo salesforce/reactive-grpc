@@ -51,7 +51,36 @@ And add the following dependency: `"com.salesforce.servicelibs:reactor-grpc-stub
 
 *At this time, Reactor-gRPC with Gradle only supports bash-based environments. Windows users will need to build using 
 Windows Subsystem for Linux (win 10) or invoke the Maven protobuf plugin with Gradle.*
+### Bazel
 
+To use RxGrpc with Bazel, update your `WORKSPACE` file.
+
+```bazel
+load("@bazel_tools//tools/build_defs/repo:http.bzl", "http_archive")
+
+http_archive(
+    name = "com_salesforce_servicelibs_reactive_grpc",
+    strip_prefix = "reactive-grpc-1.0.1",
+    url = "https://github.com/salesforce/reactive-grpc/archive/v1.0.1.zip",
+)
+
+load("@com_salesforce_servicelibs_reactive_grpc//bazel:repositories.bzl", "repositories")
+
+repositories()
+```
+
+Then, add a `rx_grpc_library()` rule to your proto's `BUILD` file, referencing both the `proto_library()` target and
+the `java_proto_library()` target.
+
+```bazel
+load("@com_salesforce_servicelibs_reactive_grpc//bazel:java_reactive_grpc_library.bzl", "rx_grpc_library")
+
+rx_grpc_library(
+    name = "foo_rx_proto",
+    proto = ":foo_proto",
+    deps = [":foo_java_proto"],
+)
+```
 Usage
 =====
 After installing the plugin, Reactor-gRPC service stubs will be generated along with your gRPC service stubs.
@@ -111,10 +140,14 @@ retry, the upstream rx pipeline is re-subscribed to acquire a request message an
 rx pipeline never sees the error.
 
 ```java
-Flux<HelloResponse> fluxResponse = fluxRequest.compose(GrpcRetry.ManyToMany.retry(stub::sayHelloBothStream));
+Flux<HelloResponse> fluxResponse = fluxRequest.transformDeferred(GrpcRetry.ManyToMany.retry(stub::sayHelloBothStream));
 ```
 
 For complex retry scenarios, use the `Retry` builder from <a href="https://github.com/reactor/reactor-addons/blob/master/reactor-extra/src/main/java/reactor/retry/Retry.java">Reactor Extras</a>.
+
+Due to breaking changes to the Flux retry API introduced in Reactor 3.3.9 (Semver fail!), the Retry class has been moved
+to either the `reactor-grpc-retry` or `reactor-grpc-retry-pre3.3.9` maven modules. You must select the correct module
+for your version.
 
 ## gRPC Context propagation
 Reactor does not have a convenient mechanism for passing the `ThreadLocal` gRPC `Context` between threads in a reactive
@@ -160,5 +193,7 @@ Reactor-gRPC is broken down into four sub-modules:
 
 * _reactor-grpc_ - a protoc generator for generating gRPC bindings for Reactor.
 * _reactor-grpc-stub_ - stub classes supporting the generated Reactor bindings.
+* _reactor-grpc-retry_ - class for retrying requests.
+* _reactor-grpc-retry-pre3.3.9_ - class for retrying requests for Reactor versions <= 3.3.8.
 * _reactor-grpc-test_ - integration tests for Reactor.
 * _reactor-grpc-tck_ - Reactive Streams TCK compliance tests for Reactor.

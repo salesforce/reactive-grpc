@@ -12,7 +12,7 @@
     <parent>
         <groupId>com.salesforce.servicelibs</groupId>
         <artifactId>reactive-grpc</artifactId>
-        <version>1.0.2-SNAPSHOT</version>
+        <version>1.1.1-SNAPSHOT</version>
         <relativePath>../../pom.xml</relativePath>
     </parent>
     <modelVersion>4.0.0</modelVersion>
@@ -31,9 +31,21 @@
             <version>${project.version}</version>
         </dependency>
         <dependency>
+            <groupId>io.projectreactor</groupId>
+            <artifactId>reactor-core</artifactId>
+            <version>${reactor.version}</version>
+            <scope>compile</scope>
+        </dependency>
+        <dependency>
             <groupId>${project.groupId}</groupId>
             <artifactId>rxgrpc-stub</artifactId>
             <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>io.reactivex.rxjava2</groupId>
+            <artifactId>rxjava</artifactId>
+            <version>${rxjava.version}</version>
+            <scope>compile</scope>
         </dependency>
         <dependency>
             <groupId>io.grpc</groupId>
@@ -45,17 +57,15 @@
         </dependency>
         <dependency>
             <groupId>io.grpc</groupId>
+            <artifactId>grpc-api</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>io.grpc</groupId>
             <artifactId>grpc-stub</artifactId>
         </dependency>
         <dependency>
             <groupId>io.grpc</groupId>
             <artifactId>grpc-protobuf</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>io.netty</groupId>
-            <artifactId>netty-buffer</artifactId>
-            <version>4.1.33.Final</version>
-            <scope>compile</scope>
         </dependency>
         <dependency>
             <groupId>org.openjdk.jmh</groupId>
@@ -105,16 +115,6 @@
                 <configuration>
                     <!-- Don't install, since there isn't anything to install -->
                     <skip>true</skip>
-                </configuration>
-            </plugin>
-
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-compiler-plugin</artifactId>
-                <version>${compiler.plugin.version}</version>
-                <configuration>
-                    <source>1.8</source>
-                    <target>1.8</target>
                 </configuration>
             </plugin>
 
