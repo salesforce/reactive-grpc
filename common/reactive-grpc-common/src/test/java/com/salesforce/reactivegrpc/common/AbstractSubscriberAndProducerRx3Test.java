@@ -55,7 +55,6 @@ public class AbstractSubscriberAndProducerRx3Test {
 		});
 	}
 
-	
     @RepeatedTest(2)
     public void shouldSupportOnlySingleSubscribersTest() throws InterruptedException {
         final TestCallStreamObserver<Integer> downstream = new TestCallStreamObserver<Integer>(executorService);
