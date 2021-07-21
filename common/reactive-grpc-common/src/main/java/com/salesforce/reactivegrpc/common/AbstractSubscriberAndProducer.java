@@ -109,7 +109,7 @@ public abstract class AbstractSubscriberAndProducer<T> implements Subscriber<T>,
 
     public void cancel() {
         Subscription s = SUBSCRIPTION.getAndSet(this, CANCELLED_SUBSCRIPTION);
-        if (s != CANCELLED_SUBSCRIPTION) {
+        if (s != null && s != CANCELLED_SUBSCRIPTION) {
             s.cancel();
 
             if (WIP.getAndIncrement(this) == 0) {

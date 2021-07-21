@@ -49,7 +49,36 @@ protobuf {
 ```
 *At this time, RxGrpc with Gradle only supports bash-based environments. Windows users will need to build using Windows 
 Subsystem for Linux (win 10) or invoke the Maven protobuf plugin with Gradle.*
+### Bazel
 
+To use RxGrpc with Bazel, update your `WORKSPACE` file.
+
+```bazel
+load("@bazel_tools//tools/build_defs/repo:http.bzl", "http_archive")
+
+http_archive(
+    name = "com_salesforce_servicelibs_reactive_grpc",
+    strip_prefix = "reactive-grpc-1.0.1",
+    url = "https://github.com/salesforce/reactive-grpc/archive/v1.0.1.zip",
+)
+
+load("@com_salesforce_servicelibs_reactive_grpc//bazel:repositories.bzl", "repositories")
+
+repositories()
+```
+
+Then, add a `rx_grpc_library()` rule to your proto's `BUILD` file, referencing both the `proto_library()` target and
+the `java_proto_library()` target.
+
+```bazel
+load("@com_salesforce_servicelibs_reactive_grpc//bazel:java_reactive_grpc_library.bzl", "rx_grpc_library")
+
+rx_grpc_library(
+    name = "foo_rx_proto",
+    proto = ":foo_proto",
+    deps = [":foo_java_proto"],
+)
+```
 Usage
 =====
 After installing the plugin, RxGrpc service stubs will be generated along with your gRPC service stubs.

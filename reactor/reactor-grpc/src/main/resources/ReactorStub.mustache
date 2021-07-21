@@ -51,7 +51,7 @@ public final class {{className}} {
         @java.lang.Deprecated
             {{/deprecated}}
         public {{#isManyOutput}}reactor.core.publisher.Flux{{/isManyOutput}}{{^isManyOutput}}reactor.core.publisher.Mono{{/isManyOutput}}<{{outputType}}> {{methodName}}({{#isManyInput}}reactor.core.publisher.Flux{{/isManyInput}}{{^isManyInput}}reactor.core.publisher.Mono{{/isManyInput}}<{{inputType}}> reactorRequest) {
-            return com.salesforce.reactorgrpc.stub.ClientCalls.{{reactiveCallsMethodName}}(reactorRequest, delegateStub::{{methodName}}, getCallOptions());
+            return com.salesforce.reactorgrpc.stub.ClientCalls.{{reactiveCallsMethodName}}(reactorRequest, delegateStub::{{methodNameCamelCase}}, getCallOptions());
         }
 
         {{/methods}}
@@ -63,7 +63,7 @@ public final class {{className}} {
         @java.lang.Deprecated
            {{/deprecated}}
         public {{#isManyOutput}}reactor.core.publisher.Flux{{/isManyOutput}}{{^isManyOutput}}reactor.core.publisher.Mono{{/isManyOutput}}<{{outputType}}> {{methodName}}({{inputType}} reactorRequest) {
-           return com.salesforce.reactorgrpc.stub.ClientCalls.{{reactiveCallsMethodName}}(reactor.core.publisher.Mono.just(reactorRequest), delegateStub::{{methodName}}, getCallOptions());
+           return com.salesforce.reactorgrpc.stub.ClientCalls.{{reactiveCallsMethodName}}(reactor.core.publisher.Mono.just(reactorRequest), delegateStub::{{methodNameCamelCase}}, getCallOptions());
         }
 
         {{/unaryRequestMethods}}
@@ -81,7 +81,7 @@ public final class {{className}} {
             {{#deprecated}}
         @java.lang.Deprecated
             {{/deprecated}}
-        public {{#isManyOutput}}reactor.core.publisher.Flux{{/isManyOutput}}{{^isManyOutput}}reactor.core.publisher.Mono{{/isManyOutput}}<{{outputType}}> {{methodName}}({{#isManyInput}}reactor.core.publisher.Flux{{/isManyInput}}{{^isManyInput}}reactor.core.publisher.Mono{{/isManyInput}}<{{inputType}}> request) {
+        public {{#isManyOutput}}reactor.core.publisher.Flux{{/isManyOutput}}{{^isManyOutput}}reactor.core.publisher.Mono{{/isManyOutput}}<{{outputType}}> {{methodNameCamelCase}}({{#isManyInput}}reactor.core.publisher.Flux{{/isManyInput}}{{^isManyInput}}reactor.core.publisher.Mono{{/isManyInput}}<{{inputType}}> request) {
             throw new io.grpc.StatusRuntimeException(io.grpc.Status.UNIMPLEMENTED);
         }
 
@@ -132,7 +132,7 @@ public final class {{className}} {
                 case METHODID_{{methodNameUpperUnderscore}}:
                     com.salesforce.reactorgrpc.stub.ServerCalls.{{reactiveCallsMethodName}}(({{inputType}}) request,
                             (io.grpc.stub.StreamObserver<{{outputType}}>) responseObserver,
-                            serviceImpl::{{methodName}});
+                            serviceImpl::{{methodNameCamelCase}});
                     break;
                 {{/isManyInput}}
                 {{/methods}}
@@ -150,7 +150,7 @@ public final class {{className}} {
                 case METHODID_{{methodNameUpperUnderscore}}:
                     return (io.grpc.stub.StreamObserver<Req>) com.salesforce.reactorgrpc.stub.ServerCalls.{{reactiveCallsMethodName}}(
                             (io.grpc.stub.StreamObserver<{{outputType}}>) responseObserver,
-                            serviceImpl::{{methodName}}, serviceImpl.getCallOptions(methodId));
+                            serviceImpl::{{methodNameCamelCase}}, serviceImpl.getCallOptions(methodId));
                 {{/isManyInput}}
                 {{/methods}}
                 default:
