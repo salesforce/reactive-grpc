@@ -265,7 +265,6 @@ public class StreamObserverAndPublisherRx3Test {
         }
     }
 
-    // TODO FIX THIS
     static class FussedTestSubscriber<T> extends TestSubscriber<T> {
         public FussedTestSubscriber() {
             super(0);
