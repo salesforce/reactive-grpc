@@ -184,5 +184,4 @@ public final class ClientCalls {
             return Flowable.error(throwable);
         }
     }
-
 }
