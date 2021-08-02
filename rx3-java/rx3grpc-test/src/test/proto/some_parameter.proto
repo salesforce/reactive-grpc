@@ -1,0 +1,14 @@
+syntax = "proto3";
+
+// Test file for https://github.com/salesforce/reactive-grpc/issues/26
+// If this proto compiles, then the test passes.
+
+package my.someparameters;
+
+message SomeParameter {
+    string id = 1;
+}
+
+service WithParameter {
+    rpc SayGoodbye (SomeParameter) returns (SomeParameter) {}
+}

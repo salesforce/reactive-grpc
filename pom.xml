@@ -6,7 +6,7 @@
 
     <groupId>com.salesforce.servicelibs</groupId>
     <artifactId>reactive-grpc</artifactId>
-    <version>1.1.1-SNAPSHOT</version>
+    <version>1.2.0-SNAPSHOT</version>
     <packaging>pom</packaging>
 
     <name>reactive-grpc</name>
@@ -42,10 +42,17 @@
     <modules>
         <module>common/reactive-grpc-common</module>
         <module>common/reactive-grpc-gencommon</module>
+        
         <module>rx-java/rxgrpc</module>
         <module>rx-java/rxgrpc-stub</module>
         <module>rx-java/rxgrpc-tck</module>
         <module>rx-java/rxgrpc-test</module>
+
+        <module>rx3-java/rx3grpc</module>
+        <module>rx3-java/rx3grpc-stub</module>
+        <module>rx3-java/rx3grpc-tck</module>
+        <module>rx3-java/rx3grpc-test</module>
+
         <module>reactor/reactor-grpc</module>
         <module>reactor/reactor-grpc-stub</module>
         <module>reactor/reactor-grpc-retry</module>
@@ -70,6 +77,7 @@
 
         <rxjava.version>2.2.21</rxjava.version>
         <reactor.version>3.4.7</reactor.version>
+        <rx3java.version>3.0.5</rx3java.version>
 
         <!-- Test Dependency Versions -->
         <grpc.contrib.version>0.8.1</grpc.contrib.version>
@@ -123,6 +131,11 @@
             <dependency>
                 <groupId>${project.groupId}</groupId>
                 <artifactId>reactor-grpc-stub</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>${project.groupId}</groupId>
+                <artifactId>rx3grpc-stub</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>
