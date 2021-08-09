@@ -53,7 +53,7 @@ def _reactive_grpc_library_impl(ctx):
     args = ctx.actions.args()
     args.add(ctx.executable.reactive_plugin.path, format = "--plugin=protoc-gen-reactive-grpc-plugin=%s")
     args.add("--reactive-grpc-plugin_out=:{0}".format(gensrcjar.path))
-    args.add_joined("--descriptor_set_in", descriptor_set_in, join_with = ":")
+    args.add_joined("--descriptor_set_in", descriptor_set_in, join_with = ctx.host_configuration.host_path_separator)
     for src in proto.check_deps_sources.to_list():
         args.add(_proto_path(src, proto))
 
