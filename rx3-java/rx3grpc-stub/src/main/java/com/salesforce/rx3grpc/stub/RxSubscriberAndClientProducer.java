@@ -12,7 +12,7 @@ import org.reactivestreams.Subscription;
 import com.salesforce.reactivegrpc.common.AbstractSubscriberAndClientProducer;
 
 import io.reactivex.rxjava3.core.FlowableSubscriber;
-import io.reactivex.rxjava3.internal.fuseable.QueueSubscription;
+import io.reactivex.rxjava3.operators.QueueSubscription;
 
 /**
  * The gRPC client-side implementation of {@link com.salesforce.reactivegrpc.common.AbstractSubscriberAndProducer}.

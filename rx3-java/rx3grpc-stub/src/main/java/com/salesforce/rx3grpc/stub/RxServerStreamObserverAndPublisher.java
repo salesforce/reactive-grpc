@@ -12,9 +12,9 @@ import com.salesforce.reactivegrpc.common.Consumer;
 
 import io.grpc.stub.CallStreamObserver;
 import io.grpc.stub.ServerCallStreamObserver;
-import io.reactivex.rxjava3.internal.fuseable.QueueFuseable;
-import io.reactivex.rxjava3.internal.fuseable.QueueSubscription;
-import io.reactivex.rxjava3.internal.queue.SpscArrayQueue;
+import io.reactivex.rxjava3.operators.QueueFuseable;
+import io.reactivex.rxjava3.operators.QueueSubscription;
+import io.reactivex.rxjava3.operators.SpscArrayQueue;
 
 /**
  * TODO: Explain what this class does.
