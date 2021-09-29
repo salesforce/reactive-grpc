@@ -14,7 +14,6 @@ import io.reactivex.rxjava3.functions.BiFunction;
 import io.reactivex.rxjava3.functions.Consumer;
 import io.reactivex.rxjava3.functions.Function;
 import io.reactivex.rxjava3.functions.Predicate;
-import io.reactivex.rxjava3.internal.functions.Functions;
 import io.reactivex.rxjava3.schedulers.Schedulers;
 
 /**
@@ -198,9 +197,15 @@ public final class RetryWhen {
 
     public static final class Builder {
 
+        static final class TruePredicate implements Predicate<Object> {
+            @Override
+            public boolean test(Object o) {
+                return true;
+            }
+        }
         private final List<Class<? extends Throwable>> retryExceptions = new ArrayList<Class<? extends Throwable>>();
         private final List<Class<? extends Throwable>> failExceptions = new ArrayList<Class<? extends Throwable>>();
-        private Predicate<? super Throwable> exceptionPredicate = Functions.alwaysTrue();
+        private Predicate<? super Throwable> exceptionPredicate = new TruePredicate();
 
         private Flowable<Long> delays = Flowable.just(0L).repeat();
         private Optional<Integer> maxRetries = Optional.absent();

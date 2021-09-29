@@ -10,7 +10,7 @@ import com.salesforce.reactivegrpc.common.AbstractUnimplementedQueue;
 import com.salesforce.reactivegrpc.common.FusionModeAwareSubscription;
 
 import io.reactivex.rxjava3.exceptions.Exceptions;
-import io.reactivex.rxjava3.internal.fuseable.QueueSubscription;
+import io.reactivex.rxjava3.operators.QueueSubscription;
 
 /**
  * Implementation of FusionModeAwareSubscription which encapsulate

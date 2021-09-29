@@ -77,7 +77,7 @@
 
         <rxjava.version>2.2.21</rxjava.version>
         <reactor.version>3.4.7</reactor.version>
-        <rx3java.version>3.0.5</rx3java.version>
+        <rx3java.version>3.1.1</rx3java.version>
 
         <!-- Test Dependency Versions -->
         <grpc.contrib.version>0.8.1</grpc.contrib.version>
