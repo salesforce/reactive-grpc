@@ -60,7 +60,7 @@
                     <archive>
                         <manifest>
                             <addClasspath>true</addClasspath>
-                            <mainClass>com.salesforce.rx3grpc.RxGrpcGenerator</mainClass>
+                            <mainClass>com.salesforce.rx3grpc.Rx3GrpcGenerator</mainClass>
                         </manifest>
                     </archive>
                 </configuration>
