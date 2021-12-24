@@ -22,7 +22,7 @@
 
     <properties>
         <kotlin.version>1.2.30</kotlin.version>
-        <reactive.grpc.version>1.0.0</reactive.grpc.version>
+        <reactive.grpc.version>1.2.3</reactive.grpc.version>
         <grpc.version>1.42.1</grpc.version>
         <protoc.version>3.9.0</protoc.version>
         <grpc.contrib.version>0.8.0</grpc.contrib.version>
