@@ -64,7 +64,7 @@
             <dependencies>
                 <dependency>
                     <groupId>org.openjfx</groupId>
-                    <artifactId>javafx-graphics </artifactId>
+                    <artifactId>javafx-graphics</artifactId>
                     <version>11.0.2</version>
                     <classifier>mac</classifier>
                 </dependency>
@@ -78,9 +78,9 @@
             <dependencies>
                 <dependency>
                     <groupId>org.openjfx</groupId>
-                    <artifactId>javafx-graphics </artifactId>
+                    <artifactId>javafx-graphics</artifactId>
                     <version>11.0.2</version>
-                    <classifier>windows</classifier>
+                    <classifier>win</classifier>
                 </dependency>
             </dependencies>
         </profile>
