@@ -33,4 +33,9 @@ public class TestSubscriberProducer<T> extends AbstractSubscriberAndProducer<T>
 
         return s;
     }
+
+    @Override
+    protected Throwable prepareError(Throwable throwable) {
+        return throwable;
+    }
 }

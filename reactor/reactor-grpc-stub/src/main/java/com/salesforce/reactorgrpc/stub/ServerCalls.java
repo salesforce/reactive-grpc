@@ -14,9 +14,10 @@ import io.grpc.StatusException;
 import io.grpc.StatusRuntimeException;
 import io.grpc.stub.ServerCallStreamObserver;
 import io.grpc.stub.StreamObserver;
-import java.util.function.Function;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
+
+import java.util.function.Function;
 
 /**
  * Utility functions for processing different server call idioms. We have one-to-one correspondence
@@ -33,7 +34,8 @@ public final class ServerCalls {
      */
     public static <TRequest, TResponse> void oneToOne(
             TRequest request, StreamObserver<TResponse> responseObserver,
-            Function<Mono<TRequest>, Mono<TResponse>> delegate) {
+            Function<Mono<TRequest>, Mono<TResponse>> delegate,
+            Function<Throwable, Throwable> prepareError) {
         try {
             Mono<TRequest> rxRequest = Mono.just(request);
 
@@ -46,10 +48,10 @@ public final class ServerCalls {
                     }
                     responseObserver.onNext(value);
                 },
-                throwable -> responseObserver.onError(prepareError(throwable)),
+                throwable -> responseObserver.onError(prepareError.apply(throwable)),
                 responseObserver::onCompleted);
         } catch (Throwable throwable) {
-            responseObserver.onError(prepareError(throwable));
+            responseObserver.onError(prepareError.apply(throwable));
         }
     }
 
@@ -59,15 +61,16 @@ public final class ServerCalls {
      */
     public static <TRequest, TResponse> void oneToMany(
             TRequest request, StreamObserver<TResponse> responseObserver,
-            Function<Mono<TRequest>, Flux<TResponse>> delegate) {
+            Function<Mono<TRequest>, Flux<TResponse>> delegate,
+            Function<Throwable, Throwable> prepareError) {
         try {
             Mono<TRequest> rxRequest = Mono.just(request);
 
             Flux<TResponse> rxResponse = Preconditions.checkNotNull(delegate.apply(rxRequest));
-            ReactorSubscriberAndServerProducer<TResponse> server = rxResponse.subscribeWith(new ReactorSubscriberAndServerProducer<>());
+            ReactorSubscriberAndServerProducer<TResponse> server = rxResponse.subscribeWith(new ReactorSubscriberAndServerProducer<>(prepareError::apply));
             server.subscribe((ServerCallStreamObserver<TResponse>) responseObserver);
         } catch (Throwable throwable) {
-            responseObserver.onError(prepareError(throwable));
+            responseObserver.onError(prepareError.apply(throwable));
         }
     }
 
@@ -78,6 +81,7 @@ public final class ServerCalls {
     public static <TRequest, TResponse> StreamObserver<TRequest> manyToOne(
             StreamObserver<TResponse> responseObserver,
             Function<Flux<TRequest>, Mono<TResponse>> delegate,
+            Function<Throwable, Throwable> prepareError,
             CallOptions options) {
 
         final int prefetch = ReactorCallOptions.getPrefetch(options);
@@ -99,13 +103,13 @@ public final class ServerCalls {
                     // Don't try to respond if the server has already canceled the request
                     if (!streamObserverPublisher.isCancelled()) {
                         streamObserverPublisher.abortPendingCancel();
-                        responseObserver.onError(prepareError(throwable));
+                        responseObserver.onError(prepareError.apply(throwable));
                     }
                 },
                 responseObserver::onCompleted
             );
         } catch (Throwable throwable) {
-            responseObserver.onError(prepareError(throwable));
+            responseObserver.onError(prepareError.apply(throwable));
         }
 
         return streamObserverPublisher;
@@ -118,6 +122,7 @@ public final class ServerCalls {
     public static <TRequest, TResponse> StreamObserver<TRequest> manyToMany(
             StreamObserver<TResponse> responseObserver,
             Function<Flux<TRequest>, Flux<TResponse>> delegate,
+            Function<Throwable, Throwable> prepareError,
             CallOptions options) {
 
         final int prefetch = ReactorCallOptions.getPrefetch(options);
@@ -128,18 +133,21 @@ public final class ServerCalls {
 
         try {
             Flux<TResponse> rxResponse = Preconditions.checkNotNull(delegate.apply(Flux.from(streamObserverPublisher)));
-            ReactorSubscriberAndServerProducer<TResponse> subscriber = new ReactorSubscriberAndServerProducer<>();
+            ReactorSubscriberAndServerProducer<TResponse> subscriber = new ReactorSubscriberAndServerProducer<>(prepareError::apply);
             subscriber.subscribe((ServerCallStreamObserver<TResponse>) responseObserver);
             // Don't try to respond if the server has already canceled the request
             rxResponse.subscribe(subscriber);
         } catch (Throwable throwable) {
-            responseObserver.onError(prepareError(throwable));
+            responseObserver.onError(prepareError.apply(throwable));
         }
 
         return streamObserverPublisher;
     }
 
-    private static Throwable prepareError(Throwable throwable) {
+    /**
+     * Implements default error mapping.
+     */
+    public static Throwable prepareError(Throwable throwable) {
         if (throwable instanceof StatusException || throwable instanceof StatusRuntimeException) {
             return throwable;
         } else {

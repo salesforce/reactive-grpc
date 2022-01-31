@@ -18,6 +18,12 @@ import io.grpc.stub.ServerCallStreamObserver;
 public abstract class AbstractSubscriberAndServerProducer<T>
         extends AbstractSubscriberAndProducer<T> {
 
+    private final Function<Throwable, Throwable> prepareError;
+
+    protected AbstractSubscriberAndServerProducer(Function<Throwable, Throwable> prepareError) {
+        this.prepareError = prepareError;
+    }
+
     @Override
     public void subscribe(CallStreamObserver<T> downstream) {
         super.subscribe(downstream);
@@ -27,5 +33,9 @@ public abstract class AbstractSubscriberAndServerProducer<T>
                 AbstractSubscriberAndServerProducer.super.cancel();
             }
         });
+    }
+
+    protected Throwable prepareError(Throwable throwable) {
+        return prepareError.apply(throwable);
     }
 }

@@ -443,7 +443,7 @@ public abstract class AbstractSubscriberAndProducer<T> implements Subscriber<T>,
         return false;
     }
 
-    private static Throwable prepareError(Throwable throwable) {
+    protected Throwable prepareError(Throwable throwable) {
         if (throwable instanceof StatusException || throwable instanceof StatusRuntimeException) {
             return throwable;
         } else {
