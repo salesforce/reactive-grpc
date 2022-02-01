@@ -79,7 +79,7 @@ public final class ServerCalls {
 
             final Flowable<TResponse> rxResponse = Preconditions.checkNotNull(delegate.apply(rxRequest));
             final RxSubscriberAndServerProducer<TResponse> serverProducer =
-                    rxResponse.subscribeWith(new RxSubscriberAndServerProducer<TResponse>(prepareError::apply));
+                    rxResponse.subscribeWith(new RxSubscriberAndServerProducer<TResponse>(prepareError));
             serverProducer.subscribe((ServerCallStreamObserver<TResponse>) responseObserver);
         } catch (Throwable throwable) {
             responseObserver.onError(prepareError.apply(throwable));
@@ -151,7 +151,7 @@ public final class ServerCalls {
 
         try {
             final Flowable<TResponse> rxResponse = Preconditions.checkNotNull(delegate.apply(Flowable.fromPublisher(streamObserverPublisher)));
-            final RxSubscriberAndServerProducer<TResponse> subscriber = new RxSubscriberAndServerProducer<TResponse>(prepareError::apply);
+            final RxSubscriberAndServerProducer<TResponse> subscriber = new RxSubscriberAndServerProducer<TResponse>(prepareError);
             subscriber.subscribe((ServerCallStreamObserver<TResponse>) responseObserver);
             // Don't try to respond if the server has already canceled the request
             rxResponse.subscribe(subscriber);

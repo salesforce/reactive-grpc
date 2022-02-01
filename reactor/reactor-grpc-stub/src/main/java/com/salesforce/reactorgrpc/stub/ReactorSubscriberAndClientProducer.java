@@ -36,9 +36,4 @@ public class ReactorSubscriberAndClientProducer<T>
 
         return s;
     }
-
-    @Override
-    protected Throwable prepareError(Throwable throwable) {
-        return throwable;
-    }
 }

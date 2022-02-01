@@ -19,7 +19,6 @@ import reactor.test.StepVerifier;
 import java.time.Duration;
 import java.util.concurrent.Executors;
 
-@SuppressWarnings("unchecked")
 public class JvmFatalServerErrorIntegrationTest {
     private static Server server;
     private static ManagedChannel channel;
