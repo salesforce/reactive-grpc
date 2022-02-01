@@ -52,8 +52,8 @@ public class JvmFatalServerErrorIntegrationTest {
 
             @Override
             protected Throwable onErrorMap(Throwable throwable) {
-                if (throwable instanceof LinkageError) {
-                    return Status.INTERNAL.withDescription("Linkage error:" + throwable.getMessage()).asRuntimeException();
+                if (throwable instanceof NoSuchMethodError) {
+                    return Status.INTERNAL.withDescription("NoSuchMethod:" + throwable.getMessage()).asRuntimeException();
                 }
                 return super.onErrorMap(throwable);
             }
