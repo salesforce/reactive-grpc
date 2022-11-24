@@ -33,11 +33,9 @@ public final class ServerCalls {
      */
     public static <TRequest, TResponse> void oneToOne(
             TRequest request, StreamObserver<TResponse> responseObserver,
-            Function<Mono<TRequest>, Mono<TResponse>> delegate) {
+            Function<TRequest, Mono<TResponse>> delegate) {
         try {
-            Mono<TRequest> rxRequest = Mono.just(request);
-
-            Mono<TResponse> rxResponse = Preconditions.checkNotNull(delegate.apply(rxRequest));
+            Mono<TResponse> rxResponse = Preconditions.checkNotNull(delegate.apply(request));
             rxResponse.subscribe(
                 value -> {
                     // Don't try to respond if the server has already canceled the request
@@ -59,11 +57,9 @@ public final class ServerCalls {
      */
     public static <TRequest, TResponse> void oneToMany(
             TRequest request, StreamObserver<TResponse> responseObserver,
-            Function<Mono<TRequest>, Flux<TResponse>> delegate) {
+            Function<TRequest, Flux<TResponse>> delegate) {
         try {
-            Mono<TRequest> rxRequest = Mono.just(request);
-
-            Flux<TResponse> rxResponse = Preconditions.checkNotNull(delegate.apply(rxRequest));
+            Flux<TResponse> rxResponse = Preconditions.checkNotNull(delegate.apply(request));
             ReactorSubscriberAndServerProducer<TResponse> server = rxResponse.subscribeWith(new ReactorSubscriberAndServerProducer<>());
             server.subscribe((ServerCallStreamObserver<TResponse>) responseObserver);
         } catch (Throwable throwable) {
