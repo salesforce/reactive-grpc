@@ -69,7 +69,7 @@ public class BackpressureIntegrationTest {
         @Override
         public Flowable<NumberProto.Number> twoWayResponsePressure(Flowable<NumberProto.Number> request) {
             request.subscribe();
-            return responsePressure(null);
+            return responsePressure((Empty) null);
         }
     }
 
