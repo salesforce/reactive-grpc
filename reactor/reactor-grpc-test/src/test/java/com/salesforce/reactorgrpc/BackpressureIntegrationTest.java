@@ -245,7 +245,7 @@ public class BackpressureIntegrationTest {
         public Flux<NumberProto.Number> twoWayResponsePressure(Flux<NumberProto.Number> request) {
             return Flux.merge(
                     request.then(Mono.empty()),
-                    responsePressure(null)
+                    responsePressure((Empty) null)
             );
         }
     }
@@ -278,7 +278,7 @@ public class BackpressureIntegrationTest {
         @Override
         public Flux<NumberProto.Number> twoWayResponsePressure(Flux<NumberProto.Number> request) {
             request.subscribe();
-            return responsePressure(null);
+            return responsePressure((Empty) null);
         }
     }
 }

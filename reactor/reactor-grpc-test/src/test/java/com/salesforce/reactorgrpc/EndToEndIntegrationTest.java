@@ -143,19 +143,16 @@ public class EndToEndIntegrationTest {
     static class TestService extends ReactorGreeterGrpc.GreeterImplBase {
 
         @Override
-        public Mono<HelloResponse> sayHello(Mono<HelloRequest> reactorRequest) {
-            return reactorRequest.hide()
-                                 .map(protoRequest -> greet("Hello", protoRequest));
+        public Mono<HelloResponse> sayHello(HelloRequest protoRequest) {
+            return Mono.fromCallable(() -> greet("Hello", protoRequest));
         }
 
         @Override
-        public Flux<HelloResponse> sayHelloRespStream(Mono<HelloRequest> reactorRequest) {
-            return reactorRequest
-                    .hide()
-                    .flatMapMany(protoRequest -> Flux.just(
+        public Flux<HelloResponse> sayHelloRespStream(HelloRequest protoRequest) {
+            return Flux.just(
                     greet("Hello", protoRequest),
                     greet("Hi", protoRequest),
-                    greet("Greetings", protoRequest)));
+                    greet("Greetings", protoRequest));
         }
 
         @Override
