@@ -15,30 +15,32 @@ import io.grpc.stub.CallStreamObserver;
 import io.grpc.stub.ServerCallStreamObserver;
 
 /**
- * The gRPC server-side implementation of
- * {@link AbstractStreamObserverAndPublisher}.
+ * The gRPC server-side implementation of {@link AbstractStreamObserverAndPublisher}.
  *
- * @param <T> T
+ * @param <T>
+ *     T
  */
 public abstract class AbstractServerStreamObserverAndPublisher<T>
-        extends AbstractStreamObserverAndPublisher<T> {
+    extends AbstractStreamObserverAndPublisher<T> {
 
     private volatile boolean abandonDelayedCancel;
 
     public AbstractServerStreamObserverAndPublisher(
         ServerCallStreamObserver<?> serverCallStreamObserver,
         Queue<T> queue,
-        Consumer<CallStreamObserver<?>> onSubscribe) {
+        Consumer<CallStreamObserver<?>> onSubscribe
+    ) {
         super(queue, onSubscribe);
         super.onSubscribe(serverCallStreamObserver);
     }
 
     public AbstractServerStreamObserverAndPublisher(
-            ServerCallStreamObserver<?> serverCallStreamObserver,
-            Queue<T> queue,
-            Consumer<CallStreamObserver<?>> onSubscribe,
-            int prefetch,
-            int lowTide) {
+        ServerCallStreamObserver<?> serverCallStreamObserver,
+        Queue<T> queue,
+        Consumer<CallStreamObserver<?>> onSubscribe,
+        int prefetch,
+        int lowTide
+    ) {
         super(queue, prefetch, lowTide, onSubscribe);
         super.onSubscribe(serverCallStreamObserver);
     }
@@ -50,7 +52,10 @@ public abstract class AbstractServerStreamObserverAndPublisher<T>
         // If the cancel happens before a half-close, the ServerCallStreamObserver's cancellation handler
         // is run, and then a CANCELLED StatusRuntimeException is sent. The StatusRuntimeException can be ignored
         // because the subscription reactive stream has already been cancelled.
-        if (throwable instanceof StatusRuntimeException && throwable.getMessage().contains("cancelled before receiving half close")) {
+        if (throwable instanceof StatusRuntimeException &&
+            (throwable.getMessage().contains("cancelled before receiving half close") ||
+                throwable.getMessage().contains("CANCELLED: client cancelled"))
+        ) {
             return;
         }
 
