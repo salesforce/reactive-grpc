@@ -7,6 +7,8 @@
 
 package com.salesforce.reactorgrpc.stub;
 
+import java.util.function.Function;
+
 import com.google.common.base.Preconditions;
 import io.grpc.CallOptions;
 import io.grpc.Status;
@@ -14,7 +16,7 @@ import io.grpc.StatusException;
 import io.grpc.StatusRuntimeException;
 import io.grpc.stub.ServerCallStreamObserver;
 import io.grpc.stub.StreamObserver;
-import java.util.function.Function;
+import reactor.core.Disposable;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
@@ -33,12 +35,10 @@ public final class ServerCalls {
      */
     public static <TRequest, TResponse> void oneToOne(
             TRequest request, StreamObserver<TResponse> responseObserver,
-            Function<Mono<TRequest>, Mono<TResponse>> delegate) {
+            Function<TRequest, Mono<TResponse>> delegate) {
         try {
-            Mono<TRequest> rxRequest = Mono.just(request);
-
-            Mono<TResponse> rxResponse = Preconditions.checkNotNull(delegate.apply(rxRequest));
-            rxResponse.subscribe(
+            Mono<TResponse> rxResponse = Preconditions.checkNotNull(delegate.apply(request));
+            Disposable subscription = rxResponse.subscribe(
                 value -> {
                     // Don't try to respond if the server has already canceled the request
                     if (responseObserver instanceof ServerCallStreamObserver && ((ServerCallStreamObserver) responseObserver).isCancelled()) {
@@ -47,7 +47,9 @@ public final class ServerCalls {
                     responseObserver.onNext(value);
                 },
                 throwable -> responseObserver.onError(prepareError(throwable)),
-                responseObserver::onCompleted);
+                responseObserver::onCompleted
+            );
+            cancelSubscriptionOnCallEnd(subscription, (ServerCallStreamObserver<?>) responseObserver);
         } catch (Throwable throwable) {
             responseObserver.onError(prepareError(throwable));
         }
@@ -59,11 +61,9 @@ public final class ServerCalls {
      */
     public static <TRequest, TResponse> void oneToMany(
             TRequest request, StreamObserver<TResponse> responseObserver,
-            Function<Mono<TRequest>, Flux<TResponse>> delegate) {
+            Function<TRequest, Flux<TResponse>> delegate) {
         try {
-            Mono<TRequest> rxRequest = Mono.just(request);
-
-            Flux<TResponse> rxResponse = Preconditions.checkNotNull(delegate.apply(rxRequest));
+            Flux<TResponse> rxResponse = Preconditions.checkNotNull(delegate.apply(request));
             ReactorSubscriberAndServerProducer<TResponse> server = rxResponse.subscribeWith(new ReactorSubscriberAndServerProducer<>());
             server.subscribe((ServerCallStreamObserver<TResponse>) responseObserver);
         } catch (Throwable throwable) {
@@ -88,7 +88,7 @@ public final class ServerCalls {
 
         try {
             Mono<TResponse> rxResponse = Preconditions.checkNotNull(delegate.apply(Flux.from(streamObserverPublisher)));
-            rxResponse.subscribe(
+            Disposable subscription = rxResponse.subscribe(
                 value -> {
                     // Don't try to respond if the server has already canceled the request
                     if (!streamObserverPublisher.isCancelled()) {
@@ -104,6 +104,7 @@ public final class ServerCalls {
                 },
                 responseObserver::onCompleted
             );
+            cancelSubscriptionOnCallEnd(subscription, (ServerCallStreamObserver<?>) responseObserver);
         } catch (Throwable throwable) {
             responseObserver.onError(prepareError(throwable));
         }
@@ -125,7 +126,6 @@ public final class ServerCalls {
 
         ReactorServerStreamObserverAndPublisher<TRequest> streamObserverPublisher =
                 new ReactorServerStreamObserverAndPublisher<>((ServerCallStreamObserver<TResponse>) responseObserver, null, prefetch, lowTide);
-
         try {
             Flux<TResponse> rxResponse = Preconditions.checkNotNull(delegate.apply(Flux.from(streamObserverPublisher)));
             ReactorSubscriberAndServerProducer<TResponse> subscriber = new ReactorSubscriberAndServerProducer<>();
@@ -145,5 +145,10 @@ public final class ServerCalls {
         } else {
             return Status.fromThrowable(throwable).asException();
         }
+    }
+
+    private static void cancelSubscriptionOnCallEnd(Disposable subscription, ServerCallStreamObserver<?> responseObserver) {
+        responseObserver.setOnCancelHandler(subscription::dispose);
+        responseObserver.setOnCloseHandler(subscription::dispose);
     }
 }

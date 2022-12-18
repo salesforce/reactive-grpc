@@ -21,11 +21,7 @@ public abstract class AbstractSubscriberAndServerProducer<T>
     @Override
     public void subscribe(CallStreamObserver<T> downstream) {
         super.subscribe(downstream);
-        ((ServerCallStreamObserver<?>) downstream).setOnCancelHandler(new Runnable() {
-            @Override
-            public void run() {
-                AbstractSubscriberAndServerProducer.super.cancel();
-            }
-        });
+        ((ServerCallStreamObserver<?>) downstream).setOnCloseHandler(AbstractSubscriberAndServerProducer.super::cancel);
+        ((ServerCallStreamObserver<?>) downstream).setOnCancelHandler(AbstractSubscriberAndServerProducer.super::cancel);
     }
 }
