@@ -97,6 +97,18 @@ public final class {{className}} {
     public static abstract class {{serviceName}}ImplBase implements io.grpc.BindableService {
 
         {{#methods}}
+        {{^isManyInput}}
+            {{#javaDoc}}
+        {{{javaDoc}}}
+            {{/javaDoc}}
+            {{#deprecated}}
+        @java.lang.Deprecated
+            {{/deprecated}}
+        public {{#isManyOutput}}io.reactivex.rxjava3.core.Flowable{{/isManyOutput}}{{^isManyOutput}}io.reactivex.rxjava3.core.Single{{/isManyOutput}}<{{outputType}}> {{methodNameCamelCase}}({{inputType}} request) {
+            return {{methodNameCamelCase}}(io.reactivex.rxjava3.core.Single.just(request));
+        }
+        {{/isManyInput}}
+
             {{#javaDoc}}
         {{{javaDoc}}}
             {{/javaDoc}}
@@ -158,9 +170,9 @@ public final class {{className}} {
                 case METHODID_{{methodNameUpperUnderscore}}:
                     com.salesforce.rx3grpc.stub.ServerCalls.{{reactiveCallsMethodName}}(({{inputType}}) request,
                             (io.grpc.stub.StreamObserver<{{outputType}}>) responseObserver,
-                            new com.salesforce.reactivegrpc.common.Function<{{#isManyInput}}io.reactivex.rxjava3.core.Flowable{{/isManyInput}}{{^isManyInput}}io.reactivex.rxjava3.core.Single{{/isManyInput}}<{{inputType}}>, {{#isManyOutput}}io.reactivex.rxjava3.core.Flowable{{/isManyOutput}}{{^isManyOutput}}io.reactivex.rxjava3.core.Single{{/isManyOutput}}<{{outputType}}>>() {
+                            new com.salesforce.reactivegrpc.common.Function<{{#isManyInput}}io.reactivex.rxjava3.core.Flowable<{{inputType}}>{{/isManyInput}}{{^isManyInput}}{{inputType}}{{/isManyInput}}, {{#isManyOutput}}io.reactivex.rxjava3.core.Flowable{{/isManyOutput}}{{^isManyOutput}}io.reactivex.rxjava3.core.Single{{/isManyOutput}}<{{outputType}}>>() {
                                 @java.lang.Override
-                                public {{#isManyOutput}}io.reactivex.rxjava3.core.Flowable{{/isManyOutput}}{{^isManyOutput}}io.reactivex.rxjava3.core.Single{{/isManyOutput}}<{{outputType}}> apply({{#isManyInput}}io.reactivex.rxjava3.core.Flowable{{/isManyInput}}{{^isManyInput}}io.reactivex.rxjava3.core.Single{{/isManyInput}}<{{inputType}}> single) {
+                                public {{#isManyOutput}}io.reactivex.rxjava3.core.Flowable{{/isManyOutput}}{{^isManyOutput}}io.reactivex.rxjava3.core.Single{{/isManyOutput}}<{{outputType}}> apply({{#isManyInput}}io.reactivex.rxjava3.core.Flowable<{{inputType}}>{{/isManyInput}}{{^isManyInput}}{{inputType}}{{/isManyInput}} single) {
                                     return serviceImpl.{{methodNameCamelCase}}(single);
                                 }
                             }, serviceImpl::onErrorMap);

@@ -75,6 +75,18 @@ public final class {{className}} {
     public static abstract class {{serviceName}}ImplBase implements io.grpc.BindableService {
 
         {{#methods}}
+        {{^isManyInput}}
+            {{#javaDoc}}
+        {{{javaDoc}}}
+            {{/javaDoc}}
+            {{#deprecated}}
+        @java.lang.Deprecated
+            {{/deprecated}}
+        public {{#isManyOutput}}reactor.core.publisher.Flux{{/isManyOutput}}{{^isManyOutput}}reactor.core.publisher.Mono{{/isManyOutput}}<{{outputType}}> {{methodNameCamelCase}}({{inputType}} request) {
+            return {{methodNameCamelCase}}(reactor.core.publisher.Mono.just(request));
+        }
+        {{/isManyInput}}
+
             {{#javaDoc}}
         {{{javaDoc}}}
             {{/javaDoc}}

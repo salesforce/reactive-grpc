@@ -35,16 +35,16 @@ public class EndToEndIntegrationTest {
         RxGreeterGrpc.GreeterImplBase svc = new RxGreeterGrpc.GreeterImplBase() {
 
             @Override
-            public Single<HelloResponse> sayHello(Single<HelloRequest> rxRequest) {
-                return rxRequest.map(protoRequest -> greet("Hello", protoRequest));
+            public Single<HelloResponse> sayHello(HelloRequest protoRequest) {
+                return Single.fromCallable(() -> greet("Hello", protoRequest));
             }
 
             @Override
-            public Flowable<HelloResponse> sayHelloRespStream(Single<HelloRequest> rxRequest) {
-                return rxRequest.flatMapPublisher(protoRequest -> Flowable.just(
+            public Flowable<HelloResponse> sayHelloRespStream(HelloRequest protoRequest) {
+                return Flowable.just(
                         greet("Hello", protoRequest),
                         greet("Hi", protoRequest),
-                        greet("Greetings", protoRequest)));
+                        greet("Greetings", protoRequest));
             }
 
             @Override

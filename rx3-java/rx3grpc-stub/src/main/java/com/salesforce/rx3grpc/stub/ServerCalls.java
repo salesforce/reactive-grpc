@@ -36,12 +36,10 @@ public final class ServerCalls {
     public static <TRequest, TResponse> void oneToOne(
             final TRequest request,
             final StreamObserver<TResponse> responseObserver,
-            final Function<Single<TRequest>, Single<TResponse>> delegate,
+            final Function<TRequest, Single<TResponse>> delegate,
             final Function<Throwable, Throwable> prepareError) {
         try {
-            final Single<TRequest> rxRequest = Single.just(request);
-
-            final Single<TResponse> rxResponse = Preconditions.checkNotNull(delegate.apply(rxRequest));
+            final Single<TResponse> rxResponse = Preconditions.checkNotNull(delegate.apply(request));
             rxResponse.subscribe(
                     new Consumer<TResponse>() {
                         @Override
@@ -72,12 +70,10 @@ public final class ServerCalls {
     public static <TRequest, TResponse> void oneToMany(
             final TRequest request,
             final StreamObserver<TResponse> responseObserver,
-            final Function<Single<TRequest>, Flowable<TResponse>> delegate,
+            final Function<TRequest, Flowable<TResponse>> delegate,
             final Function<Throwable, Throwable> prepareError) {
         try {
-            final Single<TRequest> rxRequest = Single.just(request);
-
-            final Flowable<TResponse> rxResponse = Preconditions.checkNotNull(delegate.apply(rxRequest));
+            final Flowable<TResponse> rxResponse = Preconditions.checkNotNull(delegate.apply(request));
             final RxSubscriberAndServerProducer<TResponse> serverProducer =
                     rxResponse.subscribeWith(new RxSubscriberAndServerProducer<TResponse>(prepareError));
             serverProducer.subscribe((ServerCallStreamObserver<TResponse>) responseObserver);
