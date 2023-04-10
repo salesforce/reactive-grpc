@@ -39,9 +39,15 @@ jobs:
       - image: circleci/openjdk:11-jdk
     <<: *shared
 
+  java-17:
+    docker:
+      - image: circleci/openjdk:17-jdk
+    <<: *shared
+
 workflows:
   version: 2
   java-8-and-11:
     jobs:
       - java-8
       - java-11
+      - java-17
