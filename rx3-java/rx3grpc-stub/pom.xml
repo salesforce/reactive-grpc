@@ -119,7 +119,7 @@
             <plugin>
                 <groupId>org.apache.felix</groupId>
                 <artifactId>maven-bundle-plugin</artifactId>
-                <version>4.1.0</version>
+                <version>5.1.2</version>
                 <executions>
                     <execution>
                         <id>bundle-manifest</id>
