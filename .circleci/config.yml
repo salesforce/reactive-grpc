@@ -46,7 +46,7 @@ jobs:
 
 workflows:
   version: 2
-  java-8-11-17:
+  java-8-and-11:
     jobs:
       - java-8
       - java-11
