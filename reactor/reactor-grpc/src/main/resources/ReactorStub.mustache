@@ -116,6 +116,9 @@ public final class {{className}} {
             return null;
         }
 
+        protected Throwable onErrorMap(Throwable throwable) {
+            return com.salesforce.reactorgrpc.stub.ServerCalls.prepareError(throwable);
+        }
     }
 
     {{#methods}}
@@ -144,7 +147,7 @@ public final class {{className}} {
                 case METHODID_{{methodNameUpperUnderscore}}:
                     com.salesforce.reactorgrpc.stub.ServerCalls.{{reactiveCallsMethodName}}(({{inputType}}) request,
                             (io.grpc.stub.StreamObserver<{{outputType}}>) responseObserver,
-                            serviceImpl::{{methodNameCamelCase}});
+                            serviceImpl::{{methodNameCamelCase}}, serviceImpl::onErrorMap);
                     break;
                 {{/isManyInput}}
                 {{/methods}}
@@ -162,7 +165,7 @@ public final class {{className}} {
                 case METHODID_{{methodNameUpperUnderscore}}:
                     return (io.grpc.stub.StreamObserver<Req>) com.salesforce.reactorgrpc.stub.ServerCalls.{{reactiveCallsMethodName}}(
                             (io.grpc.stub.StreamObserver<{{outputType}}>) responseObserver,
-                            serviceImpl::{{methodNameCamelCase}}, serviceImpl.getCallOptions(methodId));
+                            serviceImpl::{{methodNameCamelCase}}, serviceImpl::onErrorMap, serviceImpl.getCallOptions(methodId));
                 {{/isManyInput}}
                 {{/methods}}
                 default:

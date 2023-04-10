@@ -138,6 +138,10 @@ public final class {{className}} {
             return null;
         }
 
+        protected Throwable onErrorMap(Throwable throwable) {
+            return com.salesforce.rxgrpc.stub.ServerCalls.prepareError(throwable);
+        }
+
     }
 
     {{#methods}}
@@ -171,7 +175,7 @@ public final class {{className}} {
                                 public {{#isManyOutput}}io.reactivex.Flowable{{/isManyOutput}}{{^isManyOutput}}io.reactivex.Single{{/isManyOutput}}<{{outputType}}> apply({{#isManyInput}}io.reactivex.Flowable<{{inputType}}>{{/isManyInput}}{{^isManyInput}}{{inputType}}{{/isManyInput}} single) {
                                     return serviceImpl.{{methodNameCamelCase}}(single);
                                 }
-                            });
+                            }, serviceImpl::onErrorMap);
                     break;
                 {{/isManyInput}}
                 {{/methods}}
@@ -189,7 +193,7 @@ public final class {{className}} {
                 case METHODID_{{methodNameUpperUnderscore}}:
                     return (io.grpc.stub.StreamObserver<Req>) com.salesforce.rxgrpc.stub.ServerCalls.{{reactiveCallsMethodName}}(
                             (io.grpc.stub.StreamObserver<{{outputType}}>) responseObserver,
-                            serviceImpl::{{methodNameCamelCase}}, serviceImpl.getCallOptions(methodId));
+                            serviceImpl::{{methodNameCamelCase}}, serviceImpl::onErrorMap, serviceImpl.getCallOptions(methodId));
                 {{/isManyInput}}
                 {{/methods}}
                 default:

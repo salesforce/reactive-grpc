@@ -8,6 +8,7 @@
 package com.salesforce.reactorgrpc.stub;
 
 import com.salesforce.reactivegrpc.common.AbstractSubscriberAndServerProducer;
+import com.salesforce.reactivegrpc.common.Function;
 import org.reactivestreams.Subscription;
 import reactor.core.CoreSubscriber;
 import reactor.core.Fuseable;
@@ -20,6 +21,10 @@ import reactor.core.Fuseable;
 public class ReactorSubscriberAndServerProducer<T>
         extends AbstractSubscriberAndServerProducer<T>
         implements CoreSubscriber<T> {
+
+    public ReactorSubscriberAndServerProducer(Function<Throwable, Throwable> prepareError) {
+        super(prepareError);
+    }
 
     @Override
     protected Subscription fuse(Subscription s) {

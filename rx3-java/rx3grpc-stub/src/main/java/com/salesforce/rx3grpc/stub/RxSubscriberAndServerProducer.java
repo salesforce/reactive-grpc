@@ -7,6 +7,7 @@
 
 package com.salesforce.rx3grpc.stub;
 
+import com.salesforce.reactivegrpc.common.Function;
 import org.reactivestreams.Subscription;
 
 import com.salesforce.reactivegrpc.common.AbstractSubscriberAndServerProducer;
@@ -22,6 +23,10 @@ import io.reactivex.rxjava3.operators.QueueSubscription;
 public class RxSubscriberAndServerProducer<T>
         extends AbstractSubscriberAndServerProducer<T>
         implements FlowableSubscriber<T> {
+
+    public RxSubscriberAndServerProducer(Function<Throwable, Throwable> prepareError) {
+        super(prepareError);
+    }
 
     @Override
     protected Subscription fuse(Subscription s) {
