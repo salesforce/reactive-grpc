@@ -35,7 +35,8 @@ public final class ServerCalls {
     public static <TRequest, TResponse> void oneToOne(
             final TRequest request,
             final StreamObserver<TResponse> responseObserver,
-            final Function<TRequest, Single<TResponse>> delegate) {
+            final Function<TRequest, Single<TResponse>> delegate,
+            final Function<Throwable, Throwable> prepareError) {
         try {
             final Single<TResponse> rxResponse = Preconditions.checkNotNull(delegate.apply(request));
             rxResponse.subscribe(
@@ -53,11 +54,11 @@ public final class ServerCalls {
                     new Consumer<Throwable>() {
                         @Override
                         public void accept(Throwable throwable) {
-                            responseObserver.onError(prepareError(throwable));
+                            responseObserver.onError(prepareError.apply(throwable));
                         }
                     });
         } catch (Throwable throwable) {
-            responseObserver.onError(prepareError(throwable));
+            responseObserver.onError(prepareError.apply(throwable));
         }
     }
 
@@ -68,14 +69,15 @@ public final class ServerCalls {
     public static <TRequest, TResponse> void oneToMany(
             final TRequest request,
             final StreamObserver<TResponse> responseObserver,
-            final Function<TRequest, Flowable<TResponse>> delegate) {
+            final Function<TRequest, Flowable<TResponse>> delegate,
+            final Function<Throwable, Throwable> prepareError) {
         try {
             final Flowable<TResponse> rxResponse = Preconditions.checkNotNull(delegate.apply(request));
             final RxSubscriberAndServerProducer<TResponse> serverProducer =
-                    rxResponse.subscribeWith(new RxSubscriberAndServerProducer<TResponse>());
+                    rxResponse.subscribeWith(new RxSubscriberAndServerProducer<TResponse>(prepareError::apply));
             serverProducer.subscribe((ServerCallStreamObserver<TResponse>) responseObserver);
         } catch (Throwable throwable) {
-            responseObserver.onError(prepareError(throwable));
+            responseObserver.onError(prepareError.apply(throwable));
         }
     }
 
@@ -86,6 +88,7 @@ public final class ServerCalls {
     public static <TRequest, TResponse> StreamObserver<TRequest> manyToOne(
             final StreamObserver<TResponse> responseObserver,
             final Function<Flowable<TRequest>, Single<TResponse>> delegate,
+            final Function<Throwable, Throwable> prepareError,
             final CallOptions options) {
 
         final int prefetch = RxCallOptions.getPrefetch(options);
@@ -113,13 +116,13 @@ public final class ServerCalls {
                             // Don't try to respond if the server has already canceled the request
                             if (!streamObserverPublisher.isCancelled()) {
                                 streamObserverPublisher.abortPendingCancel();
-                                responseObserver.onError(prepareError(throwable));
+                                responseObserver.onError(prepareError.apply(throwable));
                             }
                         }
                     }
             );
         } catch (Throwable throwable) {
-            responseObserver.onError(prepareError(throwable));
+            responseObserver.onError(prepareError.apply(throwable));
         }
 
         return streamObserverPublisher;
@@ -132,6 +135,7 @@ public final class ServerCalls {
     public static <TRequest, TResponse> StreamObserver<TRequest> manyToMany(
             final StreamObserver<TResponse> responseObserver,
             final Function<Flowable<TRequest>, Flowable<TResponse>> delegate,
+            final Function<Throwable, Throwable> prepareError,
             final CallOptions options) {
 
         final int prefetch = RxCallOptions.getPrefetch(options);
@@ -142,18 +146,21 @@ public final class ServerCalls {
 
         try {
             final Flowable<TResponse> rxResponse = Preconditions.checkNotNull(delegate.apply(Flowable.fromPublisher(streamObserverPublisher)));
-            final RxSubscriberAndServerProducer<TResponse> subscriber = new RxSubscriberAndServerProducer<TResponse>();
+            final RxSubscriberAndServerProducer<TResponse> subscriber = new RxSubscriberAndServerProducer<TResponse>(prepareError::apply);
             subscriber.subscribe((ServerCallStreamObserver<TResponse>) responseObserver);
             // Don't try to respond if the server has already canceled the request
             rxResponse.subscribe(subscriber);
         } catch (Throwable throwable) {
-            responseObserver.onError(prepareError(throwable));
+            responseObserver.onError(prepareError.apply(throwable));
         }
 
         return streamObserverPublisher;
     }
 
-    private static Throwable prepareError(Throwable throwable) {
+    /**
+     * Implements default error mapping.
+     */
+    public static Throwable prepareError(Throwable throwable) {
         if (throwable instanceof StatusException || throwable instanceof StatusRuntimeException) {
             return throwable;
         } else {
