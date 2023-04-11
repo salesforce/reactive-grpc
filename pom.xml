@@ -70,7 +70,7 @@
         <canteen.plugin.version>1.1.0</canteen.plugin.version>
 
         <!-- Dependency Versions -->
-        <reactive.streams.version>1.0.3</reactive.streams.version>
+        <reactive.streams.version>1.0.4</reactive.streams.version>
         <grpc.version>1.54.0</grpc.version>
         <protoc.version>3.22.2</protoc.version> <!-- Same version as grpc-proto -->
         <jprotoc.version>1.2.0</jprotoc.version>
@@ -308,11 +308,9 @@
             </plugin>
 
             <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-surefire-plugin</artifactId>
-                <version>3.0.0-M3</version>
-                <configuration>
-                    <argLine>-Xmx1024m -XX:MaxPermSize=256m</argLine>
-                </configuration>
+                <version>3.0.0</version>
             </plugin>
         </plugins>
     </build>

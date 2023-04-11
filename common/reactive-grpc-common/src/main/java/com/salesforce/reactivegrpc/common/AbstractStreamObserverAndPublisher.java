@@ -85,7 +85,7 @@ public abstract class AbstractStreamObserverAndPublisher<T> extends AbstractUnim
     private volatile boolean done;
     private Throwable error;
 
-    private volatile Subscriber<? super T> downstream;
+    protected volatile Subscriber<? super T> downstream;
 
     private volatile boolean cancelled;
 
@@ -226,7 +226,7 @@ public abstract class AbstractStreamObserverAndPublisher<T> extends AbstractUnim
 
         for (;;) {
             if (cancelled) {
-                queue.clear();
+                discardQueue(queue);
                 downstream = null;
                 return;
             }
@@ -283,7 +283,7 @@ public abstract class AbstractStreamObserverAndPublisher<T> extends AbstractUnim
 
     private boolean checkTerminated(boolean d, boolean empty, Subscriber<? super T> subscriber, Queue<T> q) {
         if (cancelled) {
-            q.clear();
+            discardQueue(q);
             downstream = null;
             return true;
         }
@@ -305,6 +305,7 @@ public abstract class AbstractStreamObserverAndPublisher<T> extends AbstractUnim
     @Override
     public void onNext(T t) {
         if (done || cancelled) {
+            discardElement(t);
             return;
         }
 
@@ -419,7 +420,7 @@ public abstract class AbstractStreamObserverAndPublisher<T> extends AbstractUnim
 
         if (!outputFused) {
             if (WIP.getAndIncrement(this) == 0) {
-                queue.clear();
+                discardQueue(queue);
                 downstream = null;
             }
         }
@@ -456,4 +457,10 @@ public abstract class AbstractStreamObserverAndPublisher<T> extends AbstractUnim
     public void clear() {
         queue.clear();
     }
+
+    protected void discardQueue(Queue<T> q) {
+        q.clear();
+    }
+
+    protected void discardElement(T t) { }
 }

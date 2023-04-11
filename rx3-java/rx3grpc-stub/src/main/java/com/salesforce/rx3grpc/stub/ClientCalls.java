@@ -137,10 +137,10 @@ public final class ClientCalls {
                         }
                     }
                 );
-            delegate.apply(observerAndPublisher);
 
             return Flowable.fromPublisher(observerAndPublisher)
-                           .singleOrError();
+                        .doOnSubscribe(s -> delegate.apply(observerAndPublisher))
+                        .singleOrError();
         } catch (Throwable throwable) {
             return Single.error(throwable);
         }
@@ -177,9 +177,8 @@ public final class ClientCalls {
                         }
                     },
                     prefetch, lowTide);
-            delegate.apply(observerAndPublisher);
 
-            return Flowable.fromPublisher(observerAndPublisher);
+            return Flowable.fromPublisher(observerAndPublisher).doOnSubscribe(s -> delegate.apply(observerAndPublisher));
         } catch (Throwable throwable) {
             return Flowable.error(throwable);
         }
