@@ -7,8 +7,6 @@
 package com.salesforce.reactorgrpc.stub;
 
 import org.junit.jupiter.api.Test;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import reactor.core.Fuseable;
 import reactor.core.publisher.Flux;
 import reactor.core.scheduler.Schedulers;
@@ -22,7 +20,6 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 
 public class ReactorClientStreamObserverAndPublisherTest {
-    private static final Logger log = LoggerFactory.getLogger(ReactorClientStreamObserverAndPublisherTest.class.getName());
 
     private static final int DEFAULT_CHUNK_SIZE = 512;
     private static final int PART_OF_CHUNK = DEFAULT_CHUNK_SIZE * 2 / 3;
@@ -76,18 +73,12 @@ public class ReactorClientStreamObserverAndPublisherTest {
         AtomicBoolean firstHandled = new AtomicBoolean();
         Flux<Integer> consumer =
             Flux.from(processor)
-                .doOnDiscard(Integer.class, i -> {
-                    log.info("Processor: discarding {}", i);
-                    discardedByObserverAndPublisher.add(i);
-                })
+                .doOnDiscard(Integer.class, discardedByObserverAndPublisher::add)
                 .log("processor")
                 .limitRate(1)
                 .publishOn(Schedulers.parallel())
                 .limitRate(1)
-                .doOnDiscard(Integer.class, i -> {
-                    log.info("publishOn: discarding {}", i);
-                    discardedByPublishOn.add(i);
-                })
+                .doOnDiscard(Integer.class, discardedByPublishOn::add)
                 .<Integer>handle((i, sink) -> {
                     if (firstHandled.compareAndSet(false, true)) {
                         try {

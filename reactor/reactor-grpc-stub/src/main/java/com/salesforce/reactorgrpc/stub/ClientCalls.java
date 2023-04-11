@@ -104,10 +104,10 @@ public final class ClientCalls {
                         s -> subscriberAndGRPCProducer.subscribe((CallStreamObserver<TRequest>) s),
                         subscriberAndGRPCProducer::cancel
                     );
-            delegate.apply(observerAndPublisher);
 
             return Flux.from(observerAndPublisher)
-                       .singleOrEmpty();
+                    .doOnSubscribe(s -> delegate.apply(observerAndPublisher))
+                    .singleOrEmpty();
         } catch (Throwable throwable) {
             return Mono.error(throwable);
         }
@@ -134,9 +134,8 @@ public final class ClientCalls {
                     s -> subscriberAndGRPCProducer.subscribe((CallStreamObserver<TRequest>) s),
                     subscriberAndGRPCProducer::cancel, prefetch, lowTide
                 );
-            delegate.apply(observerAndPublisher);
 
-            return Flux.from(observerAndPublisher);
+            return Flux.from(observerAndPublisher).doOnSubscribe(s -> delegate.apply(observerAndPublisher));
         } catch (Throwable throwable) {
             return Flux.error(throwable);
         }
