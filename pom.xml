@@ -71,13 +71,13 @@
 
         <!-- Dependency Versions -->
         <reactive.streams.version>1.0.4</reactive.streams.version>
-        <grpc.version>1.42.1</grpc.version>
-        <protoc.version>3.19.1</protoc.version> <!-- Same version as grpc-proto -->
+        <grpc.version>1.54.0</grpc.version>
+        <protoc.version>3.22.2</protoc.version> <!-- Same version as grpc-proto -->
         <jprotoc.version>1.2.0</jprotoc.version>
 
         <rxjava.version>2.2.21</rxjava.version>
-        <reactor.version>3.4.7</reactor.version>
-        <rx3java.version>3.1.1</rx3java.version>
+        <reactor.version>3.5.4</reactor.version>
+        <rx3java.version>3.1.6</rx3java.version>
 
         <!-- Test Dependency Versions -->
         <grpc.contrib.version>0.8.1</grpc.contrib.version>
