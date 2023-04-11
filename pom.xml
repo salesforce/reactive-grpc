@@ -70,7 +70,7 @@
         <canteen.plugin.version>1.1.0</canteen.plugin.version>
 
         <!-- Dependency Versions -->
-        <reactive.streams.version>1.0.3</reactive.streams.version>
+        <reactive.streams.version>1.0.4</reactive.streams.version>
         <grpc.version>1.42.1</grpc.version>
         <protoc.version>3.19.1</protoc.version> <!-- Same version as grpc-proto -->
         <jprotoc.version>1.2.0</jprotoc.version>
