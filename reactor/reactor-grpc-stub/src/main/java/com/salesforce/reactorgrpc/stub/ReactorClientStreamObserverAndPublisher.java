@@ -10,8 +10,12 @@ package com.salesforce.reactorgrpc.stub;
 import com.salesforce.reactivegrpc.common.AbstractClientStreamObserverAndPublisher;
 import com.salesforce.reactivegrpc.common.Consumer;
 import io.grpc.stub.CallStreamObserver;
+import reactor.core.CoreSubscriber;
 import reactor.core.Fuseable;
+import reactor.core.publisher.Operators;
 import reactor.util.concurrent.Queues;
+
+import java.util.Queue;
 
 /**
  * TODO: Explain what this class does.
@@ -45,5 +49,21 @@ class ReactorClientStreamObserverAndPublisher<T>
             return Fuseable.ASYNC;
         }
         return Fuseable.NONE;
+    }
+
+    @Override
+    protected void discardQueue(Queue<T> q) {
+        if (downstream instanceof CoreSubscriber) {
+            Operators.onDiscardQueueWithClear(q, ((CoreSubscriber) downstream).currentContext(), null);
+        } else {
+            q.clear();
+        }
+    }
+
+    @Override
+    protected void discardElement(T t) {
+        if (downstream instanceof CoreSubscriber) {
+            Operators.onDiscard(t, ((CoreSubscriber) downstream).currentContext());
+        }
     }
 }
