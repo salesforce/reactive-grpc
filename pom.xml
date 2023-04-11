@@ -6,7 +6,7 @@
 
     <groupId>com.salesforce.servicelibs</groupId>
     <artifactId>reactive-grpc</artifactId>
-    <version>1.2.4-SNAPSHOT</version>
+    <version>1.2.4</version>
     <packaging>pom</packaging>
 
     <name>reactive-grpc</name>
@@ -73,7 +73,7 @@
         <reactive.streams.version>1.0.4</reactive.streams.version>
         <grpc.version>1.54.0</grpc.version>
         <protoc.version>3.22.2</protoc.version> <!-- Same version as grpc-proto -->
-        <jprotoc.version>1.2.0</jprotoc.version>
+        <jprotoc.version>1.2.2</jprotoc.version>
 
         <rxjava.version>2.2.21</rxjava.version>
         <reactor.version>3.5.4</reactor.version>
