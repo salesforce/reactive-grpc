@@ -15,6 +15,10 @@ service Greeter {
     rpc SayHelloBothStream (stream HelloRequest) returns (stream HelloResponse) {}
 }
 
+service Keywords {
+    rpc Boolean (BoolRequest) returns (BoolResponse) {}
+}
+
 service Dismisser {
     rpc SayGoodbye (HelloRequest) returns (HelloResponse) {}
 }
@@ -27,4 +31,12 @@ message HelloRequest {
 // The response message containing the greetings
 message HelloResponse {
     string message = 1;
+}
+
+message BoolRequest {
+    bool value = 1;
+}
+
+message BoolResponse {
+    bool value = 1;
 }
