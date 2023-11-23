@@ -253,7 +253,7 @@ public abstract class ReactiveGrpcGenerator extends Generator {
      * Template class for proto RPC objects.
      */
     private class MethodContext {
-        // CHECKSTYLE DISABLE VisibilityModifier FOR 10 LINES
+        // CHECKSTYLE DISABLE VisibilityModifier FOR 11 LINES
         public String originalName;
         public String methodName;
         public String inputType;
