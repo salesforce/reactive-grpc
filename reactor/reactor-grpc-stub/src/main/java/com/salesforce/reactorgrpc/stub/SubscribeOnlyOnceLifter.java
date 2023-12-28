@@ -10,6 +10,7 @@ package com.salesforce.reactorgrpc.stub;
 import org.reactivestreams.Subscription;
 import reactor.core.CoreSubscriber;
 import reactor.core.Scannable;
+import reactor.util.context.Context;
 
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.BiFunction;
@@ -25,6 +26,11 @@ public class SubscribeOnlyOnceLifter<T> extends AtomicBoolean implements BiFunct
     @Override
     public CoreSubscriber<? super T> apply(Scannable scannable, CoreSubscriber<? super T> coreSubscriber) {
         return new CoreSubscriber<T>() {
+            @Override
+            public Context currentContext() {
+                return coreSubscriber.currentContext();
+            }
+
             @Override
             public void onSubscribe(Subscription subscription) {
                 if (!compareAndSet(false, true)) {
