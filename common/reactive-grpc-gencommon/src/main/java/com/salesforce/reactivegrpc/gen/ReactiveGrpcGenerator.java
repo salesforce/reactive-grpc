@@ -246,7 +246,7 @@ public abstract class ReactiveGrpcGenerator extends Generator {
         public int methodNumber;
         public String javaDoc;
 
-        // This method mimics the upper-casing method ogf gRPC to ensure compatibility
+        // This method mimics the upper-casing method of gRPC to ensure compatibility
         // See https://github.com/grpc/grpc-java/blob/v1.8.0/compiler/src/java_plugin/cpp/java_generator.cpp#L58
         public String methodNameUpperUnderscore() {
             StringBuilder s = new StringBuilder();
