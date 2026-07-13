@@ -53,7 +53,7 @@ def _reactive_grpc_library_impl(ctx):
     args = ctx.actions.args()
     args.add(ctx.executable.reactive_plugin.path, format = "--plugin=protoc-gen-reactive-grpc-plugin=%s")
     args.add("--reactive-grpc-plugin_out=:{0}".format(gensrcjar.path))
-    args.add_joined("--descriptor_set_in", descriptor_set_in, join_with = ctx.host_configuration.host_path_separator)
+    args.add_joined("--descriptor_set_in", descriptor_set_in, join_with = ctx.configuration.host_path_separator)
     for src in proto.check_deps_sources.to_list():
         args.add(_proto_path(src, proto))
 
@@ -71,7 +71,6 @@ def _reactive_grpc_library_impl(ctx):
     java_info = java_common.compile(
         ctx,
         deps = deps,
-        host_javabase = find_java_runtime_toolchain(ctx, ctx.attr._host_javabase),
         java_toolchain = find_java_toolchain(ctx, ctx.attr._java_toolchain),
         output = ctx.outputs.jar,
         output_source_jar = ctx.outputs.srcjar,
@@ -109,10 +108,6 @@ _reactive_grpc_library = rule(
         "_java_toolchain": attr.label(
             default = Label("@bazel_tools//tools/jdk:current_java_toolchain"),
         ),
-        "_host_javabase": attr.label(
-            cfg = "host",
-            default = Label("@bazel_tools//tools/jdk:current_host_java_runtime"),
-        ),
     },
     fragments = ["java"],
     outputs = {
@@ -120,6 +115,7 @@ _reactive_grpc_library = rule(
         "srcjar": "lib%{name}-src.jar",
     },
     provides = [JavaInfo],
+    toolchains = ["@@bazel_tools//tools/jdk:toolchain_type"],
     implementation = _reactive_grpc_library_impl,
 )
 
