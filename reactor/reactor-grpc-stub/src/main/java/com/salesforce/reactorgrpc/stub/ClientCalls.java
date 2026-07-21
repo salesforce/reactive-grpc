@@ -8,7 +8,6 @@
 package com.salesforce.reactorgrpc.stub;
 
 import io.grpc.CallOptions;
-import io.grpc.stub.CallStreamObserver;
 import io.grpc.stub.StreamObserver;
 import java.util.function.BiConsumer;
 import java.util.function.Function;
@@ -34,9 +33,8 @@ public final class ClientCalls {
             BiConsumer<TRequest, StreamObserver<TResponse>> delegate,
             CallOptions options) {
         try {
-            return Mono
-                    .<TResponse>create(emitter -> monoSource.subscribe(
-                        request -> delegate.accept(request, new StreamObserver<TResponse>() {
+            return monoSource.flatMap(r ->
+                    Mono.<TResponse>create(emitter -> delegate.accept(r, new StreamObserver<TResponse>() {
                             @Override
                             public void onNext(TResponse tResponse) {
                                 emitter.success(tResponse);
@@ -51,10 +49,10 @@ public final class ClientCalls {
                             public void onCompleted() {
                                 // Do nothing
                             }
-                        }),
-                        emitter::error
-                    ))
-                    .transform(Operators.lift(new SubscribeOnlyOnceLifter<TResponse>()));
+                        })
+                    )
+                    .transform(Operators.lift(new SubscribeOnlyOnceLifter<TResponse>()))
+            );
         } catch (Throwable throwable) {
             return Mono.error(throwable);
         }
@@ -97,17 +95,8 @@ public final class ClientCalls {
             Function<StreamObserver<TResponse>, StreamObserver<TRequest>> delegate,
             CallOptions options) {
         try {
-            ReactorSubscriberAndClientProducer<TRequest> subscriberAndGRPCProducer =
-                    fluxSource.subscribeWith(new ReactorSubscriberAndClientProducer<>());
-            ReactorClientStreamObserverAndPublisher<TResponse> observerAndPublisher =
-                    new ReactorClientStreamObserverAndPublisher<>(
-                        s -> subscriberAndGRPCProducer.subscribe((CallStreamObserver<TRequest>) s),
-                        subscriberAndGRPCProducer::cancel
-                    );
-
-            return Flux.from(observerAndPublisher)
-                    .doOnSubscribe(s -> delegate.apply(observerAndPublisher))
-                    .singleOrEmpty();
+            ReactorGrpcClientCallFlux<TRequest, TResponse> operator = new ReactorGrpcClientCallFlux<>(fluxSource, delegate);
+            return operator.doOnSubscribe(operator.onSubscribeHook()).singleOrEmpty();
         } catch (Throwable throwable) {
             return Mono.error(throwable);
         }
@@ -123,19 +112,11 @@ public final class ClientCalls {
             Function<StreamObserver<TResponse>, StreamObserver<TRequest>> delegate,
             CallOptions options) {
         try {
-
             final int prefetch = ReactorCallOptions.getPrefetch(options);
             final int lowTide = ReactorCallOptions.getLowTide(options);
 
-            ReactorSubscriberAndClientProducer<TRequest> subscriberAndGRPCProducer =
-                fluxSource.subscribeWith(new ReactorSubscriberAndClientProducer<>());
-            ReactorClientStreamObserverAndPublisher<TResponse> observerAndPublisher =
-                new ReactorClientStreamObserverAndPublisher<>(
-                    s -> subscriberAndGRPCProducer.subscribe((CallStreamObserver<TRequest>) s),
-                    subscriberAndGRPCProducer::cancel, prefetch, lowTide
-                );
-
-            return Flux.from(observerAndPublisher).doOnSubscribe(s -> delegate.apply(observerAndPublisher));
+            ReactorGrpcClientCallFlux<TRequest, TResponse> operator = new ReactorGrpcClientCallFlux<>(fluxSource, delegate, prefetch, lowTide);
+            return operator.doOnSubscribe(operator.onSubscribeHook());
         } catch (Throwable throwable) {
             return Flux.error(throwable);
         }
