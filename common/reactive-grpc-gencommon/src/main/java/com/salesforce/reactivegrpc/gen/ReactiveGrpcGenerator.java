@@ -19,10 +19,7 @@ import com.salesforce.jprotoc.Generator;
 import com.salesforce.jprotoc.GeneratorException;
 import com.salesforce.jprotoc.ProtoTypeMap;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
+import java.util.*;
 import java.util.stream.Collectors;
 
 /**
@@ -32,6 +29,19 @@ public abstract class ReactiveGrpcGenerator extends Generator {
 
     private static final int SERVICE_NUMBER_OF_PATHS = 2;
     private static final int METHOD_NUMBER_OF_PATHS = 4;
+
+    // https://github.com/grpc/grpc-java/blob/v1.59.0/compiler/src/java_plugin/cpp/java_generator.cpp#L150
+    private static final Set<String> JAVA_KEYWORDS = new HashSet<>(Arrays.asList(
+            "abstract", "assert", "boolean", "break", "byte", "case", "catch", "char",
+            "class", "const", "continue", "default", "do", "double", "else", "enum",
+            "extends", "final", "finally", "float", "for", "goto", "if", "implements",
+            "import", "instanceof", "int", "interface", "long", "native", "new", "package",
+            "private", "protected", "public", "return", "short", "static", "strictfp",
+            "super", "switch", "synchronized", "this", "throw", "throws", "transient",
+            "try", "void", "volatile", "while",
+            // additional ones added by us
+            "true", "false"
+    ));
 
     protected abstract String getClassPrefix();
 
@@ -126,9 +136,18 @@ public abstract class ReactiveGrpcGenerator extends Generator {
         return serviceContext;
     }
 
+    private String fixKeywords(String s) {
+        if (JAVA_KEYWORDS.contains(s)) {
+            return s + "_";
+        } else {
+            return s;
+        }
+    }
+
     private MethodContext buildMethodContext(MethodDescriptorProto methodProto, ProtoTypeMap typeMap, List<Location> locations, int methodNumber) {
         MethodContext methodContext = new MethodContext();
-        methodContext.methodName = lowerCaseFirst(methodProto.getName());
+        methodContext.originalName = lowerCaseFirst(methodProto.getName());
+        methodContext.methodName = fixKeywords(methodContext.originalName);
         methodContext.inputType = typeMap.toJavaTypeName(methodProto.getInputType());
         methodContext.outputType = typeMap.toJavaTypeName(methodProto.getOutputType());
         methodContext.deprecated = methodProto.getOptions() != null && methodProto.getOptions().getDeprecated();
@@ -234,7 +253,8 @@ public abstract class ReactiveGrpcGenerator extends Generator {
      * Template class for proto RPC objects.
      */
     private class MethodContext {
-        // CHECKSTYLE DISABLE VisibilityModifier FOR 10 LINES
+        // CHECKSTYLE DISABLE VisibilityModifier FOR 11 LINES
+        public String originalName;
         public String methodName;
         public String inputType;
         public String outputType;
@@ -266,7 +286,12 @@ public abstract class ReactiveGrpcGenerator extends Generator {
         }
 
         public String methodNameCamelCase() {
-            String mn = methodName.replace("_", "");
+            String mn;
+            if (JAVA_KEYWORDS.contains(originalName)) {
+                mn = methodName;
+            } else {
+                mn = methodName.replace("_", "");
+            }
             return String.valueOf(Character.toLowerCase(mn.charAt(0))) + mn.substring(1);
         }
     }
