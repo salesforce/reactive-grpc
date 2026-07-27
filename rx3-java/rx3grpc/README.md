@@ -1,5 +1,5 @@
-[![Javadocs](https://javadoc.io/badge/com.salesforce.servicelibs/rxgrpc-stub.svg)](https://javadoc.io/doc/com.salesforce.servicelibs/rxgrpc-stub)
-[![Maven Central](https://maven-badges.herokuapp.com/maven-central/com.salesforce.servicelibs/rxgrpc/badge.svg)](https://maven-badges.herokuapp.com/maven-central/com.salesforce.servicelibs/rxgrpc)
+[![Javadocs](https://javadoc.io/badge/com.salesforce.servicelibs/rx3grpc-stub.svg)](https://javadoc.io/doc/com.salesforce.servicelibs/rx3grpc-stub)
+[![Maven Central](https://img.shields.io/maven-central/v/com.salesforce.servicelibs/rx3grpc)](https://central.sonatype.com/artifact/com.salesforce.servicelibs/rx3grpc)
 
 
 Usage
@@ -38,9 +38,9 @@ Usage
                                 <protocPlugin>
                                     <id>rxgrpc</id>
                                     <groupId>com.salesforce.servicelibs</groupId>
-                                    <artifactId>rxgrpc</artifactId>
+                                    <artifactId>rx3grpc</artifactId>
                                     <version>[VERSION]</version>
-                                    <mainClass>com.salesforce.rx3grpc.RxGrpcGenerator</mainClass>
+                                    <mainClass>com.salesforce.rx3grpc.Rx3GrpcGenerator</mainClass>
                                 </protocPlugin>
                             </protocPlugins>
                         </configuration>

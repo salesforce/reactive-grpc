@@ -1,4 +1,4 @@
-[![Maven Central](https://maven-badges.herokuapp.com/maven-central/com.salesforce.servicelibs/rxgrpc-stub/badge.svg)](https://maven-badges.herokuapp.com/maven-central/com.salesforce.servicelibs/rxgrpc-stub)
+[![Maven Central](https://img.shields.io/maven-central/v/com.salesforce.servicelibs/rx3grpc-stub)](https://central.sonatype.com/artifact/com.salesforce.servicelibs/rx3grpc-stub)
 
 Usage
 =====
@@ -10,7 +10,7 @@ Usage
     <dependencies>
         <dependency>
             <groupId>com.salesforce.servicelibs</groupId>
-            <artifactId>rxgrpc-stub</artifactId>
+            <artifactId>rx3grpc-stub</artifactId>
             <version>[VERSION]</version>
         </dependency>
     </dependencies>

@@ -1,5 +1,5 @@
 [![Javadocs](https://javadoc.io/badge/com.salesforce.servicelibs/rxgrpc-stub.svg)](https://javadoc.io/doc/com.salesforce.servicelibs/rxgrpc-stub)
-[![Maven Central](https://maven-badges.herokuapp.com/maven-central/com.salesforce.servicelibs/rxgrpc/badge.svg)](https://maven-badges.herokuapp.com/maven-central/com.salesforce.servicelibs/rxgrpc)
+[![Maven Central](https://img.shields.io/maven-central/v/com.salesforce.servicelibs/rxgrpc)](https://central.sonatype.com/artifact/com.salesforce.servicelibs/rxgrpc)
 
 
 Usage

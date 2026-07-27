@@ -1,4 +1,4 @@
-[![Maven Central](https://maven-badges.herokuapp.com/maven-central/com.salesforce.servicelibs/reactor-grpc-stub/badge.svg)](https://maven-badges.herokuapp.com/maven-central/com.salesforce.servicelibs/reactor-grpc-stub)
+[![Maven Central](https://img.shields.io/maven-central/v/com.salesforce.servicelibs/reactor-grpc-stub)](https://central.sonatype.com/artifact/com.salesforce.servicelibs/reactor-grpc-stub)
 
 Usage
 =====

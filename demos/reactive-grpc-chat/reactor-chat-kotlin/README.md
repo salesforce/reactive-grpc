@@ -11,17 +11,17 @@ Usage
 
 The server is a regular Spring-Boot 2 app and can be run from maven
 ```sh
-mvn spring-boot:run -pl demos/ReactorChat-Kotlin/ReactorChat-Server-Kt
+mvn spring-boot:run -pl demos/reactive-grpc-chat/reactor-chat-kotlin/ReactorChat-Server-Kt
 ```
 
 ## Starting clients
 
 First package the client app
 ```sh
-mvn package -pl demos/ReactorChat-Kotlin/ReactorChat-Client-Kt
+mvn package -pl demos/reactive-grpc-chat/reactor-chat-kotlin/ReactorChat-Client-Kt
 ```
 Then run it as a regular jar
 ```sh
-java -jar demos/ReactorChat-Kotlin/ReactorChat-Client-Kt/target/ReactorChat-Client-Kt-*.jar
+java -jar demos/reactive-grpc-chat/reactor-chat-kotlin/ReactorChat-Client-Kt/target/ReactorChat-Client-Kt-*.jar
 ```
 You can start as many clients as you want and make them chat between each other.
