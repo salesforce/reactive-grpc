@@ -1,5 +1,5 @@
 [![Javadocs](https://javadoc.io/badge/com.salesforce.servicelibs/reactor-grpc-stub.svg)](https://javadoc.io/doc/com.salesforce.servicelibs/reactor-grpc-stub)
-[![Maven Central](https://maven-badges.herokuapp.com/maven-central/com.salesforce.servicelibs/reactor-grpc/badge.svg)](https://maven-badges.herokuapp.com/maven-central/com.salesforce.servicelibs/reactor-grpc)
+[![Maven Central](https://img.shields.io/maven-central/v/com.salesforce.servicelibs/reactor-grpc)](https://central.sonatype.com/artifact/com.salesforce.servicelibs/reactor-grpc)
 
 
 Usage
